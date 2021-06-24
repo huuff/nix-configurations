@@ -27,16 +27,12 @@ with lib;
       diskSize = 8000; # MB
       memorySize = 2048; # MB
       writableStoreUseTmpfs = false;
+      msize = 512000;
     };
 
     services.openssh.enable = true;
     services.openssh.permitRootLogin = "yes";
-    services.openssh.hostKeys = options.services.openssh.hostKeys.default;
-
-    environment.systemPackages = with pkgs;
-      [ # some relevant packages here
-        pkgs.ghc
-      ];
+    #services.openssh.hostKeys = options.services.openssh.hostKeys.default;
 
     # we could alternatively hook root or a custom user
     # to some ssh key pair
