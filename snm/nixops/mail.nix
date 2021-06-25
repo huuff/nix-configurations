@@ -4,7 +4,6 @@ in {
 imports = [
 (builtins.fetchTarball {
 url = "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/${release}/nixos-mailserver-${release}.tar.gz";
-         # This hash needs to be updated
          sha256 = "1fwhb7a5v9c98nzhf3dyqf3a5ianqh7k50zizj8v5nmj3blxw4pi";
        })
      ];
@@ -25,9 +24,9 @@ url = "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/${r
                ];
              };
 
-           #"user2@example.com" = {
-              #hashedPasswordFile = ./passy;
-           #};
+           "user2@example.com" = {
+              hashedPasswordFile = "/run/keys/hashedPassword2";
+           };
          };
        };
 
