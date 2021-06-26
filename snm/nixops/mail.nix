@@ -1,6 +1,7 @@
 { config, pkgs, ... }:
 let release = "nixos-21.05";
-in {
+in
+  {
 imports = [
 (builtins.fetchTarball {
 url = "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/${release}/nixos-mailserver-${release}.tar.gz";
@@ -35,9 +36,6 @@ url = "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/${r
          hostName = "localhost";
        };
 
-     #security.acme.email = "info@example.com";
-     #security.acme.acceptTerms = true;
-
      networking.firewall = {
        allowedTCPPorts = [ 80 ];
      };
@@ -51,4 +49,11 @@ url = "https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/-/archive/${r
        virtualHosts.localhost.forceSSL = false;
        virtualHosts.localhost.enableACME = false;
      };
+
+
+  deployment.targetEnv = "virtualbox";
+  deployment.virtualbox.memorySize = 1024; # megabytes
+  deployment.virtualbox.vcpu = 2; # number of cpus
+  deployment.virtualbox.headless = true;
+  deployment.keys.hashedPassword2.text = "$2y$05$uwZ.DVftxvA3IMjXCzGYq..XW.mXI0vLqIuh9exiKiu20hIB7lefq"; 
    }
