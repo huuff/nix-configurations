@@ -19,12 +19,17 @@
     allowedTCPPorts = [ 80 ];
   };
 
+  #deployment = {
+    #targetEnv = "virtualbox";
+    #virtualbox = {
+      #memorySize = 1024;
+      #vcpu = 2;
+      #headless = true;
+    #};
+  #};
+
   deployment = {
-    targetEnv = "virtualbox";
-    virtualbox = {
-      memorySize = 1024;
-      vcpu = 2;
-      headless = true;
-    };
+    targetEnv = "libvirtd";
+    libvirtd.headless = true;
   };
 }

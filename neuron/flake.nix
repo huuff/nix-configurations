@@ -1,5 +1,5 @@
 {
-  description = "Mail server with Roundcube";
+  description = "Neuron instance with nginx";
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-21.05";
