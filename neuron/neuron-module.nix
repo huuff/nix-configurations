@@ -2,11 +2,6 @@
 with lib;
 let
   cfg = config.services.neuron;
-  #auto-rsync = pkgs.writeScriptBin "auto-rsync" ''
-    ##!${pkgs.stdenv.shell}
-    #set -euo pipefail
-    #${pkgs.fd}/bin/fd . ${cfg.path}/.neuron/output | ${pkgs.entr}/bin/entr -n -s "${pkgs.rsync}/bin/rsync -rtvu ${cfg.path}/.neuron/output/* /var/www/neuron"
-    #'';
 in
   {
     options.services.neuron = {
@@ -53,7 +48,6 @@ in
 
         serviceConfig = {
           Restart = "on-failure";
-          #ExecStart = "${auto-rsync}/bin/auto-rsync";
         };
 
         wantedBy = [ "default.target" ];
