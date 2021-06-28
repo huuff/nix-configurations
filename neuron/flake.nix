@@ -17,13 +17,6 @@
 
     nixopsConfigurations.default =
       {
-        #nixpkgs = import nixpkgs {
-          #overlays = [
-            #(final: prev: {
-              #neuron-notes = neuron.packages.x86_64-linux.neuron;
-            #})
-          #];
-        #};
         inherit nixpkgs;
 
         network.description = "Neuron";
