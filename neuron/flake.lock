@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "flake-compat_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1606424373,
+        "narHash": "sha256-oq8d4//CJOrVj+EcOaSXvMebvuTkmBJuT5tzlfewUnQ=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "99f1c2157fba4bfe6211a321fd0ee43199025dbf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
     "flake-utils": {
       "locked": {
         "lastModified": 1617631617,
@@ -31,11 +47,31 @@
         "type": "github"
       }
     },
-    "neuron": {
+    "mydrvs": {
       "inputs": {
         "flake-compat": "flake-compat",
+        "nixpkgs": "nixpkgs",
+        "utils": "utils"
+      },
+      "locked": {
+        "lastModified": 1624998864,
+        "narHash": "sha256-uqmjf3yRIUjbBvdH5lh17TCSfcx96RLcVHb5QWmBLmk=",
+        "owner": "huuff",
+        "repo": "derivations",
+        "rev": "24ac84075ecf5ed98d1f565156c57357461648e9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "huuff",
+        "repo": "derivations",
+        "type": "github"
+      }
+    },
+    "neuron": {
+      "inputs": {
+        "flake-compat": "flake-compat_2",
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs_2"
       },
       "locked": {
         "lastModified": 1624733701,
@@ -53,8 +89,8 @@
     },
     "nixops": {
       "inputs": {
-        "nixpkgs": "nixpkgs_2",
-        "utils": "utils"
+        "nixpkgs": "nixpkgs_3",
+        "utils": "utils_2"
       },
       "locked": {
         "lastModified": 1614711931,
@@ -72,6 +108,21 @@
     },
     "nixpkgs": {
       "locked": {
+        "lastModified": 1624989304,
+        "narHash": "sha256-0JVbaG4f9TdjUXiJYe0W661rRDuMJKUMgQs9LP1l20U=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "e2508a8e57eb8a6478f2b39fc5c7106654cfea41",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_2": {
+      "locked": {
         "lastModified": 1620278081,
         "narHash": "sha256-KcCxMcUFIqpZArUqHcLTdBXKJ1bsHnFdPALyB9auV7M=",
         "owner": "nixos",
@@ -86,7 +137,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_2": {
+    "nixpkgs_3": {
       "locked": {
         "lastModified": 1612282043,
         "narHash": "sha256-MzoN8nI1eydYHuWBAXBcw9Na0XndZHa/VjoxZRWSX68=",
@@ -102,13 +153,13 @@
         "type": "github"
       }
     },
-    "nixpkgs_3": {
+    "nixpkgs_4": {
       "locked": {
-        "lastModified": 1624656607,
-        "narHash": "sha256-jWVM6RP8WdRV1l0Z36hA/y6kl9BmasYVa9TpKkjRMLI=",
+        "lastModified": 1624862269,
+        "narHash": "sha256-JFcsh2+7QtfKdJFoPibLFPLgIW6Ycnv8Bts9a7RYme0=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b72bde7c4a1f9c9bf1a161f0c267186ce3c6483c",
+        "rev": "f77036342e2b690c61c97202bf48f2ce13acc022",
         "type": "github"
       },
       "original": {
@@ -119,13 +170,29 @@
     },
     "root": {
       "inputs": {
+        "mydrvs": "mydrvs",
         "neuron": "neuron",
         "nixops": "nixops",
-        "nixpkgs": "nixpkgs_3",
-        "utils": "utils_2"
+        "nixpkgs": "nixpkgs_4",
+        "utils": "utils_3"
       }
     },
     "utils": {
+      "locked": {
+        "lastModified": 1623875721,
+        "narHash": "sha256-A8BU7bjS5GirpAUv4QA+QnJ4CceLHkcXdRp4xITDB0s=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "f7e004a55b120c02ecb6219596820fcd32ca8772",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "utils_2": {
       "locked": {
         "lastModified": 1610051610,
         "narHash": "sha256-U9rPz/usA1/Aohhk7Cmc2gBrEEKRzcW4nwPWMPwja4Y=",
@@ -140,7 +207,7 @@
         "type": "github"
       }
     },
-    "utils_2": {
+    "utils_3": {
       "locked": {
         "lastModified": 1623875721,
         "narHash": "sha256-A8BU7bjS5GirpAUv4QA+QnJ4CceLHkcXdRp4xITDB0s=",

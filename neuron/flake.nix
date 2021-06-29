@@ -6,13 +6,14 @@
     nixops.url = "github:NixOS/nixops";
     utils.url = "github:numtide/flake-utils";
     neuron.url = "github:srid/neuron";
+    mydrvs.url = "github:huuff/derivations";
   };
 
-  outputs = { self, nixpkgs, nixops, neuron, utils, ... }:
+  outputs = { self, nixpkgs, nixops, neuron, utils, mydrvs, ... }:
   {
 
     overlay = final: prev: {
-        neuron-notes = neuron.packages.x86_64-linux.neuron;
+      neuron-notes = neuron.packages.x86_64-linux.neuron;
     };
 
     nixopsConfigurations.default =
@@ -21,10 +22,14 @@
 
         network.description = "Neuron";
         neuron = { config, pkgs, ... }:
-        import ./neuron.nix { inherit config pkgs; }
-        // { nixpkgs.overlays = [ self.overlay ]; }
-        ;
+        {
+          nixpkgs.overlays = [ self.overlay ];
+          imports = [
+            ./neuron.nix
+            mydrvs.nixosModules.x86_64-linux.auto-rsync
+          ];
+        };
       };
     };
 
-}
+  }

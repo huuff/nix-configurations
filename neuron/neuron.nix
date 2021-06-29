@@ -7,7 +7,7 @@
 
   services.neuron = {
     enable = true;
-    path = "/home/neuron/";
+    path = "/home/neuron";
   };
 
   services.openssh = {
@@ -18,15 +18,6 @@
   networking.firewall = {
     allowedTCPPorts = [ 80 ];
   };
-
-  #deployment = {
-    #targetEnv = "virtualbox";
-    #virtualbox = {
-      #memorySize = 1024;
-      #vcpu = 2;
-      #headless = true;
-    #};
-  #};
 
   deployment = {
     targetEnv = "libvirtd";
