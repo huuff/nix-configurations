@@ -1,16 +1,15 @@
 { config, pkgs, repo, ... }:
 let
   zettelDir = "/home/neuron";
-  actionPort = 55000;
+  actionPort = 55000; # TODO: Make it a parameter
 in
   {
-
-    environment.systemPackages = with pkgs; [
-      git
-    ];
-
     networking.firewall = {
       allowedTCPPorts = [ 80 actionPort];
+    };
+
+    system.activationScripts = {
+      createDirs = "mkdir ${zettelDir}";
     };
 
     services = {
@@ -19,7 +18,7 @@ in
       auto-rsync = {
         startPath = "${zettelDir}/.neuron/output";
         endPath = "/var/www/neuron";
-        createStartPath = false;
+        createStartPath = true;
         createEndPath = true;
         preScript = ''
             chown nginx:nginx /var/www/neuron
@@ -49,7 +48,6 @@ in
         enable = true;
         port = actionPort;
         workingDirectory = "${zettelDir}";
-        createWorkingDirectory = true;
         preScript = ''
           ${pkgs.git}/bin/git -c '${sshWithDeployKey}' clone "${repo}" ${zettelDir} || true
         '';
