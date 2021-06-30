@@ -18,7 +18,7 @@ in
       auto-rsync = {
         startPath = "${zettelDir}/.neuron/output";
         endPath = "/var/www/neuron";
-        createStartPath = true;
+        createStartPath = false;
         createEndPath = true;
         preScript = ''
             chown nginx:nginx /var/www/neuron
