@@ -49,7 +49,7 @@ in
         enable = true;
         port = actionPort;
         workingDirectory = "${zettelDir}";
-        createWorkingDirectory = false;
+        createWorkingDirectory = true;
         preScript = ''
           ${pkgs.git}/bin/git -c '${sshWithDeployKey}' clone "${repo}" ${zettelDir} || true
         '';
