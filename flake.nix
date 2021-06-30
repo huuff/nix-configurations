@@ -11,14 +11,13 @@
   outputs = { self, nixpkgs, nixops, neuron, mydrvs, ... }:
   {
 
-    nixopsConfigurations.neuron = { repo, keyPath }: 
-    {
-      inherit nixpkgs;
-
-
       overlay = final: prev: {
         neuron-notes = neuron.packages.x86_64-linux.neuron;
       };
+
+    nixopsConfigurations.neuron = { repo, keyPath }: 
+    {
+      inherit nixpkgs;
 
       network.description = "Neuron";
       neuron = { config, pkgs, ... }:
