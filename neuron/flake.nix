@@ -19,7 +19,7 @@
     nixopsConfigurations.default =
       let
         repo = "git@github.com:huuff/exobrain.git";
-        keyPath = "/home/haf/exobrain_rsa";
+        keyPath = "/home/haf/exobrain/deploy_rsa";
       in
       {
         inherit nixpkgs;
@@ -30,10 +30,10 @@
           nixpkgs.overlays = [ self.overlay ];
           imports = [
             (import ./neuron.nix { inherit config pkgs repo; })
-            ./neuron-module.nix
             ./cachix.nix
             mydrvs.nixosModules.x86_64-linux.auto-rsync
-           mydrvs.nixosModules.x86_64-linux.do-on-request 
+            mydrvs.nixosModules.x86_64-linux.do-on-request 
+            mydrvs.nixosModules.x86_64-linux.neuron-module
           ];
 
           deployment = {
