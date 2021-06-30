@@ -17,6 +17,10 @@
     };
 
     nixopsConfigurations.default =
+      let
+        repo = "git@github.com:huuff/exobrain.git";
+        keyPath = "/home/haf/exobrain_rsa";
+      in
       {
         inherit nixpkgs;
 
@@ -25,9 +29,18 @@
         {
           nixpkgs.overlays = [ self.overlay ];
           imports = [
-            ./neuron.nix
+            (import ./neuron.nix { inherit config pkgs repo; })
+            ./neuron-module.nix
+            ./cachix.nix
             mydrvs.nixosModules.x86_64-linux.auto-rsync
+           mydrvs.nixosModules.x86_64-linux.do-on-request 
           ];
+
+          deployment = {
+            targetEnv = "libvirtd";
+            libvirtd.headless = true;
+            keys.deploy.keyFile = keyPath;
+          };
         };
       };
     };
