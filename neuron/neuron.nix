@@ -9,7 +9,7 @@ in
     };
 
     system.activationScripts = {
-      createDirs = "mkdir ${zettelDir}";
+      createDirs = "mkdir ${zettelDir} || true";
     };
 
     services = {
