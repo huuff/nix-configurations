@@ -27,7 +27,6 @@
           (import ./neuron/neuron.nix { inherit config pkgs repo; })
           ./neuron/cachix.nix
           mydrvs.nixosModules.auto-rsync
-          mydrvs.nixosModules.do-on-request 
           mydrvs.nixosModules.neuron-module
         ];
 

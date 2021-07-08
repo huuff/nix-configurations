@@ -10,7 +10,7 @@ in
     };
 
     system.activationScripts = {
-      cloneRepo = ''${gitWithDeployKey} clone "${repo}" ${zettelDir} || true'';
+      createDir = ''(${gitWithDeployKey} clone "${repo}" ${zettelDir}; chown -R neuron:neuron ${zettelDir}) || true'';
     };
 
   systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
@@ -41,7 +41,6 @@ in
         '';
       };
 
-
       neuron = {
         enable = true;
         path = "${zettelDir}";
@@ -57,6 +56,7 @@ in
       isSystemUser = true;
       home = "${zettelDir}";
       group = "neuron";
+      extraGroups = [ "keys" ]; # needed so it can access /run/keys
       createHome = true;
     };
 

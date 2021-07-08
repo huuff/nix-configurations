@@ -31,7 +31,6 @@
           imports = [
             (import ./neuron.nix { inherit config pkgs repo; })
             ./cachix.nix
-            mydrvs.nixosModules.auto-rsync
             mydrvs.nixosModules.do-on-request 
             mydrvs.nixosModules.neuron-module
           ];
@@ -40,6 +39,8 @@
             targetEnv = "libvirtd";
             libvirtd.headless = true;
             keys.deploy.keyFile = keyPath;
+            keys.deploy.user = "neuron";
+            keys.deploy.group = "neuron";
           };
         };
       };
