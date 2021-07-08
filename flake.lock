@@ -54,11 +54,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1625763351,
-        "narHash": "sha256-jCAvauo22csk0jDyzK0Ot7KJPOiA4XLr77GjtBZYpCM=",
+        "lastModified": 1625767104,
+        "narHash": "sha256-gw9e3rx5BIgzYYr98xL9rFjWiL583T3M/V6DneKR+wQ=",
         "owner": "huuff",
         "repo": "derivations",
-        "rev": "fe6d0ef15817e0db3169493d1b6c653a57cf90d7",
+        "rev": "c37980f218410cd967ee38b692cc17441f6520d3",
         "type": "github"
       },
       "original": {
@@ -173,7 +173,8 @@
         "mydrvs": "mydrvs",
         "neuron": "neuron",
         "nixops": "nixops",
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": "nixpkgs_4",
+        "utils": "utils_3"
       }
     },
     "utils": {
@@ -198,6 +199,21 @@
         "owner": "numtide",
         "repo": "flake-utils",
         "rev": "3982c9903e93927c2164caa727cd3f6a0e6d14cc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "utils_3": {
+      "locked": {
+        "lastModified": 1623875721,
+        "narHash": "sha256-A8BU7bjS5GirpAUv4QA+QnJ4CceLHkcXdRp4xITDB0s=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "f7e004a55b120c02ecb6219596820fcd32ca8772",
         "type": "github"
       },
       "original": {

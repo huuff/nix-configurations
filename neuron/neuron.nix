@@ -1,8 +1,8 @@
-{ config, pkgs, repo, ... }:
+{ config, pkgs, repo, keyPath, ... }:
 let
   zettelDir = "/home/neuron";
   actionPort = 55000; # TODO: Make it a parameter
-  gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i /run/keys/deploy -o StrictHostKeyChecking=no' '';
+  gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${keyPath} -o StrictHostKeyChecking=no' '';
 in
   {
     networking.firewall = {
