@@ -11,9 +11,9 @@
   outputs = { self, nixpkgs, nixops, neuron, mydrvs, ... }:
   {
 
-      overlay = final: prev: {
-        neuron-notes = neuron.packages.x86_64-linux.neuron;
-      };
+    overlay = final: prev: {
+      neuron-notes = neuron.packages.x86_64-linux.neuron;
+    };
 
     nixopsConfigurations.neuron = { repo, keyPath }: 
     {
@@ -34,6 +34,8 @@
           targetEnv = "libvirtd";
           libvirtd.headless = true;
           keys.deploy.keyFile = keyPath;
+          keys.deploy.user = "neuron";
+          keys.deploy.group = "neuron";
         };
 
       };
