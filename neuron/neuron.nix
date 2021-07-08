@@ -13,7 +13,17 @@ in
       createDir = ''(${gitWithDeployKey} clone "${repo}" ${zettelDir}; chown -R neuron:neuron ${zettelDir}) || true'';
     };
 
-  systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
+    users.users.neuron = {
+      isSystemUser = true;
+      home = "${zettelDir}";
+      group = "neuron";
+      extraGroups = [ "keys" ]; # needed so it can access /run/keys
+      createHome = true;
+    };
+
+    users.groups.neuron = {};
+
+    systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
     services = {
       nginx = {
@@ -52,13 +62,4 @@ in
       };
     };
 
-    users.users.neuron = {
-      isSystemUser = true;
-      home = "${zettelDir}";
-      group = "neuron";
-      extraGroups = [ "keys" ]; # needed so it can access /run/keys
-      createHome = true;
-    };
-
-    users.groups.neuron = {};
   }
