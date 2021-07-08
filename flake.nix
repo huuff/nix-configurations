@@ -26,9 +26,9 @@
         imports = [
           (import ./neuron/neuron.nix { inherit config pkgs repo; })
           ./neuron/cachix.nix
-          mydrvs.nixosModules.x86_64-linux.auto-rsync
-          mydrvs.nixosModules.x86_64-linux.do-on-request 
-          mydrvs.nixosModules.x86_64-linux.neuron-module
+          mydrvs.nixosModules.auto-rsync
+          mydrvs.nixosModules.do-on-request 
+          mydrvs.nixosModules.neuron-module
         ];
 
         deployment = {

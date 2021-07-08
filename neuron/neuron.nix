@@ -2,6 +2,7 @@
 let
   zettelDir = "/home/neuron";
   actionPort = 55000; # TODO: Make it a parameter
+  gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i /run/keys/deploy -o StrictHostKeyChecking=no' '';
 in
   {
     networking.firewall = {
@@ -9,29 +10,19 @@ in
     };
 
     system.activationScripts = {
-      createDirs = "mkdir ${zettelDir} || true";
+      cloneRepo = ''${gitWithDeployKey} clone "${repo}" ${zettelDir} || true'';
     };
 
-    services = {
-       # I can't for the life of me serve from the user directory (permissions fucking me over)
-      # So this is my best solution
-      auto-rsync = {
-        startPath = "${zettelDir}/.neuron/output";
-        endPath = "/var/www/neuron";
-        createStartPath = false;
-        createEndPath = true;
-        preScript = ''
-            chown nginx:nginx /var/www/neuron
-            chmod 0755 /var/www/neuron
-        '';
-      };
+  systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
+    services = {
       nginx = {
         enable = true;
-
+        user = "neuron";
+        group = "neuron";
         virtualHosts.neuron = {
           enableACME = false;
-          root = "/var/www/neuron";
+          root = "${zettelDir}/.neuron/output";
           locations."/" = {
             extraConfig = ''
               index index.html index.htm;
@@ -40,21 +31,16 @@ in
         };
       };
 
-      do-on-request = 
-      let
-        sshWithDeployKey = ''core.sshCommand=${pkgs.openssh}/bin/ssh -i /run/keys/deploy -o StrictHostKeyChecking=no'';
-      in
-      {
+      do-on-request = {
         enable = true;
         port = actionPort;
+        user = "neuron";
         workingDirectory = "${zettelDir}";
-        preScript = ''
-          ${pkgs.git}/bin/git -c '${sshWithDeployKey}' clone "${repo}" ${zettelDir} || true
-        '';
         script = ''
-          ${pkgs.git}/bin/git -c '${sshWithDeployKey}' pull
+          ${gitWithDeployKey} pull
         '';
       };
+
 
       neuron = {
         enable = true;
@@ -67,4 +53,12 @@ in
       };
     };
 
+    users.users.neuron = {
+      isSystemUser = true;
+      home = "${zettelDir}";
+      group = "neuron";
+      createHome = true;
+    };
+
+    users.groups.neuron = {};
   }
