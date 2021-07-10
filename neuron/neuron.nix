@@ -12,11 +12,11 @@ in
     system.activationScripts = {
       createDir = ''
         echo "START ACTIVATION SCRIPT"
-        echo "REMOVING PREVIOUS ${zettelDir}"
+        echo "Removing previous ${zettelDir}"
         rm -r ${zettelDir}
-        echo "CLONING ${repo} to ${zettelDir}"
+        echo "Cloning ${repo} to ${zettelDir}"
         ${gitWithDeployKey} clone "${repo}" ${zettelDir} 
-        echo "MAKING neuron OWN ${zettelDir}"
+        echo "Making neuron own ${zettelDir}"
         chown -R neuron:neuron ${zettelDir}
         '';
     };
