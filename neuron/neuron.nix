@@ -10,7 +10,11 @@ in
     };
 
     system.activationScripts = {
-      createDir = ''(${gitWithDeployKey} clone "${repo}" ${zettelDir}; chown -R neuron:neuron ${zettelDir}) || true'';
+      createDir = ''
+        rm -r /home/neuron
+        ${gitWithDeployKey} clone "${repo}" ${zettelDir} 
+        chown -R neuron:neuron ${zettelDir}
+        '';
     };
 
     users.users.neuron = {
