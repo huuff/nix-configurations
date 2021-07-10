@@ -11,8 +11,12 @@ in
 
     system.activationScripts = {
       createDir = ''
-        rm -r /home/neuron
+        echo "START ACTIVATION SCRIPT"
+        echo "REMOVING PREVIOUS ${zettelDir}"
+        rm -r ${zettelDir}
+        echo "CLONING ${repo} to ${zettelDir}"
         ${gitWithDeployKey} clone "${repo}" ${zettelDir} 
+        echo "MAKING neuron OWN ${zettelDir}"
         chown -R neuron:neuron ${zettelDir}
         '';
     };
