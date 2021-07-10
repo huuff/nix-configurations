@@ -12,8 +12,8 @@ in
     system.activationScripts = {
       createDir = ''
         echo "START ACTIVATION SCRIPT"
-        echo "Removing everything in ${zettelDir}"
-        ls -A1 ${zettelDir} | xargs rm -rf # weird but it will delete hidden files too
+        echo "Removing previous ${zettelDir}"
+        rm -rf ${zettelDir}/{,.[!.],..?}* # weird but it will delete hidden files too without returning an error for . and ..
         echo "Cloning ${repo} to ${zettelDir}"
         ${gitWithDeployKey} clone "${repo}" ${zettelDir} 
         echo "Making neuron own ${zettelDir}"
