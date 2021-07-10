@@ -61,6 +61,7 @@ in
 
       neuron = {
         enable = true;
+        user = "neuron";
         path = "${zettelDir}";
       };
 

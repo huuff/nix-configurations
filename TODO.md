@@ -1,3 +1,4 @@
 ## Neuron
-* Use libressl for nc instead of busybox
 * Permissions still not correctly set on startup
+* Make user configurable
+* Make action port configurable
