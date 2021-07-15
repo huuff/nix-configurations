@@ -1,4 +1,4 @@
-{ stdenv, php74 }:
+{ stdenv }:
 
 stdenv.mkDerivation rec {
   pname = "osTicket";
@@ -9,10 +9,8 @@ stdenv.mkDerivation rec {
     sha256 = "1zwb2bgh97iwi1j2vaygzyfm9saw0lx14b6nim24w6y88rirr8qy";
   };
 
-  nativeBuildInputs = [ php74 ];
-
   installPhase = ''
-    mkdir $out
-    php manage.php deploy --setup $out
+    mkdir -p $out
+    cp -r * $out
   '';
 }

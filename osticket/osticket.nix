@@ -1,11 +1,11 @@
 { config, pkgs, ... }:
 let
-  osTicket = pkgs.callPackage ./osticket-derivation.nix { };
+  osTicket = pkgs.callPackage ./osticket-derivation.nix {};
 in
 {
-  environment.systemPackages = [
-    osTicket
-  ];
+  # XXX osTicket installation seems to need it. Is there any way to provide it only to the systemd unit?
+  # still, I'm not sure it's working at all, journalctl -fu to see hundreds of failed git commands
+  environment.systemPackages = [ pkgs.git ];
 
   services.mysql = {
     enable = true;
@@ -15,5 +15,18 @@ in
       CREATE USER 'osticket'@'localhost';
       GRANT ALL PRIVILEGES ON osticket.* TO 'osticket'@'localhost' IDENTIFIED BY 'password';
       '';
+  };
+
+  systemd.services.osTicket-first-deploy = {
+    script = ''
+        mkdir -p /var/www/osticket/
+        ${pkgs.php74}/bin/php manage.php deploy --setup /var/www/osticket/
+      '';
+
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      WorkingDirectory = osTicket;
+    };
   };
 }
