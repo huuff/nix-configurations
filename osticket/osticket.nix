@@ -5,7 +5,10 @@
   services.mysql = {
     enable = true;
     package = pkgs.mariadb;
-    user = "root";
-    initialScript = /home/haf/nix-machines/osticket/initalScript.sql;
+    initialScript = pkgs.writeText "initScript" ''
+      CREATE DATABASE osticket;
+      CREATE USER 'osticket' IDENTIFIED BY 'pass';
+      GRANT ALL PRIVILEGES ON osticket.* TO 'osticket';
+      '';
   };
 }

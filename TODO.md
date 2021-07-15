@@ -3,4 +3,5 @@
 * Make user configurable. Or not? I don't really care
 
 ## osTicket
-* The initial script is not being executed. Try to look into the systemd unit, the postExec command and see why
+* The initial script only seems to get executed if inlined
+* I can't access the database using mysql -uosticket
