@@ -3,5 +3,6 @@
 * Make user configurable. Or not? I don't really care
 
 ## osTicket
-* The initial script only seems to get executed if inlined
-* I can't access the database using mysql -uosticket
+* The initial script only seems to get executed if inlined, try to get it to work without putting it into the nix store
+* Create a user for osTicket
+* Set up nginx
