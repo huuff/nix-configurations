@@ -7,8 +7,9 @@
     package = pkgs.mariadb;
     initialScript = pkgs.writeText "initScript" ''
       CREATE DATABASE osticket;
-      CREATE USER 'osticket' IDENTIFIED BY 'pass';
-      GRANT ALL PRIVILEGES ON osticket.* TO 'osticket';
+      CREATE USER 'osticket'@'localhost';
+      GRANT ALL PRIVILEGES ON osticket.* TO 'osticket'@'localhost' IDENTIFIED BY 'password';
       '';
+      #GRANT ALL PRIVILEGES ON osticket.* TO 'osticket';
   };
 }
