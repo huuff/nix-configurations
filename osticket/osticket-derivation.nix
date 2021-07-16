@@ -12,6 +12,6 @@ stdenv.mkDerivation rec {
 
   installPhase = ''
     mkdir -p $out
-    cp -r * $out
+    cp -r upload/* $out
   '';
 }

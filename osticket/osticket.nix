@@ -46,6 +46,9 @@ in
     groups.osticket = {}; # create the group
   };
 
+  systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
+  systemd.services.nginx.serviceConfig.ReadWritePaths = [ directory ];
+
   services.nginx = {
     enable = true;
     user = "osticket";
