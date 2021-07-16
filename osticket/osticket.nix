@@ -58,7 +58,7 @@ in
       root = directory;
       locations."/" = {
       extraConfig = ''
-          try_files $uri $uri/ index.php;
+          index index.php;
         '';
       };
       locations."~ \.php$" = {
