@@ -1,12 +1,13 @@
-{ stdenv }:
+{ stdenv, fetchzip }:
 
 stdenv.mkDerivation rec {
   pname = "osTicket";
   version = "1.15.2";
 
-  src = builtins.fetchurl {
-    url = "https://github.com/osTicket/osTicket/archive/refs/tags/v${version}.tar.gz";
-    sha256 = "1zwb2bgh97iwi1j2vaygzyfm9saw0lx14b6nim24w6y88rirr8qy";
+  src = fetchzip {
+    url = "https://github.com/osTicket/osTicket/releases/download/v1.15.2/${pname}-v${version}.zip";
+    sha256 = "3agOy5cDlqIO7lW3v01iZ6n4Jj0XQiJG7z7SzUgqE4E=";
+    stripRoot = false;
   };
 
   installPhase = ''

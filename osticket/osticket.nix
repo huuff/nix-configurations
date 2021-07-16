@@ -83,11 +83,9 @@ in
   };
 
   # XXX Will this be run on every activation?
-  systemd.services.osTicket-first-deploy = {
+  systemd.services.osticket-copy-to-dir = {
     script = ''
-        set -x
-        ls ${directory}
-        ${pkgs.php74}/bin/php manage.php deploy --setup ${directory}
+        cp -rv * ${directory}
       '';
 
     wantedBy = [ "default.target" ];
