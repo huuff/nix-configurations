@@ -66,6 +66,7 @@ in
 
   services.phpfpm.pools.osTicket = {
     user = "osticket";
+    phpPackage = pkgs.php74;
     settings = {
       "listen.owner" = config.services.nginx.user;
       "pm" = "dynamic";
