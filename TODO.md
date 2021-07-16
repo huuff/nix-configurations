@@ -1,8 +1,9 @@
 ## Neuron
 * Use a systemd user oneshot script to initialize directory (check home-manager/nixos). Or maybe not? I'm not sure oneshot is for this
 * Make user configurable. Or not? I don't really care
+* Add SSL options
 
 ## osTicket
-* The initial script only seems to get executed if inlined, try to get it to work without putting it into the nix store
-* Create a user for osTicket
+* The initial script (mysql) only seems to get executed if inlined, try to get it to work without putting it into the nix store
 * Set up nginx
+* Add SSL options
