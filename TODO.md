@@ -6,3 +6,4 @@
 ## osTicket
 * The initial script (mysql) only seems to get executed if inlined, try to get it to work without putting it into the nix store
 * All CSS and JS is loaded incorrectly
+* APCu extension? supposedly that makes it faster

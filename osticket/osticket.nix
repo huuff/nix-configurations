@@ -57,8 +57,12 @@ in
       enableACME = false;
       root = directory;
       locations."/" = {
-        extraConfig = ''
+      extraConfig = ''
           try_files $uri $uri/ index.php;
+        '';
+      };
+      locations."~ \.php$" = {
+        extraConfig = ''
           fastcgi_split_path_info ^(.+\.php)(/.+)$;
           fastcgi_pass unix:${config.services.phpfpm.pools.osTicket.socket};
           include ${pkgs.nginx}/conf/fastcgi_params;
