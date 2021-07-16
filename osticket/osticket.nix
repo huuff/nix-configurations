@@ -65,6 +65,11 @@ in
           include ${pkgs.nginx}/conf/fastcgi.conf;
         '';
       };
+      locations."~ ^/scp/ajax.php/.*$" = {
+        extraConfig = ''
+            try_files $uri $uri/ /scp/ajax.php?$query_string;
+          '';
+      };
     };
   };
 
