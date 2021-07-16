@@ -9,3 +9,4 @@
 * Does changing ost-config.php to put database info help in any way?
 * Add SSL options
 * Add backup options
+* Can't enter admin panel! (/scp). It redirects to https so maybe I must set a certificate?
