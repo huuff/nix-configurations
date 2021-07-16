@@ -5,10 +5,6 @@ let
   user = "osticket";
 in
   {
-  # XXX osTicket installation seems to need it. Is there any way to provide it only to the systemd unit?
-  # still, I'm not sure it's working at all, journalctl -fu to see hundreds of failed git commands
-  environment.systemPackages = [ pkgs.git ];
-
   system.activationScripts = {
     # Maybe I should put this into some library since it's pretty useful
     prepareDir = ''
@@ -55,7 +51,6 @@ in
     group = user;
 
     virtualHosts.osticket = {
-      enableACME = false;
       root = directory;
       locations."/" = {
       extraConfig = ''
