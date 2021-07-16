@@ -3,7 +3,7 @@ let
   osTicket = pkgs.callPackage ./osticket-derivation.nix {};
   directory = "/var/www/osticket";
 in
-{
+  {
   # XXX osTicket installation seems to need it. Is there any way to provide it only to the systemd unit?
   # still, I'm not sure it's working at all, journalctl -fu to see hundreds of failed git commands
   environment.systemPackages = [ pkgs.git ];
@@ -21,7 +21,7 @@ in
           currentPath="$currentPath/$dir"
           chmod og+x "$currentPath"
         done
-      '';
+    '';
   };
 
   services.mysql = {
@@ -31,7 +31,7 @@ in
       CREATE DATABASE osticket;
       CREATE USER 'osticket'@'localhost';
       GRANT ALL PRIVILEGES ON osticket.* TO 'osticket'@'localhost' IDENTIFIED BY 'password';
-      '';
+    '';
   };
 
   users = {
@@ -48,18 +48,20 @@ in
 
   services.nginx = {
     enable = true;
+    user = "osticket";
+    group = "osticket";
 
     virtualHosts.osticket = {
       enableACME = false;
+      root = directory;
       locations."/" = {
-        root = directory;
         extraConfig = ''
-        try_files $uri $uri/ index.php;
-        fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:${config.services.phpfpm.pools.osTicket.socket};
-        include ${pkgs.nginx}/conf/fastcgi_params;
-        include ${pkgs.nginx}/conf/fastcgi.conf;
-          '';
+          try_files $uri $uri/ index.php;
+          fastcgi_split_path_info ^(.+\.php)(/.+)$;
+          fastcgi_pass unix:${config.services.phpfpm.pools.osTicket.socket};
+          include ${pkgs.nginx}/conf/fastcgi_params;
+          include ${pkgs.nginx}/conf/fastcgi.conf;
+        '';
       };
     };
   };
@@ -86,7 +88,7 @@ in
   systemd.services.osticket-copy-to-dir = {
     script = ''
         cp -rv * ${directory}
-      '';
+    '';
 
     wantedBy = [ "default.target" ];
     serviceConfig = {
