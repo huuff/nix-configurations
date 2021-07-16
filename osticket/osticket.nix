@@ -2,6 +2,7 @@
 let
   osTicket = pkgs.callPackage ./osticket-derivation.nix {};
   directory = "/var/www/osticket";
+  user = "osticket";
 in
   {
   # XXX osTicket installation seems to need it. Is there any way to provide it only to the systemd unit?
@@ -35,23 +36,23 @@ in
   };
 
   users = {
-    users.osticket = {
+    users.${user} = {
       isSystemUser = true;
       home = directory;
-      group = "osticket";
+      group = user;
       extraGroups = [ "keys" ]; # needed for nixops, to access /run/keys
       createHome = true; # remove it? I'm creating the directory in the activation script anyway
     };
 
-    groups.osticket = {}; # create the group
+    groups.${user} = {}; # create the group
   };
 
   systemd.services.nginx.serviceConfig.ReadWritePaths = [ directory ];
 
   services.nginx = {
     enable = true;
-    user = "osticket";
-    group = "osticket";
+    user = user;
+    group = user;
 
     virtualHosts.osticket = {
       enableACME = false;
@@ -73,7 +74,7 @@ in
   };
 
   services.phpfpm.pools.osTicket = {
-    user = "osticket";
+    user = user;
     phpPackage = pkgs.php74;
     settings = {
       "listen.owner" = config.services.nginx.user;
@@ -94,14 +95,20 @@ in
   # XXX Will this be run on every activation?
   systemd.services.osticket-copy-to-dir = {
     script = ''
-        cp -rv * ${directory}
+        set -x
+        cp -rv ${osTicket}/* ${directory}
+        find ${directory} -type d -print0 | xargs -0 chmod 0755
+        find ${directory} -type f -print0 | xargs -0 chmod 0644
+        mv ${directory}/include/ost-sampleconfig.php ${directory}/include/ost-config.php
+        chmod 0666 ${directory}/include/ost-config.php
     '';
 
     wantedBy = [ "default.target" ];
     serviceConfig = {
-      User = "osticket";
+      User = user;
       Type = "oneshot";
-      WorkingDirectory = osTicket;
+      ReadWritePaths = [ directory ];
+      #WorkingDirectory = osTicket;
     };
   };
 }

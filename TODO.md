@@ -6,6 +6,6 @@
 ## osTicket
 * The initial script (mysql) only seems to get executed if inlined, try to get it to work without putting it into the nix store
 * APCu extension? supposedly that makes it faster
-* Copy include/ost-sampleconfig.php to include/ost-config.php and chmod it to 666. Does it change anything if I put the database info there? Doesn't seem like it
+* Does changing ost-config.php to put database info help in any way?
 * Add SSL options
 * Add backup options
