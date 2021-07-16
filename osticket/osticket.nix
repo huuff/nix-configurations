@@ -46,7 +46,6 @@ in
     groups.osticket = {}; # create the group
   };
 
-  systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
   systemd.services.nginx.serviceConfig.ReadWritePaths = [ directory ];
 
   services.nginx = {
@@ -83,6 +82,7 @@ in
       "php_admin_value[error_log]" = "stderr";
       "php_admin_flag[log_errors]" = true;
       "catch_workers_output" = true;
+      "security.limit_extensions" = "";
     };
     phpEnv."PATH" = lib.makeBinPath [ pkgs.php74 ];
   };
