@@ -69,6 +69,9 @@ in
         locations."~ ^/scp/ajax.php/.*$".extraConfig = ''
             try_files $uri $uri/ /scp/ajax.php?$query_string;
           '';
+        locations."/scp".extraConfig = ''
+            try_files $uri $uri/ /scp/index.php;
+          '';
       };
     };
 

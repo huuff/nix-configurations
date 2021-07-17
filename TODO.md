@@ -6,10 +6,9 @@
 * Add SSL options
 
 ## osTicket
-* Does changing ost-config.php to put database info help in any way?
+* Does changing ost-config.php to put database info help in any way? Crazy idea: run a headless browser and fill in the form automatically on activation
 * Add SSL options
 * Add backup options
-* Can't enter admin panel! (/scp). It redirects to https so maybe I must set a certificate? Update: Welp, I actually can (http://localhost:8989/scp/login.php). But why does it redirect me to https?
 
 ### initial-script.sql
 osTicket needs a mysql user identified by a password, the NixOS module won't let us do this through config since that password would be in cleartext in the nix-store, so we need to pass it a file. 
