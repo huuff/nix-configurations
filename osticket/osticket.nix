@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, initialScript, ... }:
 let
   osTicket = pkgs.callPackage ./osticket-derivation.nix {};
   directory = "/var/www/osticket";
@@ -6,7 +6,6 @@ let
 in
   {
   system.activationScripts.prepare = ''
-        set -x
         echo "CREATING DIRECTORIES AND SETTING PERMISSIONS..."
         mkdir -p ${directory}
         dirsUpToPath=$(namei ${directory} | tail -n +3 | cut -d' ' -f3)
@@ -34,11 +33,7 @@ in
   services.mysql = {
     enable = true;
     package = pkgs.mariadb;
-    initialScript = pkgs.writeText "initScript" ''
-      CREATE DATABASE osticket;
-      CREATE USER 'osticket'@'localhost';
-      GRANT ALL PRIVILEGES ON osticket.* TO 'osticket'@'localhost' IDENTIFIED BY 'password';
-    '';
+    inherit initialScript;
   };
 
   users = {

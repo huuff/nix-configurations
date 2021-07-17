@@ -5,7 +5,6 @@
 * Add SSL options
 
 ## osTicket
-* The initial script (mysql) only seems to get executed if inlined, try to get it to work without putting it into the nix store
 * APCu extension? supposedly that makes it faster
 * Does changing ost-config.php to put database info help in any way?
 * Add SSL options
