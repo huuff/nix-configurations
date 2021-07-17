@@ -2,7 +2,6 @@
 * osTicket forces users to install through a GUI, so it's not very suitable for Nix. Maybe use zammad
 
 ## Neuron
-* Use a systemd user oneshot script to initialize directory (check home-manager/nixos). Or maybe not? I'm not sure oneshot is for this
 * Add SSL options
 
 ## osTicket
