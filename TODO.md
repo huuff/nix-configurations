@@ -1,4 +1,5 @@
 # TODO
+* Maybe these should be modules with options and all instead of functions? It would make them much more versatile
 * osTicket forces users to install through a GUI, so it's not very suitable for Nix. Maybe use zammad
 
 ## Neuron
