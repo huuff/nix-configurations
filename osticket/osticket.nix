@@ -57,24 +57,18 @@ in
 
       virtualHosts.osticket = {
         root = directory;
-        locations."/" = {
-          extraConfig = ''
+        locations."/".extraConfig = ''
             index index.php;
           '';
-        };
-        locations."~ \.php$" = {
-          extraConfig = ''
+        locations."~ \.php$".extraConfig = ''
             fastcgi_split_path_info ^(.+\.php)(/.+)$;
             fastcgi_pass unix:${config.services.phpfpm.pools.osTicket.socket};
             include ${pkgs.nginx}/conf/fastcgi_params;
             include ${pkgs.nginx}/conf/fastcgi.conf;
           '';
-        };
-        locations."~ ^/scp/ajax.php/.*$" = {
-          extraConfig = ''
+        locations."~ ^/scp/ajax.php/.*$".extraConfig = ''
             try_files $uri $uri/ /scp/ajax.php?$query_string;
           '';
-        };
       };
     };
 
