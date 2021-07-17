@@ -10,5 +10,4 @@
 * Does changing ost-config.php to put database info help in any way?
 * Add SSL options
 * Add backup options
-* Can't enter admin panel! (/scp). It redirects to https so maybe I must set a certificate?Update: Welp, I actually can (http://localhost:8989/scp/login.php). But why does it redirect me to https?
-* My oneshot systemd unit runs on every activation, so it ruins everything.
+* Can't enter admin panel! (/scp). It redirects to https so maybe I must set a certificate? Update: Welp, I actually can (http://localhost:8989/scp/login.php). But why does it redirect me to https?

@@ -5,10 +5,9 @@ let
   user = "osticket";
 in
   {
-  system.activationScripts = {
-    # Maybe I should put this into some library since it's pretty useful
-    prepareDir = ''
-        echo "SETTING EXECUTE PERMISSIONS ON ALL DIRECTORIES UP TO ${directory}"
+  system.activationScripts.prepare = ''
+        set -x
+        echo "CREATING DIRECTORIES AND SETTING PERMISSIONS..."
         mkdir -p ${directory}
         dirsUpToPath=$(namei ${directory} | tail -n +3 | cut -d' ' -f3)
 
@@ -18,8 +17,19 @@ in
           currentPath="$currentPath/$dir"
           chmod og+x "$currentPath"
         done
+
+        echo "DEPLOYING..."
+        if [ ! "$(ls -A ${directory})" ]; then
+          echo ">>> ${directory} is empty, copying osTicket files there"
+          cp -r ${osTicket}/* ${directory}
+          find ${directory} -type d -print0 | xargs -0 chmod 0755
+          find ${directory} -type f -print0 | xargs -0 chmod 0644
+          mv ${directory}/include/ost-sampleconfig.php ${directory}/include/ost-config.php
+          chmod 0666 ${directory}/include/ost-config.php
+        else
+          echo ">>> ${directory} not empty, considering already deployed"
+        fi
     '';
-  };
 
   services.mysql = {
     enable = true;
@@ -90,25 +100,5 @@ in
       "security.limit_extensions" = "";
     };
     phpEnv."PATH" = lib.makeBinPath [ pkgs.php74 ];
-  };
-
-  # XXX Will this be run on every activation?
-  systemd.services.osticket-copy-to-dir = {
-    script = ''
-        set -x
-        cp -rv ${osTicket}/* ${directory}
-        find ${directory} -type d -print0 | xargs -0 chmod 0755
-        find ${directory} -type f -print0 | xargs -0 chmod 0644
-        mv ${directory}/include/ost-sampleconfig.php ${directory}/include/ost-config.php
-        chmod 0666 ${directory}/include/ost-config.php
-    '';
-
-    wantedBy = [ "default.target" ];
-    serviceConfig = {
-      User = user;
-      Type = "oneshot";
-      ReadWritePaths = [ directory ];
-      #WorkingDirectory = osTicket;
-    };
   };
 }
