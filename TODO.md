@@ -1,12 +1,12 @@
 # TODO
 * Maybe these should be modules with options and all instead of functions? It would make them much more versatile
-* osTicket forces users to install through a GUI, so it's not very suitable for Nix. Maybe use zammad
+* Maybe Zammad? osTicket seems dated
 
 ## Neuron
 * Add SSL options
 
 ## osTicket
-* Does changing ost-config.php to put database info help in any way? Crazy idea: run a headless browser and fill in the form automatically on activation
+* Still can't enter localhost:8989/scp (Or more explicitly: it doesn't redirect me to scp/index.php)
 * Add SSL options
 * Add backup options
 
