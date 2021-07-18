@@ -36,6 +36,9 @@ in
         else
           echo ">>> ${directory} not empty, considering already deployed"
         fi
+
+        echo "MAKING USER OWN EVERYTHING"
+        chown -R ${user}:${user} ${directory}
     '';
 
     services.mysql = {
@@ -111,6 +114,7 @@ in
     systemd.services.install-osticket = {
       script = ''
         set -x
+        echo ">>> Installing osTicket"
         ${pkgs.curl}/bin/curl "localhost/setup/install.php" \
           -F "s=install" \
           -F "name=Site Name" \
@@ -126,6 +130,9 @@ in
           -F "dbname=osticket" \
           -F "dbuser=osticket" \
           -F "dbpass=password"
+          echo ">>> Performing post-install cleanup"
+          chmod 0644 ${directory}/include/ost-config.php
+          rm -r ${directory}/setup
       '';
 
       wantedBy = [ "multi-user.target" ];
