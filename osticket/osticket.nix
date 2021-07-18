@@ -5,6 +5,13 @@ let
   user = "osticket";
 in
   {
+
+    environment.systemPackages = [
+      # I'm using these two just for testing on nixos-shell
+      pkgs.php74 
+      vim
+    ];
+
     system.activationScripts.prepare = ''
         echo "CREATING DIRECTORIES AND SETTING PERMISSIONS..."
         mkdir -p ${directory}
