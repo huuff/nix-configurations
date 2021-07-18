@@ -6,9 +6,9 @@ let
 in
   {
 
-    environment.systemPackages = [
+    environment.systemPackages = with pkgs; [
       # I'm using these two just for testing on nixos-shell
-      pkgs.php74 
+      php74 
       vim
     ];
 
