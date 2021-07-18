@@ -149,11 +149,13 @@ in
 
         unitConfig = {
           After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "deploy-osticket.service" ]; # any nix way to get the service names? especially phpfpm since it's more likely to change
+          ConditionPathExists = "${directory}/setup";
         };
 
         serviceConfig = {
           User = user;
           Type = "oneshot";
+          RemainAfterExit = true;
         };
       };
     };

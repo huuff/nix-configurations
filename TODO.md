@@ -11,6 +11,7 @@
 * Add backup options
 * Go to scp, hit New Ticket. A modal fails to appear and I'm sure it's some nginx stuff
 * The systemd units run every time, [https://unix.stackexchange.com/questions/320400/systemd-oneshot-requirement-to-execute-only-once](check this out)
+* Definitely needs to be a module and set all osTicket installation options as module options
 
 ### initial-script.sql
 osTicket needs a mysql user identified by a password, the NixOS module won't let us do this through config since that password would be in cleartext in the nix-store, so we need to pass it a file. 
