@@ -10,6 +10,7 @@
 * Add SSL options
 * Add backup options
 * Go to scp, hit New Ticket. A modal fails to appear and I'm sure it's some nginx stuff
+* Pretty sure the install systemd unit runs every time
 
 ### initial-script.sql
 osTicket needs a mysql user identified by a password, the NixOS module won't let us do this through config since that password would be in cleartext in the nix-store, so we need to pass it a file. 
