@@ -100,31 +100,34 @@ in
     systemd.services = {
       deploy-osticket = {
         script = ''
-          echo "COPYING TO DESTINATION..."
-          if [ ! "$(ls -A ${directory})" ]; then
-            echo ">>> ${directory} is empty, copying osTicket files there"
+            echo ">>> Copying files to ${directory}"
             cp -r ${osTicket}/* ${directory}
+
+            echo ">>> Setting permissions for serving"
             find ${directory} -type d -print0 | xargs -0 chmod 0755
             find ${directory} -type f -print0 | xargs -0 chmod 0644
-            mv ${directory}/include/ost-sampleconfig.php ${directory}/include/ost-config.php
-            chmod 0666 ${directory}/include/ost-config.php
-          else
-            echo ">>> ${directory} not empty, considering already deployed"
-          fi
         '';
 
         wantedBy = [ "multi-user.target" ];
 
+        unitConfig = {
+          ConditionDirectoryNotEmpty="!${directory}";
+        };
+
         serviceConfig = {
           User = user;
           Type = "oneshot";
+          RemainAfterExit = true;
         };
       };
 
       install-osticket = {
         script = ''
-          set -x
-          echo ">>> Installing osTicket"
+          echo ">>> Setting config file"
+          mv ${directory}/include/ost-sampleconfig.php ${directory}/include/ost-config.php
+          chmod 0666 ${directory}/include/ost-config.php
+
+          echo ">>> Calling install script"
           ${pkgs.curl}/bin/curl "localhost/setup/install.php" \
             -F "s=install" \
             -F "name=Site Name" \
