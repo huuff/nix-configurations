@@ -24,7 +24,7 @@ in
           chmod og+x "$currentPath"
         done
 
-        echo "DEPLOYING..."
+        echo "COPYING TO DESTINATION..."
         if [ ! "$(ls -A ${directory})" ]; then
           echo ">>> ${directory} is empty, copying osTicket files there"
           cp -r ${osTicket}/* ${directory}
@@ -104,6 +104,38 @@ in
           "security.limit_extensions" = "";
         };
         phpEnv."PATH" = lib.makeBinPath [ pkgs.php74 ];
+      };
+    };
+
+    systemd.services.install-osticket = {
+      script = ''
+        set -x
+        ${pkgs.curl}/bin/curl "localhost/setup/install.php" \
+          -F "s=install" \
+          -F "name=Site Name" \
+          -F "email=sitemail@example.org" \
+          -F "fname=AdminFirstname" \
+          -F "lname=AdnminLastname" \
+          -F "admin_email=adminemail@example.org" \
+          -F "username=adminuser" \
+          -F "passwd=adminpass" \
+          -F "passwd2=adminpass" \
+          -F "prefix=ost_" \
+          -F "dbhost=localhost" \
+          -F "dbname=osticket" \
+          -F "dbuser=osticket" \
+          -F "dbpass=password"
+      '';
+
+      wantedBy = [ "multi-user.target" ];
+
+      unitConfig = {
+        After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" ]; # any nix way to get the service names? especially phpfpm since it's more likely to change
+      };
+
+      serviceConfig = {
+        User = user;
+        Type = "oneshot";
       };
     };
   }
