@@ -12,6 +12,7 @@ in
       vim
     ];
 
+    # TODO: Make these systemd units with more explicit ordering?
     system.activationScripts.prepare = ''
         echo "CREATING DIRECTORIES AND SETTING PERMISSIONS..."
         mkdir -p ${directory}
