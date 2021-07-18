@@ -12,7 +12,6 @@
 * Add backup options
 * Go to scp, hit New Ticket. A modal fails to appear and I'm sure it's some nginx stuff
 * Definitely needs to be a module and set all osTicket installation options as module options
-* Add descriptions to services
 * Set some options to add default users and put these into the database
 
 ### initial-script.sql

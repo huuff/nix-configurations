@@ -1,6 +1,6 @@
 { config, pkgs, lib, initialScript, ... }:
 let
-  osTicket = pkgs.callPackage ./osticket-derivation.nix {};
+  osTicket = pkgs.callPackage ./derivation.nix {};
   directory = "/var/www/osticket";
   user = "osticket";
 in
@@ -111,7 +111,8 @@ in
         wantedBy = [ "multi-user.target" ];
 
         unitConfig = {
-          ConditionDirectoryNotEmpty="!${directory}";
+          ConditionDirectoryNotEmpty = "!${directory}";
+          Description = "Copy osTicket files and set permissions";
         };
 
         serviceConfig = {
@@ -153,6 +154,7 @@ in
         unitConfig = {
           After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "deploy-osticket.service" ]; # any nix way to get the service names? especially phpfpm since it's more likely to change
           ConditionPathExists = "${directory}/setup";
+          Description = "Run osTicket installation script and cleanup";
         };
 
         serviceConfig = {
