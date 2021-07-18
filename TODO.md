@@ -1,5 +1,6 @@
 # TODO
 * Maybe these should be modules with options and all instead of functions? It would make them much more versatile
+* NixOS testing? [https://nixos.org/#asciinema-demo-example_6](check this out)
 * Maybe Zammad? osTicket seems dated
 
 ## Neuron
