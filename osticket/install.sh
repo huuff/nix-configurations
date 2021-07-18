@@ -1,2 +1,16 @@
 #!/usr/bin/env bash
-curl localhost:8989/setup/install.php -X POST -H "Content-Type: application/x-www-form-urlencoded" -d "s=install&name=Sitename&email=admin@email.com&fname=Adminfname&lname=Adminlname&admin2@email.com&username=adminuser&passwd=password&passwd2=password&prefix=ost_&dbhost=localhost&dbname=osticket&dbuser=osticket&dbpass=password&admin_email=adminemail@email.com"
+curl localhost:8989/setup/install.php \
+  -F "s=install" \
+  -F "name=Site Name" \
+  -F "email=sitemail@example.org" \
+  -F "fname=AdminFirstname" \
+  -F "lname=AdnminLastname" \
+  -F "admin_email=adminemail@example.org" \
+  -F "username=adminuser" \
+  -F "passwd=adminpass" \
+  -F "passwd2=adminpass" \
+  -F "prefix=ost_" \
+  -F "dbhost=localhost" \
+  -F "dbname=osticket" \
+  -F "dbuser=osticket" \
+  -F "dbpass=password"

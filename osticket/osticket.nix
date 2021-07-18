@@ -85,7 +85,7 @@ in
     services.phpfpm = {
       phpOptions = ''
         extension=${pkgs.php74Extensions.apcu}/lib/php/extensions/apcu.so
-      '';
+      ''; # better performance
 
       pools.osTicket = {
         user = user;
