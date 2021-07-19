@@ -119,6 +119,10 @@ in with lib;
       vim
     ];
 
+    networking.firewall = {
+      allowedTCPPorts = [ 80 ];
+    };
+
     # TODO: Creating the directory wouldn't be necessary if createHome were working
     # is it that it's badly ordered?
     # I can't think of any solution to the problem of setting the executable bit

@@ -12,7 +12,8 @@
 * Add backup options
 * Go to scp, hit New Ticket. A modal fails to appear and I'm sure it's some nginx stuff
 * Set some options to add default users and put these into the database
-* Open ports in firewall
+* Use `with types` in options because I have a thousand `types.*`
+* Prevent the server from being ready before installing. (Wasn't this happening before? Have I broken something in systemd units?)
 
 ## Mail
 * Give it some love
