@@ -1,11 +1,35 @@
-{ config, pkgs, lib, initialScript, ... }:
+{ config, pkgs, lib, ... }:
 let
   osTicket = pkgs.callPackage ./derivation.nix {};
-  directory = "/var/www/osticket";
-  user = "osticket";
-in
+  cfg = config.services.osticket;
+in with lib;
   {
-    environment.systemPackages = with pkgs; [
+    options.services.osticket = {
+      enable = mkEnableOption "osTicket ticketing system";
+
+      user = mkOption {
+        type = types.str;
+        default = "osticket";
+        description = "User on which to run osTicket";
+      };
+
+      directory = mkOption {
+        type = types.str;
+        default = "/var/www/osticket";
+        description = "Directory where to install and serve osTicket";
+      };
+
+      # TODO: This shouldn't need to be provided by the user, only the password
+      initialScript = mkOption {
+        type = types.path;
+        default = null;
+        description = "Initial script with which to load the DB";
+      };
+
+    };
+
+    config = mkIf cfg.enable {
+      environment.systemPackages = with pkgs; [
       # I'm using these two just for testing on nixos-shell
       php74 
       vim
@@ -16,8 +40,8 @@ in
     # I can't think of any solution to the problem of setting the executable bit
     system.activationScripts.createDirectory = ''
         echo "CREATING DIRECTORIES AND SETTING PERMISSIONS..."
-        mkdir -p ${directory}
-        dirsUpToPath=$(namei ${directory} | tail -n +3 | cut -d' ' -f3)
+        mkdir -p ${cfg.directory}
+        dirsUpToPath=$(namei ${cfg.directory} | tail -n +3 | cut -d' ' -f3)
 
         currentPath=""
         for dir in $dirsUpToPath
@@ -30,30 +54,31 @@ in
     services.mysql = {
       enable = true;
       package = pkgs.mariadb;
-      inherit initialScript;
+      initialScript = cfg.initialScript;
     };
 
     users = {
-      users.${user} = {
+      users.${cfg.user} = {
         isSystemUser = true;
-        home = directory;
-        group = user;
+        home = cfg.directory;
+        group = cfg.user;
         extraGroups = [ "keys" ]; # needed for nixops, to access /run/keys
         createHome = true; # remove it? I'm creating the directory in the activation script anyway
       };
 
-      groups.${user} = {}; # create the group
+      groups.${cfg.user} = {}; # create the group
     };
 
-    systemd.services.nginx.serviceConfig.ReadWritePaths = [ directory ];
+    # is this useful for anything?
+    systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.directory ];
 
     services.nginx = {
       enable = true;
-      user = user;
-      group = user;
+      user = cfg.user;
+      group = cfg.user;
 
       virtualHosts.osticket = {
-        root = directory;
+        root = cfg.directory;
         locations."/".extraConfig = ''
             index index.php;
         '';
@@ -78,7 +103,7 @@ in
       ''; # better performance
 
       pools.osTicket = {
-        user = user;
+        user = cfg.user;
         phpPackage = pkgs.php74;
         settings = {
           "listen.owner" = config.services.nginx.user;
@@ -100,23 +125,23 @@ in
     systemd.services = {
       deploy-osticket = {
         script = ''
-            echo ">>> Copying files to ${directory}"
-            cp -r ${osTicket}/* ${directory}
+            echo ">>> Copying files to ${cfg.directory}"
+            cp -r ${osTicket}/* ${cfg.directory}
 
             echo ">>> Setting permissions for serving"
-            find ${directory} -type d -print0 | xargs -0 chmod 0755
-            find ${directory} -type f -print0 | xargs -0 chmod 0644
+            find ${cfg.directory} -type d -print0 | xargs -0 chmod 0755
+            find ${cfg.directory} -type f -print0 | xargs -0 chmod 0644
         '';
 
         wantedBy = [ "multi-user.target" ];
 
         unitConfig = {
-          ConditionDirectoryNotEmpty = "!${directory}";
+          ConditionDirectoryNotEmpty = "!${cfg.directory}";
           Description = "Copy osTicket files and set permissions";
         };
 
         serviceConfig = {
-          User = user;
+          User = cfg.user;
           Type = "oneshot";
           RemainAfterExit = true;
         };
@@ -125,8 +150,8 @@ in
       install-osticket = {
         script = ''
           echo ">>> Setting config file"
-          mv ${directory}/include/ost-sampleconfig.php ${directory}/include/ost-config.php
-          chmod 0666 ${directory}/include/ost-config.php
+          mv ${cfg.directory}/include/ost-sampleconfig.php ${cfg.directory}/include/ost-config.php
+          chmod 0666 ${cfg.directory}/include/ost-config.php
 
           echo ">>> Calling install script"
           ${pkgs.curl}/bin/curl "localhost/setup/install.php" \
@@ -145,23 +170,24 @@ in
             -F "dbuser=osticket" \
             -F "dbpass=password"
           echo ">>> Performing post-install cleanup"
-          chmod 0644 ${directory}/include/ost-config.php
-          rm -r ${directory}/setup
+          chmod 0644 ${cfg.directory}/include/ost-config.php
+          rm -r ${cfg.directory}/setup
         '';
 
         wantedBy = [ "multi-user.target" ];
 
         unitConfig = {
           After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "deploy-osticket.service" ]; # any nix way to get the service names? especially phpfpm since it's more likely to change
-          ConditionPathExists = "${directory}/setup";
+          ConditionPathExists = "${cfg.directory}/setup";
           Description = "Run osTicket installation script and cleanup";
         };
 
         serviceConfig = {
-          User = user;
+          User = cfg.user;
           Type = "oneshot";
           RemainAfterExit = true;
         };
       };
     };
-  }
+  };
+}

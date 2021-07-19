@@ -7,8 +7,17 @@ let
   };
 in
 {
+  imports = [
+    ./osticket.nix 
+  ];
+
+  services.osticket = {
+    enable = true;
+    inherit initialScript;
+  };
+
   virtualisation.qemu.networkingOptions = [
     "-net nic,netdev=user.0,model=virtio"
     "-netdev user,id=user.0,hostfwd=tcp::8989-:80"
   ];
-} // import ./osticket.nix { inherit initialScript config pkgs lib; }
+}
