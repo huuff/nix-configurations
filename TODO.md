@@ -11,8 +11,6 @@
 * Add SSL options
 * Add backup options
 * Set some options to add default users and put these into the database
-* Use `with types` in options because I have a thousand `types.*`
-* Prevent the server from being ready before installing. (Wasn't this happening before? Have I broken something in systemd units?)
 
 ## Mail/SNM
 * Give it some love

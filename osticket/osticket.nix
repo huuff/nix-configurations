@@ -3,62 +3,62 @@ let
   cfg = config.services.osticket;
 in with lib;
   {
-    options.services.osticket = {
+    options.services.osticket = with types; {
       enable = mkEnableOption "osTicket ticketing system";
 
       user = mkOption {
-        type = types.str;
+        type = str;
         default = "osticket";
         description = "User on which to run osTicket";
       };
 
       directory = mkOption {
-        type = types.str;
+        type = str;
         default = "/var/www/osticket";
         description = "Directory where to install and serve osTicket";
       };
 
       # TODO: This shouldn't need to be provided by the user, only the password
       initialScript = mkOption {
-        type = types.path;
+        type = path;
         default = null;
         description = "Initial script with which to load the DB";
       };
 
       package = mkOption {
-        type = types.package;
+        type = package;
         default = pkgs.callPackage ./derivation.nix {};
         description = "The package that provides osTicket";
       };
 
       admin = {
         username = mkOption {
-          type = types.str;
+          type = str;
           default = null;
           description = "Username of the admin account";
         };
 
         email = mkOption {
-          type = types.str;
+          type = str;
           default = null;
           description = "Email of the admin account";
         };
 
         # TODO: this shouldn't be here because Nix doesn't manage secrets
         password = mkOption {
-          type = types.str;
+          type = str;
           default = null;
           description = "Password of the admin account";
         };
 
         firstName = mkOption {
-          type = types.str;
+          type = str;
           default = null;
           description = "First name of the admin";
         };
 
         lastName = mkOption {
-          type = types.str;
+          type = str;
           default = null;
           description = "Last name of the admin";
         };
@@ -66,31 +66,31 @@ in with lib;
 
       database = {
         host = mkOption {
-          type = types.str;
+          type = str;
           default = "localhost";
           description = "Host location of the database";
         };
 
         name = mkOption {
-          type = types.str;
+          type = str;
           default = null;
           description = "Name of the database";
         };
 
         user = mkOption {
-          type = types.str;
+          type = str;
           default = null;
           description = "Name of the database user";
         };
 
         password = mkOption {
-          type = types.str;
+          type = str;
           default = null;
           description = "Password of the database user";
         };
 
         prefix = mkOption {
-          type = types.str;
+          type = str;
           default = "ost_";
           description = "Prefix to put on all tables of the database";
         };
@@ -98,13 +98,13 @@ in with lib;
 
       site = {
         name = mkOption {
-          type = types.str;
+          type = str;
           default = null;
           description = "Name of the site";
         };
 
         email = mkOption {
-          type = types.str;
+          type = str;
           default = null;
           description = "Email of the site";
         };
@@ -200,7 +200,7 @@ in with lib;
         }
 
         location / {
-            try_files $uri $uri/ index.php;
+            index index.php;
         }
 
         location ~ \.php$ {
@@ -233,7 +233,7 @@ in with lib;
           "php_admin_value[error_log]" = "stderr";
           "php_admin_flag[log_errors]" = true;
           "catch_workers_output" = true;
-          "security.limit_extensions" = "";
+          "security.limit_extensions" = ""; # TODO: what is this? try removing it
         };
         phpEnv."PATH" = lib.makeBinPath [ pkgs.php74 ];
       };
