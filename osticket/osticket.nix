@@ -167,20 +167,49 @@ in with lib;
 
       virtualHosts.osticket = {
         root = cfg.directory;
-        locations."/".extraConfig = ''
-            index index.php;
-        '';
-        locations."~ \.php$".extraConfig = ''
-            fastcgi_split_path_info ^(.+\.php)(/.+)$;
-            fastcgi_pass unix:${config.services.phpfpm.pools.osTicket.socket};
+        extraConfig = ''
+        set $path_info "";
+
+        location ~ /include {
+            deny all;
+            return 403;
+        }
+
+        if ($request_uri ~ "^/api(/[^\?]+)") {
+            set $path_info $1;
+        }
+
+        location ~ ^/api/(?:tickets|tasks).*$ {
+            try_files $uri $uri/ /api/http.php?$query_string;
+        }
+
+        if ($request_uri ~ "^/scp/.*\.php(/[^\?]+)") {
+            set $path_info $1;
+        }
+
+        if ($request_uri ~ "^/.*\.php(/[^\?]+)") {
+            set $path_info $1;
+        }
+
+        location ~ ^/scp/ajax.php/.*$ {
+            try_files $uri $uri/ /scp/ajax.php?$query_string;
+        }
+
+        location ~ ^/ajax.php/.*$ {
+            try_files $uri $uri/ /ajax.php?$query_string;
+        }
+
+        location / {
+            try_files $uri $uri/ index.php;
+        }
+
+        location ~ \.php$ {
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
             include ${pkgs.nginx}/conf/fastcgi_params;
             include ${pkgs.nginx}/conf/fastcgi.conf;
-        '';
-        locations."~ ^/scp/ajax.php/.*$".extraConfig = ''
-            try_files $uri $uri/ /scp/ajax.php?$query_string;
-        '';
-        locations."/scp".extraConfig = ''
-            try_files $uri $uri/ /scp/index.php;
+            fastcgi_param PATH_INFO $path_info;
+            fastcgi_pass unix:${config.services.phpfpm.pools.osTicket.socket};
+        }
         '';
       };
     };
