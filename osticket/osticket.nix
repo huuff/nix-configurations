@@ -31,6 +31,39 @@ in with lib;
         description = "The package that provides osTicket";
       };
 
+      admin = {
+        username = mkOption {
+          type = types.str;
+          default = null;
+          description = "Username of the admin account";
+        };
+
+        email = mkOption {
+          type = types.str;
+          default = null;
+          description = "Email of the admin account";
+        };
+
+        # TODO: this shouldn't be here because Nix doesn't manage secrets
+        password = mkOption {
+          type = types.str;
+          default = null;
+          description = "Password of the admin account";
+        };
+
+        firstName = mkOption {
+          type = types.str;
+          default = null;
+          description = "First name of the admin";
+        };
+
+        lastName = mkOption {
+          type = types.str;
+          default = null;
+          description = "Last name of the admin";
+        };
+      };
+
     };
 
     config = mkIf cfg.enable {
@@ -163,12 +196,12 @@ in with lib;
             -F "s=install" \
             -F "name=Site Name" \
             -F "email=sitemail@example.org" \
-            -F "fname=AdminFirstname" \
-            -F "lname=AdnminLastname" \
-            -F "admin_email=adminemail@example.org" \
-            -F "username=adminuser" \
-            -F "passwd=adminpass" \
-            -F "passwd2=adminpass" \
+            -F "fname=${cfg.admin.firstName}" \
+            -F "lname=${cfg.admin.lastName}" \
+            -F "admin_email=${cfg.admin.email}" \
+            -F "username=${cfg.admin.username}" \
+            -F "passwd=${cfg.admin.password}" \
+            -F "passwd2=${cfg.admin.password}" \
             -F "prefix=ost_" \
             -F "dbhost=localhost" \
             -F "dbname=osticket" \

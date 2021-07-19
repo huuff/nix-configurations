@@ -14,6 +14,14 @@ in
   services.osticket = {
     enable = true;
     inherit initialScript;
+
+    admin = {
+      username = "root";
+      password = "passwd";
+      email = "root@example.com";
+      firstName = "Firstname";
+      lastName = "Lastname";
+    };
   };
 
   virtualisation.qemu.networkingOptions = [
