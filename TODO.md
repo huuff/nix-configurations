@@ -11,8 +11,11 @@
 * Add SSL options
 * Add backup options
 * Go to scp, hit New Ticket. A modal fails to appear and I'm sure it's some nginx stuff
-* Definitely needs to be a module and set all osTicket installation options as module options
 * Set some options to add default users and put these into the database
+* Open ports in firewall
+
+## Mail
+* Give it some love
 
 ### initial-script.sql
 osTicket needs a mysql user identified by a password, the NixOS module won't let us do this through config since that password would be in cleartext in the nix-store, so we need to pass it a file. 

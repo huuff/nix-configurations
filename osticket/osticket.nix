@@ -64,6 +64,52 @@ in with lib;
         };
       };
 
+      database = {
+        host = mkOption {
+          type = types.str;
+          default = "localhost";
+          description = "Host location of the database";
+        };
+
+        name = mkOption {
+          type = types.str;
+          default = null;
+          description = "Name of the database";
+        };
+
+        user = mkOption {
+          type = types.str;
+          default = null;
+          description = "Name of the database user";
+        };
+
+        password = mkOption {
+          type = types.str;
+          default = null;
+          description = "Password of the database user";
+        };
+
+        prefix = mkOption {
+          type = types.str;
+          default = "ost_";
+          description = "Prefix to put on all tables of the database";
+        };
+      };
+
+      site = {
+        name = mkOption {
+          type = types.str;
+          default = null;
+          description = "Name of the site";
+        };
+
+        email = mkOption {
+          type = types.str;
+          default = null;
+          description = "Email of the site";
+        };
+      };
+
     };
 
     config = mkIf cfg.enable {
@@ -194,19 +240,19 @@ in with lib;
           echo ">>> Calling install script"
           ${pkgs.curl}/bin/curl "localhost/setup/install.php" \
             -F "s=install" \
-            -F "name=Site Name" \
-            -F "email=sitemail@example.org" \
+            -F "name=${cfg.site.name}" \
+            -F "email=${cfg.site.email}" \
             -F "fname=${cfg.admin.firstName}" \
             -F "lname=${cfg.admin.lastName}" \
             -F "admin_email=${cfg.admin.email}" \
             -F "username=${cfg.admin.username}" \
             -F "passwd=${cfg.admin.password}" \
             -F "passwd2=${cfg.admin.password}" \
-            -F "prefix=ost_" \
-            -F "dbhost=localhost" \
-            -F "dbname=osticket" \
-            -F "dbuser=osticket" \
-            -F "dbpass=password"
+            -F "prefix=${cfg.database.prefix}" \
+            -F "dbhost=${cfg.database.host}" \
+            -F "dbname=${cfg.database.name}" \
+            -F "dbuser=${cfg.database.user}" \
+            -F "dbpass=${cfg.database.password}"
           echo ">>> Performing post-install cleanup"
           chmod 0644 ${cfg.directory}/include/ost-config.php
           rm -r ${cfg.directory}/setup

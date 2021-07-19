@@ -22,6 +22,17 @@ in
       firstName = "Firstname";
       lastName = "Lastname";
     };
+
+    database = {
+      name = "osticket";
+      user = "osticket";
+      password = "password";
+    };
+
+    site = {
+      name = "osTicket";
+      email = "site@example.com";
+    };
   };
 
   virtualisation.qemu.networkingOptions = [
