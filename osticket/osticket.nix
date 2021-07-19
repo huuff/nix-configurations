@@ -1,6 +1,5 @@
 { config, pkgs, lib, ... }:
 let
-  osTicket = pkgs.callPackage ./derivation.nix {};
   cfg = config.services.osticket;
 in with lib;
   {
@@ -24,6 +23,12 @@ in with lib;
         type = types.path;
         default = null;
         description = "Initial script with which to load the DB";
+      };
+
+      package = mkOption {
+        type = types.package;
+        default = pkgs.callPackage ./derivation.nix {};
+        description = "The package that provides osTicket";
       };
 
     };
@@ -126,7 +131,7 @@ in with lib;
       deploy-osticket = {
         script = ''
             echo ">>> Copying files to ${cfg.directory}"
-            cp -r ${osTicket}/* ${cfg.directory}
+            cp -r ${cfg.package}/* ${cfg.directory}
 
             echo ">>> Setting permissions for serving"
             find ${cfg.directory} -type d -print0 | xargs -0 chmod 0755
