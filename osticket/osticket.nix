@@ -18,13 +18,6 @@ in with lib;
         description = "Directory where to install and serve osTicket";
       };
 
-      # TODO: This shouldn't need to be provided by the user, only the password
-      initialScript = mkOption {
-        type = path;
-        default = null;
-        description = "Initial script with which to load the DB";
-      };
-
       package = mkOption {
         type = package;
         default = pkgs.callPackage ./derivation.nix {};
@@ -142,7 +135,6 @@ in with lib;
     services.mysql = {
       enable = true;
       package = pkgs.mariadb;
-      initialScript = cfg.initialScript;
     };
 
     users = {
@@ -264,6 +256,35 @@ in with lib;
         };
       };
 
+      setup-database =
+      let
+        initialScript = ''
+          CREATE DATABASE ${cfg.database.name};
+          CREATE USER '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${cfg.database.password}';
+          GRANT ALL PRIVILEGES ON ${cfg.database.name}.* TO '${cfg.database.user}'@${cfg.database.host};
+          '';
+      in 
+        {
+        script = ''
+          set -x
+          echo "${initialScript}" | ${config.services.mysql.package}/bin/mysql -u root -N
+        '';
+
+        wantedBy = [ "multi-user.target" ];
+
+        unitConfig = {
+          ConditionPathExists = "${cfg.directory}/setup"; # a.k.a. not yet installed
+          After = [ "mysql.service" "deploy-osticket.service" ];
+          Description = "Create database and user for osTicket";
+        };
+
+        serviceConfig = {
+          User = "root"; #TODO: is there any other way?
+          Type = "oneshot";
+          RemainAfterExit = true;
+        };
+      };
+
       install-osticket = {
         script = ''
           echo ">>> Setting config file"
@@ -294,7 +315,7 @@ in with lib;
         wantedBy = [ "multi-user.target" ];
 
         unitConfig = {
-          After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "deploy-osticket.service" ]; # any nix way to get the service names? especially phpfpm since it's more likely to change
+          After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-database.service" "deploy-osticket.service" ];
           ConditionPathExists = "${cfg.directory}/setup";
           Description = "Run osTicket installation script and cleanup";
         };

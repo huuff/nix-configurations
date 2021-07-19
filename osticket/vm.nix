@@ -1,11 +1,5 @@
 # Environment for nixos-shell, for testing purposes
 { config, pkgs, lib, ... }:
-let
-  initialScript = pkgs.writeTextFile {
-    name = "initial-script";
-    text = builtins.readFile ./initial-script.sql; 
-  };
-in
 {
   imports = [
     ./osticket.nix 
@@ -13,7 +7,6 @@ in
 
   services.osticket = {
     enable = true;
-    inherit initialScript;
 
     admin = {
       username = "root";
