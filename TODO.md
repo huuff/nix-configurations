@@ -32,3 +32,10 @@ UPDATE: Okay, my action plan:
 * Then, this JSON file path could be passed as an option to the module
 
 This process is kinda extenuating, and reinforces the idea that Nix needs some form of secret management
+
+UPDATE2:
+The file for users is on, it's currently taking the password for the admin user (TODO: also the email, name, etc). It's not yet done for the rest of users.
+
+A challenge: the root user password is entered unhashed (it's how the install script takes it), however, those for normal users will need to be hashed (since they will be entered into the DB directly). How can I marry these two requisites?
+
+* Maybe enter some default admin user password first unhashed, and then alter the database to put it hashed from userfile?

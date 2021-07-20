@@ -8,9 +8,11 @@
   services.osticket = {
     enable = true;
 
+    userFile = pkgs.writeText "userfile" (builtins.readFile ./userfile.json);
+
     admin = {
       username = "root";
-      password = "passwd";
+      #password = "passwd";
       email = "root@example.com";
       firstName = "Firstname";
       lastName = "Lastname";
