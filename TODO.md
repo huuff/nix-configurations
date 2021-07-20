@@ -26,7 +26,6 @@ Some solutions that might be worth of looking into:
 
 UPDATE: Okay, my action plan:
 * I have created a systemd service that creates the database and the user, get the user password from a file that can be passed as an option so it's taken from outside of the nix store.
-* Currently I'm passing the script in an `echo`, which wouldn't work well with parameter substitution.
 * Then, using more or less the same process, create another systemd unit that populates the database with some default users, my idea for that:
 * Put these into a JSON, stating only username and password, read through it and convert it to sql, but substitute the contents of the json only using bash (not nix, and thus, it won't get into the nix store)
 * Then, this JSON file path could be passed as an option to the module

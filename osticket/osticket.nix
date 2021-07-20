@@ -266,8 +266,9 @@ in with lib;
       in 
         {
         script = ''
-          set -x
-          echo "${initialScript}" | ${config.services.mysql.package}/bin/mysql -u root -N
+          ${config.services.mysql.package}/bin/mysql -u root -N <<EOF
+          ${initialScript}
+          EOF
         '';
 
         wantedBy = [ "multi-user.target" ];
