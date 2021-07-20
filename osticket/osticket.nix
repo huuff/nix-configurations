@@ -76,8 +76,8 @@ in with lib;
           description = "Name of the database user";
         };
 
-        password = mkOption {
-          type = str;
+        passwordFile = mkOption {
+          type = oneOf [ str path ];
           default = null;
           description = "Password of the database user";
         };
@@ -260,7 +260,7 @@ in with lib;
       let
         initialScript = ''
           CREATE DATABASE ${cfg.database.name};
-          CREATE USER '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${cfg.database.password}';
+          CREATE USER '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '$(cat ${toString cfg.database.passwordFile})';
           GRANT ALL PRIVILEGES ON ${cfg.database.name}.* TO '${cfg.database.user}'@${cfg.database.host};
           '';
       in 
@@ -307,7 +307,7 @@ in with lib;
             -F "dbhost=${cfg.database.host}" \
             -F "dbname=${cfg.database.name}" \
             -F "dbuser=${cfg.database.user}" \
-            -F "dbpass=${cfg.database.password}"
+            -F "dbpass=$(cat ${toString cfg.database.passwordFile})"
           echo ">>> Performing post-install cleanup"
           chmod 0644 ${cfg.directory}/include/ost-config.php
           rm -r ${cfg.directory}/setup

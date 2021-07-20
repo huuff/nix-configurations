@@ -19,7 +19,9 @@
     database = {
       name = "osticket";
       user = "osticket";
-      password = "password";
+      # This goes to the Nix store so obviously something better would be needed in
+      # production. But this is just for testing
+      passwordFile = pkgs.writeText "dbpass" (builtins.readFile ./dbpass);
     };
 
     site = {
