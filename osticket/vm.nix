@@ -5,6 +5,8 @@
     ./osticket.nix 
   ];
 
+  networking.firewall.allowedTCPPorts = [ 3306 ];
+
   services.osticket = {
     enable = true;
 
@@ -34,6 +36,16 @@
 
   virtualisation.qemu.networkingOptions = [
     "-net nic,netdev=user.0,model=virtio"
-    "-netdev user,id=user.0,hostfwd=tcp::8989-:80"
+    "-netdev user,id=user.0,hostfwd=tcp::8989-:80,hostfwd=tcp::2222-:22"
   ];
+
+  services.openssh = {
+    enable = true;
+    permitRootLogin = "yes";
+  };
+
+  users = {
+    users.root.password="pass";
+    mutableUsers=false;
+  };
 }

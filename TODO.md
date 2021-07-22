@@ -12,9 +12,7 @@
 * Add backup options
 * Set some options to add default users and put these into the database
 * Why is multi-user target reached before having run my systemd units? but only on some computers? a complete mystery
-
-## Mail/SNM
-* Give it some love
+* Move what I use for testing to an `example` folder
 
 ### initial-script.sql
 osTicket needs a mysql user identified by a password, the NixOS module won't let us do this through config since that password would be in cleartext in the nix-store, so we need to pass it a file. 
@@ -39,3 +37,7 @@ The file for users is on, it's currently taking the password for the admin user 
 A challenge: the root user password is entered unhashed (it's how the install script takes it), however, those for normal users will need to be hashed (since they will be entered into the DB directly). How can I marry these two requisites?
 
 * Maybe enter some default admin user password first unhashed, and then alter the database to put it hashed from userfile?
+
+## Mail/SNM
+* Give it some love
+
