@@ -251,8 +251,6 @@ in with lib;
             find ${cfg.directory} -type f -print0 | xargs -0 chmod 0644
         '';
 
-        wantedBy = [ "multi-user.target" ];
-
         unitConfig = {
           ConditionDirectoryNotEmpty = "!${cfg.directory}";
           Description = "Copy osTicket files and set permissions";
@@ -279,8 +277,6 @@ in with lib;
           ${initialScript}
           EOF
         '';
-
-        wantedBy = [ "multi-user.target" ];
 
         unitConfig = {
           ConditionPathExists = "${cfg.directory}/setup"; # a.k.a. not yet installed
@@ -330,6 +326,7 @@ in with lib;
 
         unitConfig = {
           After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-database.service" "deploy-osticket.service" ];
+          Requires = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-database.service" "deploy-osticket.service" ];
           ConditionPathExists = "${cfg.directory}/setup";
           Description = "Run osTicket installation script and cleanup";
         };
