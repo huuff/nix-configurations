@@ -20,7 +20,6 @@ Find out which configuration options need to be set and which values must be spe
 
 Find out which configs are not needed, maybe set up some way so they are not set at all.
 
-* Every email is needed, maybe even check if it's an email? (UPDATE: Definitely not checking if they are emails)
 * username is not required for users.
 * Are admin first and last name required?
 

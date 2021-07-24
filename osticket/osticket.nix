@@ -115,6 +115,7 @@ in
       site = {
         name = mkOption {
           type = str;
+          default = "osTicket";
           description = "Name of the site";
         };
 
@@ -138,12 +139,20 @@ in
           message = "passwordFile must be set for all users, and point to an existing file!";
         }
         {
+          assertion = all (user: user.email != null) cfg.users;
+          message = "email must be set for all users!";
+        }
+        {
           assertion = cfg.admin.passwordFile != null && pathExists cfg.admin.passwordFile;
           message = "admin.passwordFile must be set and point to an existing file!";
         }
         {
           assertion = cfg.database.passwordFile != null && pathExists cfg.database.passwordFile;
           message = "cfg.database.passwordFile must be set and point to an existing file";
+        }
+        {
+          assertion = cfg.admin.email != null && cfg.site.email != null;
+          message = "cfg.admin.email and cfg.site.email must be set!";
         }
       ];
 

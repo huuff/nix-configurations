@@ -23,10 +23,7 @@ in {
 
     database.passwordFile = fileFromStore ./dbpass;
 
-    site = {
-      name = "osTicket";
-      email = "site@example.com";
-    };
+    site.email = "site@example.com";
 
     users = [
       {
