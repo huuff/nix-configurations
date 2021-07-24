@@ -38,6 +38,13 @@ A challenge: the root user password is entered unhashed (it's how the install sc
 
 * Maybe enter some default admin user password first unhashed, and then alter the database to put it hashed from userfile?
 
+UPDATE3:
+Okay, I just noticed that putting all user config into a JSON is pretty crazy, it would need to be consumed by bash since otherwise, it would end in the nix store and fuck our security constraints.
+
+Since it would need to be consumed by bash, we couldn't use any of nix power for it and thus the result would be an unsightly mix of bash + nix.
+
+Next idea: Only put passwords in files, and specify the files in the config. Nothing else. This will make it much simpler.
+
 ## Mail/SNM
 * Give it some love
 
