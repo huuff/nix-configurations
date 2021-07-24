@@ -14,8 +14,8 @@
 * Why is multi-user target reached before having run my systemd units? but only on some computers? a complete mystery
 * Remove null defaults
 * Add assertions for nulls, especially those interpolated into strings since these just appear as ""
-* `user.username` is not actually username but full name, change accordingly (what is username?)
 * `setup-users` gets run on every activation which is not optimal
+* Set up username for users
 * Some function for running code into the database since I do it a lot
 
 ## Mail/SNM

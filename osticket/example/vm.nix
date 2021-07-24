@@ -15,7 +15,6 @@ in {
 
     admin = {
       username = "root";
-      #password = "passwd";
       passwordFile = fileFromStore ./adminpass;
       email = "root@example.com";
       firstName = "Firstname";
@@ -37,7 +36,7 @@ in {
 
     users = [
       {
-        username = "user1";
+        fullName = "Mr. User 1";
         email = "user1@example.com";
         passwordFile = fileFromStore ./user1pass;
       }

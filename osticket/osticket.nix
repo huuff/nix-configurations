@@ -6,7 +6,7 @@ let
   cfg = config.services.osticket;
   userModule = with types; submodule {
     options = {
-      username = mkOption {
+      fullName = mkOption {
         type = str;
         description = "Username of the user";
       };
@@ -355,7 +355,7 @@ in
         '';
         insertUser = user: ''
           START TRANSACTION;
-          INSERT INTO ost_user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.username}', NOW(), NOW());
+          INSERT INTO ost_user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.fullName}', NOW(), NOW());
           SELECT LAST_INSERT_ID() INTO @user_id;
           INSERT INTO ost_user_email (user_id, address) VALUES (@user_id, '${user.email}');
           SELECT LAST_INSERT_ID() INTO @email_id;
