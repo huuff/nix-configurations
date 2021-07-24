@@ -105,12 +105,6 @@ in
             ${gitWithDeployKey} pull
           '';
         };
-
-        neuron = {
-          user = cfg.user;
-          enable = true;
-          path = "${cfg.directory}";
-        };
       };
 
       systemd.services.neuron = {
