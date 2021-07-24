@@ -11,9 +11,16 @@
 * Still can't enter localhost:8989/scp (Or more explicitly: it doesn't redirect me to scp/admin.php)
 * Add SSL options
 * Add backup options
+* Add email options
 * Why is multi-user target reached before having run my systemd units? but only on some computers? a complete mystery
-* Add assertions for nulls, especially those interpolated into strings since these just appear as ""
 * `setup-users` gets run on every activation which is not optimal
+
+### Assertions
+Find out which configuration options need to be set and which values must be specified and add assertions to them. For example:
+* Everything about database is definitely needed
+* Every email is needed, maybe even check if it's an email?
+* username is not required for users, I can ignore it
+* Are admin first and last name required?
 
 ## Mail/SNM
 * Give it some love

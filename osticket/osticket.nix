@@ -135,6 +135,14 @@ in
           assertion = all (user: user.passwordFile != null && pathExists user.passwordFile) cfg.users;
           message = "passwordFile must be set for all users, and point to an existing file!";
         }
+        {
+          assertion = cfg.admin.passwordFile != null && pathExists cfg.admin.passwordFile;
+          message = "admin.passwordFile must be set and point to an existing file!";
+        }
+        {
+          assertion = cfg.database.passwordFile != null && pathExists cfg.database.passwordFile;
+          message = "cfg.database.passwordFile must be set and point to an existing file";
+        }
       ];
 
     environment.systemPackages = with pkgs; [
