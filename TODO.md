@@ -17,6 +17,7 @@
 * Add assertions for nulls, especially those interpolated into strings since these just appear as ""
 * `user.username` is not actually username but full name, change accordingly (what is username?)
 * `setup-users` gets run on every activation which is not optimal
+* Some function for running code into the database since I do it a lot
 
 ## Mail/SNM
 * Give it some love
