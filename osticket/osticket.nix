@@ -1,7 +1,23 @@
 { config, pkgs, lib, ... }:
+
+with lib;
+
 let
   cfg = config.services.osticket;
-in with lib;
+  userModule = with types; submodule {
+    options = {
+      hashedPassword = {
+        type = str;
+        description = "htpasswd hash of the user"; # TODO: What's its name? bcrypt?
+       };
+       email = {
+        type = str;
+        description = "email address of the user";
+       };
+      };
+    };
+   catPasswordFile = file: "$(cat ${toString cfg.database.passwordFile})";
+in
   {
     options.services.osticket = with types; {
       enable = mkEnableOption "osTicket ticketing system";
@@ -35,6 +51,11 @@ in with lib;
           type = str;
           default = null;
           description = "Email of the admin account";
+        };
+
+        passwordFile = mkOption {
+          type = oneOf [ str path ];
+          description = "Path to the file with the hashed password of the admin user";
         };
 
         firstName = mkOption {
@@ -113,7 +134,7 @@ in with lib;
     # is it that it's badly ordered?
     # I can't think of any solution to the problem of setting the executable bit
     system.activationScripts.createDirectory = ''
-        echo "CREATING DIRECTORIES AND SETTING PERMISSIONS..."
+        echo ">>> Creating directory and setting permissions"
         mkdir -p ${cfg.directory}
         dirsUpToPath=$(namei ${cfg.directory} | tail -n +3 | cut -d' ' -f3)
 
@@ -251,7 +272,7 @@ in with lib;
       let
         initialScript = ''
           CREATE DATABASE ${cfg.database.name};
-          CREATE USER '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '$(cat ${toString cfg.database.passwordFile})';
+          CREATE USER '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${catPasswordFile cfg.database.passwordFile}';
           GRANT ALL PRIVILEGES ON ${cfg.database.name}.* TO '${cfg.database.user}'@${cfg.database.host};
           '';
       in 
