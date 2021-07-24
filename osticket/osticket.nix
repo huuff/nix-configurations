@@ -19,7 +19,7 @@ let
 
       passwordFile = mkOption {
         type = oneOf [ str path ];
-        description = "File containing the htpasswd hash of the user's password"; # TODO: What's its name? bcrypt?
+        description = "File containing the bcrypt hash of the user's password";
       };
 
        email = mkOption {
@@ -289,7 +289,6 @@ in
           "php_admin_value[error_log]" = "stderr";
           "php_admin_flag[log_errors]" = true;
           "catch_workers_output" = true;
-          "security.limit_extensions" = ""; # TODO: what is this? try removing it
         };
         phpEnv."PATH" = lib.makeBinPath [ pkgs.php74 ];
       };
