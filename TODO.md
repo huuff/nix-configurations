@@ -12,7 +12,6 @@
 * Add SSL options
 * Add backup options
 * Why is multi-user target reached before having run my systemd units? but only on some computers? a complete mystery
-* Remove null defaults
 * Add assertions for nulls, especially those interpolated into strings since these just appear as ""
 * `setup-users` gets run on every activation which is not optimal
 

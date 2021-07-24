@@ -62,7 +62,6 @@ in
 
         email = mkOption {
           type = str;
-          default = null;
           description = "Email of the admin account";
         };
 
@@ -73,13 +72,11 @@ in
 
         firstName = mkOption {
           type = str;
-          default = null;
           description = "First name of the admin";
         };
 
         lastName = mkOption {
           type = str;
-          default = null;
           description = "Last name of the admin";
         };
       };
@@ -93,19 +90,16 @@ in
 
         name = mkOption {
           type = str;
-          default = null;
           description = "Name of the database";
         };
 
         user = mkOption {
           type = str;
-          default = null;
           description = "Name of the database user";
         };
 
         passwordFile = mkOption {
           type = oneOf [ str path ];
-          default = null;
           description = "Password of the database user";
         };
 
@@ -119,13 +113,11 @@ in
       site = {
         name = mkOption {
           type = str;
-          default = null;
           description = "Name of the site";
         };
 
         email = mkOption {
           type = str;
-          default = null;
           description = "E-mail of the site";
         };
       };
@@ -138,7 +130,14 @@ in
     };
 
     config = mkIf cfg.enable {
-      environment.systemPackages = with pkgs; [
+      assertions = [
+        {
+          assertion = all (user: user.passwordFile != null && pathExists user.passwordFile) cfg.users;
+          message = "passwordFile must be set for all users, and point to an existing file!";
+        }
+      ];
+
+    environment.systemPackages = with pkgs; [
       # I'm using these two just for testing on nixos-shell
       php74 
       vim
