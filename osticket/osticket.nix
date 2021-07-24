@@ -27,6 +27,7 @@ let
        };
       };
     };
+   runSQL = sql: ''${config.services.mysql.package}/bin/mysql "${cfg.database.name}" -u root -e "${sql}"'';
    catPasswordFile = file: "$(cat ${toString file})";
 in
   {
@@ -368,12 +369,10 @@ in
           INSERT INTO ost_user_account (user_id, username, status, passwd) VALUES (@user_id, '${user.username}', 1, '${catPasswordFile user.passwordFile}');
           COMMIT;
           '';
-          userToDML = map (user: ''
-              ${config.services.mysql.package}/bin/mysql -uroot "${cfg.database.name}" -e "${insertUser user}"
-            '') cfg.users;
+          userToDML = map (user: runSQL (insertUser user)) cfg.users;
       in {
         script = ''
-          ${config.services.mysql.package}/bin/mysql -uroot "${cfg.database.name}" -e "${updateAdminPass}"
+          ${runSQL updateAdminPass}
 
           ${concatStringsSep "\n" userToDML}
           '';
