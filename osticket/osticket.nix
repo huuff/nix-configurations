@@ -423,7 +423,7 @@ in
         };
 
         serviceConfig = {
-          User = cfg.user; # TODO: Is there any other way?
+          User = cfg.user;
           Type = "oneshot";
           RemainAfterExit = "true";
         };
