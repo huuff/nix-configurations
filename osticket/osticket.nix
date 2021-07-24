@@ -27,6 +27,7 @@ let
        };
       };
     };
+   runDDL = ddl: ''${config.services.mysql.package}/bin/mysql -u root -e "${ddl}"'';
    runSQL = db: sql: ''${config.services.mysql.package}/bin/mysql ${if db != null then ''"${db}"'' else ""} -u root -e "${sql}"'';
    catPasswordFile = file: "$(cat ${toString file})";
 in
@@ -294,7 +295,7 @@ in
           '';
       in 
         {
-        script = runSQL null initialScript;
+        script = runDDL initialScript;
 
         unitConfig = {
           ConditionPathExists = "${cfg.directory}/setup"; # a.k.a. not yet installed
@@ -303,7 +304,7 @@ in
         };
 
         serviceConfig = {
-          User = "root"; #TODO: is there any other way?
+          User = "root";
           Type = "oneshot";
           RemainAfterExit = true;
         };
