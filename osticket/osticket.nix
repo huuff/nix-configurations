@@ -6,13 +6,19 @@ let
   cfg = config.services.osticket;
   userModule = with types; submodule {
     options = {
-      hashedPassword = {
+      username = mkOption {
         type = str;
-        description = "htpasswd hash of the user"; # TODO: What's its name? bcrypt?
-       };
-       email = {
+        description = "Username of the user";
+      };
+
+      passwordFile = mkOption {
+        type = oneOf [ str path ];
+        description = "File containing the htpasswd hash of the user's password"; # TODO: What's its name? bcrypt?
+      };
+
+       email = mkOption {
         type = str;
-        description = "email address of the user";
+        description = "E-mail address of the user";
        };
       };
     };
@@ -113,10 +119,15 @@ in
         email = mkOption {
           type = str;
           default = null;
-          description = "Email of the site";
+          description = "E-mail of the site";
         };
       };
 
+      users = mkOption {
+          type = listOf userModule;
+          default = [];
+          description = "List of initial osTicket users";
+      };
     };
 
     config = mkIf cfg.enable {
@@ -296,7 +307,6 @@ in
         };
       };
 
-      # TODO: Temporary password for root user, we'll change it in the database later.
       install-osticket = {
         script = ''
           echo ">>> Setting config file"
@@ -343,9 +353,24 @@ in
         updateAdminPass = ''
           UPDATE ost_staff SET passwd='${catPasswordFile cfg.admin.passwordFile}' WHERE staff_id=1;
         '';
+        insertUser = user: ''
+          START TRANSACTION;
+          INSERT INTO ost_user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.username}', NOW(), NOW());
+          SELECT LAST_INSERT_ID() INTO @user_id;
+          INSERT INTO ost_user_email (user_id, address) VALUES (@user_id, '${user.email}');
+          SELECT LAST_INSERT_ID() INTO @email_id;
+          UPDATE ost_user SET default_email_id=@email_id WHERE id=@user_id;
+          INSERT INTO ost_user_account (user_id, status, passwd) VALUES (@user_id, 1, '${catPasswordFile user.passwordFile}');
+          COMMIT;
+          '';
+          userToDML = map (user: ''
+              ${config.services.mysql.package}/bin/mysql -uroot "${cfg.database.name}" -e "${insertUser user}"
+            '') cfg.users;
       in {
         script = ''
           ${config.services.mysql.package}/bin/mysql -uroot "${cfg.database.name}" -e "${updateAdminPass}"
+
+          ${concatStringsSep "\n" userToDML}
           '';
 
         wantedBy = [ "multi-user.target" ];
@@ -353,11 +378,11 @@ in
         unitConfig = {
           After = [ "install-osticket.service" ];
           Requires = [ "install-osticket.service" ];
-          Description = "Create initial users";
+          Description = "Create initial osTicket users";
         };
 
         serviceConfig = {
-          User = "root"; # TODO: Is there any other way
+          User = "root"; # TODO: Is there any other way?
           Type = "oneshot";
           RemainAfterExit = "true";
         };

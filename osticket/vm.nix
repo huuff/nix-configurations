@@ -34,6 +34,14 @@ in {
       name = "osTicket";
       email = "site@example.com";
     };
+
+    users = [
+      {
+        username = "user1";
+        email = "user1@example.com";
+        passwordFile = fileFromStore ./user1pass;
+      }
+    ];
   };
 
   virtualisation.qemu.networkingOptions = [
