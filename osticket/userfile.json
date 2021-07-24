@@ -1,9 +1,0 @@
-{
-  "root": {
-    "password":"passwd"
-  },
-  "user1": {
-    "password":"passwd1"
-  }
-}
-

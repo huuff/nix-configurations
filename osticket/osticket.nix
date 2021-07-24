@@ -24,27 +24,11 @@ in with lib;
         description = "The package that provides osTicket";
       };
 
-      userFile = mkOption {
-        type = oneOf [ str path ];
-        default = null;
-        description = "Path to a JSON file containing the users to create on startup, at the very least, it should contain the admin user. The example is that of the file and not of the option";
-        example = literalExample ''
-        {
-          "root": {
-            "password":"passwd"
-           },
-          "user1": {
-            "password":"passwd1"
-           }
-        }
-          '';
-      };
-
       admin = {
         username = mkOption {
           type = str;
           default = null;
-          description = "Username of the admin account. This will be used to look for its password in the userFile";
+          description = "Username of the admin account";
         };
 
         email = mkOption {
@@ -291,12 +275,9 @@ in with lib;
         };
       };
 
+      # TODO: Temporary password for root user, we'll change it in the database later.
       install-osticket = {
-        script = 
-        let
-          jqGetProp = prop: "$(cat ${toString cfg.userFile} | ${pkgs.jq}/bin/jq -r .${cfg.admin.username}.${prop})";
-        in
-        ''
+        script = ''
           echo ">>> Setting config file"
           mv ${cfg.directory}/include/ost-sampleconfig.php ${cfg.directory}/include/ost-config.php
           chmod 0666 ${cfg.directory}/include/ost-config.php
@@ -310,8 +291,8 @@ in with lib;
             -F "lname=${cfg.admin.lastName}" \
             -F "admin_email=${cfg.admin.email}" \
             -F "username=${cfg.admin.username}" \
-            -F "passwd=${jqGetProp "password"}" \
-            -F "passwd2=${jqGetProp "password"}" \
+            -F "passwd=passwd" \
+            -F "passwd2=passwd" \
             -F "prefix=${cfg.database.prefix}" \
             -F "dbhost=${cfg.database.host}" \
             -F "dbname=${cfg.database.name}" \
