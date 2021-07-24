@@ -34,7 +34,7 @@ in {
       }
 
       {
-        username = "user2";
+        #username = "user2";
         fullName = "Ms. User 2";
         email = "user2@example.com";
         passwordFile = fileFromStore ./user2pass;

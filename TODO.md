@@ -15,13 +15,6 @@
 * Why is multi-user target reached before having run my systemd units? but only on some computers? a complete mystery
 * Currently, I have a hack for `setup-users` to launch only on first boot. Manage to get ConditionFirstBoot to work in order to remove it.
 
-### Assertions
-Find out which configuration options need to be set and which values must be specified and add assertions for them.
-
-Find out which configs are not needed, maybe set up some way so they are not set at all.
-
-* username is not required for users.
-
 ## Mail/SNM
 * Give it some love
 

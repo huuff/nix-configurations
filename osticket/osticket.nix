@@ -7,7 +7,8 @@ let
   userModule = with types; submodule {
     options = {
       username = mkOption {
-        type = str;
+        type = nullOr str;
+        default = null;
         description = "Username of the user";
       };
 
@@ -380,7 +381,7 @@ in
           INSERT INTO ost_user_email (user_id, address) VALUES (@user_id, '${user.email}');
           SELECT LAST_INSERT_ID() INTO @email_id;
           UPDATE ost_user SET default_email_id=@email_id WHERE id=@user_id;
-          INSERT INTO ost_user_account (user_id, username, status, passwd) VALUES (@user_id, '${user.username}', 1, '${catPasswordFile user.passwordFile}');
+          INSERT INTO ost_user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${catPasswordFile user.passwordFile}');
           COMMIT;
           '';
           userToDML = map (user: runDML (insertUser user)) cfg.users;
