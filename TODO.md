@@ -13,6 +13,8 @@
 * Set some options to add default users and put these into the database
 * Why is multi-user target reached before having run my systemd units? but only on some computers? a complete mystery
 * Move what I use for testing to an `example` folder
+* Remove null defaults
+* Add assertions for nulls, especially those interpolated into strings since these just appear as ""
 
 ### initial-script.sql
 osTicket needs a mysql user identified by a password, the NixOS module won't let us do this through config since that password would be in cleartext in the nix-store, so we need to pass it a file. 

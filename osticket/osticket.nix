@@ -16,7 +16,7 @@ let
        };
       };
     };
-   catPasswordFile = file: "$(cat ${toString cfg.database.passwordFile})";
+   catPasswordFile = file: "$(cat ${toString file})";
 in
   {
     options.services.osticket = with types; {
@@ -324,8 +324,6 @@ in
           rm -r ${cfg.directory}/setup
         '';
 
-        wantedBy = [ "multi-user.target" ];
-
         unitConfig = {
           After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-database.service" "deploy-osticket.service" ];
           Requires = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-database.service" "deploy-osticket.service" ];
@@ -339,6 +337,32 @@ in
           RemainAfterExit = true;
         };
       };
+
+      setup-users =
+      let
+        updateAdminPass = ''
+          UPDATE ost_staff SET passwd='${catPasswordFile cfg.admin.passwordFile}' WHERE staff_id=1;
+        '';
+      in {
+        script = ''
+          ${config.services.mysql.package}/bin/mysql -uroot "${cfg.database.name}" -e "${updateAdminPass}"
+          '';
+
+        wantedBy = [ "multi-user.target" ];
+
+        unitConfig = {
+          After = [ "install-osticket.service" ];
+          Requires = [ "install-osticket.service" ];
+          Description = "Create initial users";
+        };
+
+        serviceConfig = {
+          User = "root"; # TODO: Is there any other way
+          Type = "oneshot";
+          RemainAfterExit = "true";
+        };
+      };
+
     };
   };
 }

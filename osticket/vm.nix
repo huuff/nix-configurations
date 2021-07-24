@@ -1,6 +1,9 @@
 # Environment for nixos-shell, for testing purposes
 { config, pkgs, lib, ... }:
-{
+let
+  # This goes to the store, so obviously something better would be needed in production
+  fileFromStore = file: pkgs.writeText "${file}" (builtins.readFile file);
+in {
   imports = [
     ./osticket.nix 
   ];
@@ -13,6 +16,7 @@
     admin = {
       username = "root";
       #password = "passwd";
+      passwordFile = fileFromStore ./adminpass;
       email = "root@example.com";
       firstName = "Firstname";
       lastName = "Lastname";
@@ -23,7 +27,7 @@
       user = "osticket";
       # This goes to the Nix store so obviously something better would be needed in
       # production. But this is just for testing
-      passwordFile = pkgs.writeText "dbpass" (builtins.readFile ./dbpass);
+      passwordFile = fileFromStore ./dbpass;
     };
 
     site = {
