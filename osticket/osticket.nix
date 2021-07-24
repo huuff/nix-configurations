@@ -149,14 +149,6 @@ in
           assertion = cfg.database.passwordFile != null && pathExists cfg.database.passwordFile;
           message = "cfg.database.passwordFile must be set and point to an existing file";
         }
-        {
-          assertion = cfg.admin.email != null && cfg.site.email != null;
-          message = "cfg.admin.email and cfg.site.email must be set!";
-        }
-        {
-          assertion = cfg.admin.username != null;
-          message = "cfg.admin.username must be set!";
-        }
       ];
 
     environment.systemPackages = with pkgs; [

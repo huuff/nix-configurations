@@ -21,7 +21,6 @@ Find out which configuration options need to be set and which values must be spe
 Find out which configs are not needed, maybe set up some way so they are not set at all.
 
 * username is not required for users.
-* Are admin first and last name required?
 
 ## Mail/SNM
 * Give it some love
