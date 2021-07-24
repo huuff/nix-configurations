@@ -318,7 +318,7 @@ in
             -F "dbhost=${cfg.database.host}" \
             -F "dbname=${cfg.database.name}" \
             -F "dbuser=${cfg.database.user}" \
-            -F "dbpass=$(cat ${toString cfg.database.passwordFile})"
+            -F "dbpass=${catPasswordFile cfg.database.passwordFile}"
           echo ">>> Performing post-install cleanup"
           chmod 0644 ${cfg.directory}/include/ost-config.php
           rm -r ${cfg.directory}/setup
