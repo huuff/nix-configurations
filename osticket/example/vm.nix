@@ -41,6 +41,13 @@ in {
         email = "user1@example.com";
         passwordFile = fileFromStore ./user1pass;
       }
+
+      {
+        username = "user2";
+        fullName = "Ms. User 2";
+        email = "user2@example.com";
+        passwordFile = fileFromStore ./user2pass;
+      }
     ];
   };
 
