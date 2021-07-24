@@ -51,7 +51,7 @@ in
         (pkgs.fetchgit {
           url = "https://github.com/huuff/derivations";
           rev = "82a25a7bac0cee4a86144185741ed7390bad2f43"; 
-        }).nixosModules.do-on-request
+        }).packages."x86_64-linux"
       ];
 
       networking.firewall = {
