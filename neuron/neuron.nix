@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 let
   cfg = config.services.neuron;
-  gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${keyPath} -o StrictHostKeyChecking=no' '';
+  gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no' '';
 in
   {
     options.services.neuron = with types; {
