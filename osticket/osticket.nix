@@ -27,7 +27,7 @@ let
        };
       };
     };
-   runSQL = sql: ''${config.services.mysql.package}/bin/mysql "${cfg.database.name}" -u root -e "${sql}"'';
+   runSQL = db: sql: ''${config.services.mysql.package}/bin/mysql ${if db != null then ''"${db}"'' else ""} -u root -e "${sql}"'';
    catPasswordFile = file: "$(cat ${toString file})";
 in
   {
@@ -294,11 +294,7 @@ in
           '';
       in 
         {
-        script = ''
-          ${config.services.mysql.package}/bin/mysql -u root -N <<EOF
-          ${initialScript}
-          EOF
-        '';
+        script = runSQL null initialScript;
 
         unitConfig = {
           ConditionPathExists = "${cfg.directory}/setup"; # a.k.a. not yet installed
@@ -369,10 +365,10 @@ in
           INSERT INTO ost_user_account (user_id, username, status, passwd) VALUES (@user_id, '${user.username}', 1, '${catPasswordFile user.passwordFile}');
           COMMIT;
           '';
-          userToDML = map (user: runSQL (insertUser user)) cfg.users;
+          userToDML = map (user: runSQL cfg.database.name (insertUser user)) cfg.users;
       in {
         script = ''
-          ${runSQL updateAdminPass}
+          ${runSQL cfg.database.name updateAdminPass}
 
           ${concatStringsSep "\n" userToDML}
           '';
