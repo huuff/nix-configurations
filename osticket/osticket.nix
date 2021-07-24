@@ -130,6 +130,20 @@ in
           default = [];
           description = "List of initial osTicket users";
       };
+
+      ssl = {
+        enable = mkEnableOption "Enable SSL in the server";
+
+        certificate = mkOption {
+          type = oneOf [ str path ];
+          description = "SSL certficiate of the server";
+        };
+
+        key = mkOption {
+          type = oneOf [ str path ];
+          description = "Key of the SSL certificate";
+        };
+      };
     };
 
     config = mkIf cfg.enable {
@@ -159,7 +173,7 @@ in
     ];
 
     networking.firewall = {
-      allowedTCPPorts = [ 80 ];
+      allowedTCPPorts = [ 80 ] ++ optional cfg.ssl.enable 443;
     };
 
     # TODO: Creating the directory wouldn't be necessary if createHome were working
@@ -249,6 +263,10 @@ in
             fastcgi_pass unix:${config.services.phpfpm.pools.osTicket.socket};
         }
         '';
+      } // optionalAttrs cfg.ssl.enable {
+        addSSL = true;
+        sslCertificate = cfg.ssl.certificate;
+        sslCertificateKey = cfg.ssl.key;
       };
     };
 

@@ -13,6 +13,12 @@ in {
   services.osticket = {
     enable = true;
 
+    ssl = {
+      enable = true;
+      certificate = ./cert.pem;
+      key = ./key.pem;
+    };
+
     admin = {
       username = "root";
       passwordFile = fileFromStore ./adminpass;
@@ -34,7 +40,7 @@ in {
       }
 
       {
-        #username = "user2";
+        username = "user2";
         fullName = "Ms. User 2";
         email = "user2@example.com";
         passwordFile = fileFromStore ./user2pass;
@@ -44,7 +50,7 @@ in {
 
   virtualisation.qemu.networkingOptions = [
     "-net nic,netdev=user.0,model=virtio"
-    "-netdev user,id=user.0,hostfwd=tcp::8989-:80,hostfwd=tcp::2222-:22"
+    "-netdev user,id=user.0,hostfwd=tcp::8989-:80,hostfwd=tcp::2222-:22,hostfwd=tcp::8988-:443"
   ];
 
   services.openssh = {
