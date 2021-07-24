@@ -12,7 +12,6 @@
 * Add backup options
 * Set some options to add default users and put these into the database
 * Why is multi-user target reached before having run my systemd units? but only on some computers? a complete mystery
-* Move what I use for testing to an `example` folder
 * Remove null defaults
 * Add assertions for nulls, especially those interpolated into strings since these just appear as ""
 * `user.username` is not actually username but full name, change accordingly (what is username?)
