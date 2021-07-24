@@ -56,7 +56,6 @@ in
       admin = {
         username = mkOption {
           type = str;
-          default = null;
           description = "Username of the admin account";
         };
 
@@ -153,6 +152,10 @@ in
         {
           assertion = cfg.admin.email != null && cfg.site.email != null;
           message = "cfg.admin.email and cfg.site.email must be set!";
+        }
+        {
+          assertion = cfg.admin.username != null;
+          message = "cfg.admin.username must be set!";
         }
       ];
 
@@ -353,6 +356,10 @@ in
           echo ">>> Performing post-install cleanup"
           chmod 0644 ${cfg.directory}/include/ost-config.php
           rm -r ${cfg.directory}/setup
+
+          # TODO: This is a temporary hack for running setup-users only on first boot
+          # remove it when I get ConditionFirstBoot to work
+          touch ${cfg.directory}/setup-users
         '';
 
         unitConfig = {
@@ -390,6 +397,9 @@ in
           ${runDML updateAdminPass}
 
           ${concatStringsSep "\n" userToDML}
+
+          # TODO: Remove it when I get ConditionFirstBoot to work
+          rm ${cfg.directory}/setup-users
           '';
 
         wantedBy = [ "multi-user.target" ];
@@ -397,6 +407,7 @@ in
         unitConfig = {
           After = [ "install-osticket.service" ];
           Requires = [ "install-osticket.service" ];
+          ConditionPathExists = "${cfg.directory}/setup-users";
           Description = "Create initial osTicket users";
         };
 
