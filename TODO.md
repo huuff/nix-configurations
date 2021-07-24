@@ -16,14 +16,6 @@
 * Add assertions for nulls, especially those interpolated into strings since these just appear as ""
 * `setup-users` gets run on every activation which is not optimal
 
-### SQL as root
-Currently I'm running all SQL as root because I can easily login through unix socket with it. However, this is suboptimal (maybe not, but I want to stop doing it anyway).
-
-What can I do?
-* Does the `mysql` user work for this? (I think not)
-* What about giving osticket user unix socket access?
-* Catting the db user password in the script? It doesn't seem like a bad idea actually, almost everything is done that way.
-
 ## Mail/SNM
 * Give it some love
 

@@ -27,9 +27,9 @@ let
        };
       };
     };
-   runDDL = ddl: ''${config.services.mysql.package}/bin/mysql -u root -e "${ddl}"'';
-   runSQL = db: sql: ''${config.services.mysql.package}/bin/mysql ${if db != null then ''"${db}"'' else ""} -u root -e "${sql}"'';
    catPasswordFile = file: "$(cat ${toString file})";
+   runDDL = ddl: ''${config.services.mysql.package}/bin/mysql -u root -e "${ddl}"'';
+   runDML = dml: ''${config.services.mysql.package}/bin/mysql "${cfg.database.name}" -u "${cfg.database.user}" -p"${catPasswordFile cfg.database.passwordFile}" -e "${dml}"'';
 in
   {
     options.services.osticket = with types; {
@@ -38,7 +38,7 @@ in
       user = mkOption {
         type = str;
         default = "osticket";
-        description = "User on which to run osTicket";
+        description = "OS user on which to run osTicket";
       };
 
       directory = mkOption {
@@ -366,10 +366,10 @@ in
           INSERT INTO ost_user_account (user_id, username, status, passwd) VALUES (@user_id, '${user.username}', 1, '${catPasswordFile user.passwordFile}');
           COMMIT;
           '';
-          userToDML = map (user: runSQL cfg.database.name (insertUser user)) cfg.users;
+          userToDML = map (user: runDML (insertUser user)) cfg.users;
       in {
         script = ''
-          ${runSQL cfg.database.name updateAdminPass}
+          ${runDML updateAdminPass}
 
           ${concatStringsSep "\n" userToDML}
           '';
@@ -383,7 +383,7 @@ in
         };
 
         serviceConfig = {
-          User = "root"; # TODO: Is there any other way?
+          User = cfg.user; # TODO: Is there any other way?
           Type = "oneshot";
           RemainAfterExit = "true";
         };
