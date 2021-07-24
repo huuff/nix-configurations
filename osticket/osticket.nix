@@ -6,9 +6,14 @@ let
   cfg = config.services.osticket;
   userModule = with types; submodule {
     options = {
-      fullName = mkOption {
+      username = mkOption {
         type = str;
         description = "Username of the user";
+      };
+
+      fullName = mkOption {
+        type = str;
+        description = "Full name of the user";
       };
 
       passwordFile = mkOption {
@@ -360,7 +365,7 @@ in
           INSERT INTO ost_user_email (user_id, address) VALUES (@user_id, '${user.email}');
           SELECT LAST_INSERT_ID() INTO @email_id;
           UPDATE ost_user SET default_email_id=@email_id WHERE id=@user_id;
-          INSERT INTO ost_user_account (user_id, status, passwd) VALUES (@user_id, 1, '${catPasswordFile user.passwordFile}');
+          INSERT INTO ost_user_account (user_id, username, status, passwd) VALUES (@user_id, '${user.username}', 1, '${catPasswordFile user.passwordFile}');
           COMMIT;
           '';
           userToDML = map (user: ''

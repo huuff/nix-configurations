@@ -36,6 +36,7 @@ in {
 
     users = [
       {
+        username = "user1";
         fullName = "Mr. User 1";
         email = "user1@example.com";
         passwordFile = fileFromStore ./user1pass;

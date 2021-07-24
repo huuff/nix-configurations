@@ -15,7 +15,6 @@
 * Remove null defaults
 * Add assertions for nulls, especially those interpolated into strings since these just appear as ""
 * `setup-users` gets run on every activation which is not optimal
-* Set up username for users
 * Some function for running code into the database since I do it a lot
 
 ## Mail/SNM
