@@ -48,10 +48,14 @@ in
     config = mkIf cfg.enable {
       imports = [
         ./cachix.nix
-        (pkgs.fetchgit {
+        builtins.trace (pkgs.fetchgit {
           url = "https://github.com/huuff/derivations";
           rev = "82a25a7bac0cee4a86144185741ed7390bad2f43"; 
-        }).packages."x86_64-linux"
+        }).nixosModules.do-on-request (pkgs.fetchgit {
+          url = "https://github.com/huuff/derivations";
+          rev = "82a25a7bac0cee4a86144185741ed7390bad2f43"; 
+        }).nixosModules.do-on-request
+
       ];
 
       networking.firewall = {
