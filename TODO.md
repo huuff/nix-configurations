@@ -16,10 +16,12 @@
 * `setup-users` gets run on every activation which is not optimal
 
 ### Assertions
-Find out which configuration options need to be set and which values must be specified and add assertions to them. For example:
-* Everything about database is definitely needed
-* Every email is needed, maybe even check if it's an email?
-* username is not required for users, I can ignore it
+Find out which configuration options need to be set and which values must be specified and add assertions for them.
+
+Find out which configs are not needed, maybe set up some way so they are not set at all.
+
+* Every email is needed, maybe even check if it's an email? (UPDATE: Definitely not checking if they are emails)
+* username is not required for users.
 * Are admin first and last name required?
 
 ## Mail/SNM

@@ -90,11 +90,13 @@ in
 
         name = mkOption {
           type = str;
+          default = "osticket";
           description = "Name of the database";
         };
 
         user = mkOption {
           type = str;
+          default = "osticket";
           description = "Name of the database user";
         };
 

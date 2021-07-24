@@ -21,13 +21,7 @@ in {
       lastName = "Lastname";
     };
 
-    database = {
-      name = "osticket";
-      user = "osticket";
-      # This goes to the Nix store so obviously something better would be needed in
-      # production. But this is just for testing
-      passwordFile = fileFromStore ./dbpass;
-    };
+    database.passwordFile = fileFromStore ./dbpass;
 
     site = {
       name = "osTicket";
