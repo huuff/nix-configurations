@@ -12,11 +12,12 @@
   outputs = { self, nixpkgs, nixops, neuron, utils, myDrvs, ... }:
   {
 
-    overlay = final: prev: {
-      neuron-notes = neuron.packages.x86_64-linux.neuron;
+    nixosModules.neuron = import ./neuron/neuron.nix {
+      doOnRequest = myDrvs.nixosModules.do-on-request;
+      neuronPkg = neuron.packages.x86_64-linux.neuron;
     };
 
-    nixosModules.neuron = import ./neuron/neuron.nix myDrvs.nixosModules.do-on-request;
+    nixosModules.osticket = import ./osticket/osticket.nix;
   };
 
 }

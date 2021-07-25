@@ -1,4 +1,5 @@
-doOnRequest:
+{ doOnRequest, neuronPkg }:
+
 { config, pkgs, lib, ... }:
 
 with lib;
@@ -9,12 +10,6 @@ let
 in
   {
     imports = 
-    let
-      myDrvs = builtins.fetchGit {
-        url = "https://github.com/huuff/derivations";
-        rev = "82a25a7bac0cee4a86144185741ed7390bad2f43"; 
-      };
-    in
     [
       ./cachix.nix
       doOnRequest
@@ -53,7 +48,7 @@ in
 
       package = mkOption {
         type = package;
-        default = pkgs.neuron-notes;
+        default = neuronPkg;
         description = "Neuron package used to generate zettelkasten";
       };
     };
