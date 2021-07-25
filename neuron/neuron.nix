@@ -59,18 +59,6 @@ in
     };
 
     config = mkIf cfg.enable {
-      imports = 
-      let
-        myDrvs = builtins.fetchGit {
-          url = "https://github.com/huuff/derivations";
-          rev = "82a25a7bac0cee4a86144185741ed7390bad2f43"; 
-        };
-      in
-      [
-        ./cachix.nix
-        doOnRequest
-      ];
-
       networking.firewall = {
         allowedTCPPorts = [ 80 cfg.refreshPort ];
       };
