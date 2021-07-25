@@ -12,12 +12,12 @@
   outputs = { self, nixpkgs, nixops, neuron, utils, myDrvs, ... }:
   {
 
-    nixosModules.neuron = import ./neuron/neuron.nix {
+    nixosModules.neuron = import ./neuron {
       doOnRequest = myDrvs.nixosModules.do-on-request;
       neuronPkg = neuron.packages.x86_64-linux.neuron;
     };
 
-    nixosModules.osticket = import ./osticket/osticket.nix;
+    nixosModules.osticket = import ./osticket;
   };
 
 }
