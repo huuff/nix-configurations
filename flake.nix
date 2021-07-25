@@ -16,7 +16,7 @@
       neuron-notes = neuron.packages.x86_64-linux.neuron;
     };
 
-    nixosModules.neuron = import ./neuron/neuron.nix;
+    nixosModules.neuron = import ./neuron/neuron.nix myDrvs.nixosModules.do-on-request;
   };
 
 }

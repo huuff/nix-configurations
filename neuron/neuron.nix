@@ -1,3 +1,4 @@
+doOnRequest:
 { config, pkgs, lib, ... }:
 
 with lib;
@@ -46,12 +47,16 @@ in
     };
 
     config = mkIf cfg.enable {
-      imports = [
+      imports = 
+        let
+          myDrvs = builtins.fetchGit {
+            url = "https://github.com/huuff/derivations";
+            rev = "82a25a7bac0cee4a86144185741ed7390bad2f43"; 
+          };
+        in
+      [
         ./cachix.nix
-        (import pkgs.fetchgit {
-          url = "https://github.com/huuff/derivations";
-          rev = "82a25a7bac0cee4a86144185741ed7390bad2f43"; 
-        }).nixosModules.do-on-request
+        doOnRequest
       ];
 
       networking.firewall = {
