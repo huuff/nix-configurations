@@ -67,8 +67,8 @@ in
         createDir = ''
           echo ">>> Removing previous ${cfg.directory}"
           rm -rf ${cfg.directory}/{,.[!.],..?}* # weird but it will delete hidden files too without returning an error for . and ..
-          echo ">>> Cloning ${cfg.repo} to ${cfg.directory}"
-          ${gitWithDeployKey} clone "${cfg.repo}" ${cfg.directory} 
+          echo ">>> Cloning ${cfg.repository} to ${cfg.directory}"
+          ${gitWithDeployKey} clone "${cfg.repository}" ${cfg.directory} 
           echo ">>> Making ${cfg.user} own ${cfg.directory}"
           chown -R ${cfg.user}:${cfg.user} ${cfg.directory}
         '';
