@@ -64,17 +64,6 @@ in
         allowedTCPPorts = [ 80 cfg.refreshPort ];
       };
 
-      system.activationScripts = {
-        createDir = ''
-          echo ">>> Removing previous ${cfg.directory}"
-          rm -rf ${cfg.directory}/{,.[!.],..?}* # weird but it will delete hidden files too without returning an error for . and ..
-          echo ">>> Cloning ${cfg.repository} to ${cfg.directory}"
-          ${gitWithDeployKey} clone "${cfg.repository}" ${cfg.directory} 
-          echo ">>> Making ${cfg.user} own ${cfg.directory}"
-          chown -R ${cfg.user}:${cfg.user} ${cfg.directory}
-        '';
-      };
-
       users.users.${cfg.user} = {
         isSystemUser = true;
         home = "${cfg.directory}";
@@ -86,6 +75,30 @@ in
       users.groups.${cfg.user} = {};
 
       systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
+
+      systemd.services = {
+        initialize-zettelkasten = {
+          description = "Create Zettelkasten directory and clone repository";
+        
+          script = ''
+            echo ">>> Removing previous ${cfg.directory}"
+            rm -rf ${cfg.directory}/{,.[!.],..?}* # weird but it will delete hidden files too without returning an error for . and ..
+            echo ">>> Cloning ${cfg.repository} to ${cfg.directory}"
+            ${gitWithDeployKey} clone "${cfg.repository}" ${cfg.directory} 
+            echo ">>> Making ${cfg.user} own ${cfg.directory}"
+            chown -R ${cfg.user}:${cfg.user} ${cfg.directory}
+          '';
+
+          wantedBy = [ "do-on-request.service" ];
+
+          serviceConfig = {
+            User = cfg.user;
+            Before = [ "do-on-request.service" ];
+            Type = "oneshot";
+            RemainAfterExit = true;
+          };
+        };
+      };
 
       services = {
         nginx = {
