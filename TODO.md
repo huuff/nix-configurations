@@ -4,7 +4,6 @@
 
 ## Neuron
 * Add SSL options
-* Add the password option since I'm using it in my personal instance and doesn't seem like a bad idea
 
 ## osTicket
 * Still can't enter localhost:8989/scp (Or more explicitly: it doesn't redirect me to scp/admin.php)
