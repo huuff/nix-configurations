@@ -13,7 +13,7 @@
   {
 
     nixosModules.neuron = import ./neuron {
-      doOnRequest = myDrvs.nixosModules.do-on-request;
+      doOnRequest = myDrvs.nixosModules.doOnRequest;
       neuronPkg = neuron.packages.x86_64-linux.neuron;
     };
 
