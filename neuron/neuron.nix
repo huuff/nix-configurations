@@ -101,7 +101,7 @@ in
 
             '' + optionalString (!isNull cfg.passwordFile) ''
                auth_basic "Neuron";
-               auth_basic_user_file ${cfg.passwordFile}
+               auth_basic_user_file ${cfg.passwordFile};
               '';
           };
         };
