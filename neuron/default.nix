@@ -6,7 +6,7 @@ with lib;
 
 let
   cfg = config.services.neuron;
-  gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no' '';
+  gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no' -p ${cfg.sshPort}'';
 in
   {
     imports = 
@@ -44,6 +44,12 @@ in
       deployKey = mkOption {
         type = oneOf [ str path ];
         description = "Path to the SSH key that will allow pulling the repository";
+      };
+
+      sshPort = mkOption {
+        type = int;
+        default = 22;
+        description = "If you, for some reason, have changed the default SSH port, you'll need to specify here for cloning the repository";
       };
 
       package = mkOption {
