@@ -6,7 +6,7 @@ with lib;
 
 let
   cfg = config.services.neuron;
-  gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no' -p ${cfg.sshPort}'';
+  gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no' -p ${toString cfg.sshPort}'';
 in
   {
     imports = 
