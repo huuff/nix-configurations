@@ -91,9 +91,12 @@ in
 
           wantedBy = [ "do-on-request.service" ];
 
+          unitConfig = {
+            Before = [ "do-on-request.service" ];
+          };
+
           serviceConfig = {
             User = cfg.user;
-            Before = [ "do-on-request.service" ];
             Type = "oneshot";
             RemainAfterExit = true;
           };
