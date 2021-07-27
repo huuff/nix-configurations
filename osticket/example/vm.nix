@@ -5,7 +5,7 @@ let
   fileFromStore = file: pkgs.writeText "${file}" (builtins.readFile file);
 in {
   imports = [
-    ../osticket.nix 
+    ../default.nix 
   ];
 
   networking.firewall.allowedTCPPorts = [ 3306 ];

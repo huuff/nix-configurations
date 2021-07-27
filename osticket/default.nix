@@ -251,6 +251,10 @@ in
             try_files $uri $uri/ /ajax.php?$query_string;
         }
 
+        location /scp {
+            index /scp/admin.php;
+        }
+
         location / {
             index index.php;
         }
