@@ -1,5 +1,4 @@
 # TODO
-* NixOS testing? [https://nixos.org/#asciinema-demo-example_6](check this out), [https://nixos.org/manual/nixos/stable/index.html#sec-nixos-tests](and this)
 * Maybe Zammad? osTicket seems dated
 
 ## Neuron

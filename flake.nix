@@ -11,19 +11,20 @@
 
   outputs = { self, nixpkgs, nixops, neuron, utils, myDrvs, ... }:
   let
-    pkgs = import nixpkgs { system = "x86_64-linux"; };
+    system = "x86_64-linux";
+    pkgs = import nixpkgs { inherit system; };
+    doOnRequest = myDrvs.nixosModules.doOnRequest;
+    neuronPkg = neuron.packages.${system}.neuron;
   in
   {
-
-    nixosModules.neuron = import ./neuron {
-      doOnRequest = myDrvs.nixosModules.doOnRequest;
-      neuronPkg = neuron.packages.x86_64-linux.neuron;
+    nixosModules = {
+      neuron = import ./neuron { inherit doOnRequest neuronPkg; };
+      osticket = import ./osticket;
     };
-    nixosModules.osticket = import ./osticket;
-    nixosTests.neuron = import ./neuron/test.nix {
-      doOnRequest = myDrvs.nixosModules.doOnRequest;
-      neuronPkg = neuron.packages.x86_64-linux.neuron;
-      inherit pkgs;
+
+    nixosTests = {
+      neuron = import ./neuron/test.nix { inherit pkgs doOnRequest neuronPkg; };
+      osticket = import ./osticket/test.nix { inherit pkgs; };
     };
   };
 
