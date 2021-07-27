@@ -6,7 +6,9 @@ with lib;
 
 let
   cfg = config.services.neuron;
+  gitWithoutDeployKey = "${pkgs.git}/bin/git";
   gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no -p ${toString cfg.sshPort}' '';
+  gitCommand = if isNull cfg.deployKey then gitWithoutDeployKey else gitWithDeployKey;
 in
   {
     imports = 
@@ -42,7 +44,8 @@ in
       };
 
       deployKey = mkOption {
-        type = oneOf [ str path ];
+        type = nullOr (oneOf [ str path ]);
+        default = null;
         description = "Path to the SSH key that will allow pulling the repository";
       };
 
@@ -90,7 +93,7 @@ in
             echo ">>> Removing previous ${cfg.directory}"
             rm -rf ${cfg.directory}/{,.[!.],..?}* # weird but it will delete hidden files too without returning an error for . and ..
             echo ">>> Cloning ${cfg.repository} to ${cfg.directory}"
-            ${gitWithDeployKey} clone "${cfg.repository}" ${cfg.directory} 
+            ${gitCommand} clone "${cfg.repository}" ${cfg.directory} 
             echo ">>> Making ${cfg.user} own ${cfg.directory}"
             chown -R ${cfg.user}:${cfg.user} ${cfg.directory}
           '';
@@ -134,7 +137,7 @@ in
           port = cfg.refreshPort;
           workingDirectory = "${cfg.directory}";
           script = ''
-            ${gitWithDeployKey} pull
+            ${gitCommand} pull
           '';
         };
       };

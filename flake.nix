@@ -10,14 +10,21 @@
   };
 
   outputs = { self, nixpkgs, nixops, neuron, utils, myDrvs, ... }:
+  let
+    pkgs = import nixpkgs { system = "x86_64-linux"; };
+  in
   {
 
     nixosModules.neuron = import ./neuron {
       doOnRequest = myDrvs.nixosModules.doOnRequest;
       neuronPkg = neuron.packages.x86_64-linux.neuron;
     };
-
     nixosModules.osticket = import ./osticket;
+    nixosTests.neuron = import ./neuron/test.nix {
+      doOnRequest = myDrvs.nixosModules.doOnRequest;
+      neuronPkg = neuron.packages.x86_64-linux.neuron;
+      inherit pkgs;
+    };
   };
 
 }
