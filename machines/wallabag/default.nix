@@ -1,3 +1,5 @@
+{ myLib }:
+
 { config, lib, pkgs, ... }:
 
 with lib;
@@ -44,16 +46,19 @@ in
       # because it comes with like one trillion files, so just copy in this unit and
       # install in another one so I can only run install while I test it
       copy-wallabag = {
-        description = "Copy wallabag to final directory and setting permissions";
+        description = "Copy wallabag to final directory and setting permissions for installation";
 
         script = ''
-          set -x
-          cp -r ${cfg.package}/* ${cfg.directory}
+          echo '>>> Copying all wallabag files from the store to ${cfg.directory}'
+          cp -rp ${cfg.package}/* ${cfg.directory}
+          echo '>>> Setting appropriate permissions for installation'
+          chmod u+w *
         '';
 
         serviceConfig = {
           User = cfg.user;
           Type = "oneshot";
+          WorkingDirectory = cfg.directory;
           RemainAfterExit = true;
         };
 

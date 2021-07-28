@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 {
   imports = [
-    ./default.nix
+    (import ./default.nix { myLib = import ../../lib { inherit lib; }; })
   ];
 
   virtualisation.memorySize = "2048M";

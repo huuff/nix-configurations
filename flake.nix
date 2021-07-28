@@ -15,16 +15,17 @@
     pkgs = import nixpkgs { inherit system; };
     doOnRequest = myDrvs.nixosModules.doOnRequest;
     neuronPkg = neuron.packages.${system}.neuron;
+    myLib = import ./lib { lib = pkgs.lib; };
   in
   {
     nixosModules = {
-      neuron = import ./neuron { inherit doOnRequest neuronPkg; };
-      osticket = import ./osticket;
+      neuron = import ./machines/neuron { inherit doOnRequest neuronPkg; };
+      osticket = import ./machines/osticket { inherit myLib; };
     };
 
     nixosTests = {
-      neuron = import ./neuron/test.nix { inherit pkgs doOnRequest neuronPkg; };
-      osticket = import ./osticket/test.nix { inherit pkgs; };
+      neuron = import ./machines/neuron/test.nix { inherit pkgs doOnRequest neuronPkg; };
+      osticket = import ./machines/osticket/test.nix { inherit pkgs myLib; };
     };
   };
 
