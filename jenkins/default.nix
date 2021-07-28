@@ -28,7 +28,7 @@ in
                 <?xml version='1.1' encoding='UTF-8'?>
                 <hudson>
                 <disabledAdministrativeMonitors/>
-                <version>2.289.1</version>
+                <version>${cfg.package.version}</version>
                 <numExecutors>2</numExecutors>
                 <mode>NORMAL</mode>
                 <useSecurity>true</useSecurity>
