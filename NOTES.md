@@ -1,0 +1,1 @@
+* Check the user home for wallabag, the VM fails on startup when it's `/home/wallabag/` but it's fine when it's `/var/lib/wallabag`. What gives? Also, aren't neuron and osTicket using `/home/`? Why do they work while wallabag fails?
