@@ -5,6 +5,7 @@
 
 ## Neuron
 * Add SSL options
+* `Restart="always"` for `neuron` and `do-on-request`
 
 ## osTicket
 * Add backup options
@@ -21,4 +22,6 @@
 * Give it some love
 
 ## Wallabag
-* Mostly everything
+* `copy-wallabag` takes 5 minutes, runs out of RAM if I don't increase it. This must be a QEMU problem, I've tried all reasonable msizes to no avail so maybe it's not 9p? Nothing is mounted anyway (well, `/home` is but that shouldn't matter)
+* Write parameters.yml
+* Setup database
