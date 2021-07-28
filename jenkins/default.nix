@@ -11,6 +11,7 @@ in
     config = {
       services.jenkins = {
         enable = true;
+        #withCLI = true;
 
         extraJavaOptions = [
           "-Djenkins.install.runSetupWizard=false "
