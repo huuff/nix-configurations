@@ -1,5 +1,6 @@
 # TODO
 * Maybe Zammad? osTicket seems dated
+* For all systemd services: Put description in the outermost block instead of `unitConfig`
 
 ## Neuron
 * Add SSL options
