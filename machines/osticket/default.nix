@@ -319,29 +319,7 @@ in
         };
       };
 
-      setup-database =
-      let
-        initialScript = ''
-          CREATE DATABASE ${cfg.database.name};
-          CREATE USER '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${myLib.catPasswordFile cfg.database.passwordFile}';
-          GRANT ALL PRIVILEGES ON ${cfg.database.name}.* TO '${cfg.database.user}'@${cfg.database.host};
-          '';
-      in 
-        {
-        script = myLib.db.execDDL initialScript;
-
-        unitConfig = {
-          ConditionPathExists = "${cfg.directory}/setup"; # a.k.a. not yet installed
-          After = [ "mysql.service" "deploy-osticket.service" ];
-          Description = "Create database and user for osTicket";
-        };
-
-        serviceConfig = {
-          User = "root";
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
-      };
+      setup-database = myLib.db.setupUnit cfg;
 
       install-osticket = {
         script = ''
