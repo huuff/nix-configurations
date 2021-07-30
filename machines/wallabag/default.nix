@@ -1,11 +1,10 @@
-{ myLib }:
-
 { config, lib, pkgs, ... }:
 
 with lib;
 
 let
   cfg = config.services.wallabag;
+  myLib = import ../../lib/default.nix { inherit config lib; };
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
 in
   {

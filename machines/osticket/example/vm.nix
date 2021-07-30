@@ -4,10 +4,9 @@
 let
   # This goes to the store, so obviously something better would be needed in production
   fileFromStore = file: pkgs.writeText "${file}" (builtins.readFile file);
-  myLib = import ../../../lib { inherit lib; };
 in {
   imports = [
-    (import ../default.nix { inherit myLib; })
+    ../default.nix
   ];
 
   networking.firewall.allowedTCPPorts = [ 3306 ];

@@ -1,4 +1,4 @@
-{ pkgs, myLib, ... }:
+{ pkgs, ... }:
 let
   directory = "/home/neuron";
 in
@@ -7,7 +7,7 @@ pkgs.nixosTest {
 
   machine = { pkgs, ... }: {
     imports = [ 
-      (import ./default.nix { inherit myLib; })
+      ./default.nix
     ];
 
     environment.systemPackages = with pkgs; [ git ];

@@ -1,11 +1,10 @@
-{ myLib }:
-
 { config, pkgs, lib, ... }:
 
 with lib;
 
 let
   cfg = config.services.osticket;
+  myLib = import ../../lib/default.nix { inherit config lib; };
   userModule = with types; submodule {
     options = {
       username = mkOption {
@@ -30,9 +29,6 @@ let
        };
       };
     };
-   catPasswordFile = file: "$(cat ${toString file})";
-   runDDL = ddl: ''${config.services.mysql.package}/bin/mysql -u root -e "${ddl}"'';
-   runDML = dml: ''${config.services.mysql.package}/bin/mysql "${cfg.database.name}" -u "${cfg.database.user}" -p"${catPasswordFile cfg.database.passwordFile}" -e "${dml}"'';
 in
   {
     options.services.osticket = with types; {
@@ -327,12 +323,12 @@ in
       let
         initialScript = ''
           CREATE DATABASE ${cfg.database.name};
-          CREATE USER '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${catPasswordFile cfg.database.passwordFile}';
+          CREATE USER '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${myLib.catPasswordFile cfg.database.passwordFile}';
           GRANT ALL PRIVILEGES ON ${cfg.database.name}.* TO '${cfg.database.user}'@${cfg.database.host};
           '';
       in 
         {
-        script = runDDL initialScript;
+        script = myLib.db.execDDL initialScript;
 
         unitConfig = {
           ConditionPathExists = "${cfg.directory}/setup"; # a.k.a. not yet installed
@@ -368,7 +364,7 @@ in
             -F "dbhost=${cfg.database.host}" \
             -F "dbname=${cfg.database.name}" \
             -F "dbuser=${cfg.database.user}" \
-            -F "dbpass=${catPasswordFile cfg.database.passwordFile}"
+            -F "dbpass=${myLib.catPasswordFile cfg.database.passwordFile}"
           echo ">>> Performing post-install cleanup"
           chmod 0644 ${cfg.directory}/include/ost-config.php
           rm -r ${cfg.directory}/setup
@@ -395,7 +391,7 @@ in
       setup-users =
       let
         updateAdminPass = ''
-          UPDATE ost_staff SET passwd='${catPasswordFile cfg.admin.passwordFile}' WHERE staff_id=1;
+          UPDATE ost_staff SET passwd='${myLib.catPasswordFile cfg.admin.passwordFile}' WHERE staff_id=1;
         '';
         insertUser = user: ''
           START TRANSACTION;
@@ -404,13 +400,13 @@ in
           INSERT INTO ost_user_email (user_id, address) VALUES (@user_id, '${user.email}');
           SELECT LAST_INSERT_ID() INTO @email_id;
           UPDATE ost_user SET default_email_id=@email_id WHERE id=@user_id;
-          INSERT INTO ost_user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${catPasswordFile user.passwordFile}');
+          INSERT INTO ost_user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.catPasswordFile user.passwordFile}');
           COMMIT;
           '';
-          userToDML = map (user: runDML (insertUser user)) cfg.users;
+          userToDML = map (user: (myLib.db.execDML cfg (insertUser user))) cfg.users;
       in {
         script = ''
-          ${runDML updateAdminPass}
+          ${myLib.db.execDML cfg updateAdminPass}
 
           ${concatStringsSep "\n" userToDML}
 
