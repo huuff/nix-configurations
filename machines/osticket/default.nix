@@ -4,7 +4,9 @@ with lib;
 
 let
   cfg = config.services.osticket;
-  myLib = import ../../lib/default.nix { inherit config lib; };
+  myLib = import ../../lib/default.nix { inherit config; };
+  mkDatabaseModule = import ../../lib/mkDatabaseModule.nix;
+
   userModule = with types; submodule {
     options = {
       username = mkOption {
@@ -29,8 +31,11 @@ let
        };
       };
     };
-in
-  {
+in {
+    imports = [
+        (mkDatabaseModule "osticket")
+    ];
+
     options.services.osticket = with types; {
       enable = mkEnableOption "osTicket ticketing system";
 
@@ -76,37 +81,6 @@ in
         lastName = mkOption {
           type = str;
           description = "Last name of the admin";
-        };
-      };
-
-      database = {
-        host = mkOption {
-          type = str;
-          default = "localhost";
-          description = "Host location of the database";
-        };
-
-        name = mkOption {
-          type = str;
-          default = "osticket";
-          description = "Name of the database";
-        };
-
-        user = mkOption {
-          type = str;
-          default = "osticket";
-          description = "Name of the database user";
-        };
-
-        passwordFile = mkOption {
-          type = oneOf [ str path ];
-          description = "Password of the database user";
-        };
-
-        prefix = mkOption {
-          type = str;
-          default = "ost_";
-          description = "Prefix to put on all tables of the database";
         };
       };
 
@@ -164,6 +138,7 @@ in
         }
       ];
 
+
     environment.systemPackages = with pkgs; [
       # I'm using these two just for testing on nixos-shell
       php74 
@@ -189,11 +164,6 @@ in
           chmod og+x "$currentPath"
         done
     '';
-
-    services.mysql = {
-      enable = true;
-      package = pkgs.mariadb;
-    };
 
     users = {
       users.${cfg.user} = {
@@ -319,8 +289,6 @@ in
         };
       };
 
-      setup-database = myLib.db.setupUnit cfg;
-
       install-osticket = {
         script = ''
           echo ">>> Setting config file"
@@ -353,8 +321,8 @@ in
         '';
 
         unitConfig = {
-          After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-database.service" "deploy-osticket.service" ];
-          Requires = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-database.service" "deploy-osticket.service" ];
+          After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
+          Requires = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
           ConditionPathExists = "${cfg.directory}/setup";
           Description = "Run osTicket installation script and cleanup";
         };
@@ -369,16 +337,16 @@ in
       setup-users =
       let
         updateAdminPass = ''
-          UPDATE ost_staff SET passwd='${myLib.catPasswordFile cfg.admin.passwordFile}' WHERE staff_id=1;
+          UPDATE ${cfg.database.prefix}staff SET passwd='${myLib.catPasswordFile cfg.admin.passwordFile}' WHERE staff_id=1;
         '';
         insertUser = user: ''
           START TRANSACTION;
-          INSERT INTO ost_user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.fullName}', NOW(), NOW());
+          INSERT INTO ${cfg.database.prefix}user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.fullName}', NOW(), NOW());
           SELECT LAST_INSERT_ID() INTO @user_id;
-          INSERT INTO ost_user_email (user_id, address) VALUES (@user_id, '${user.email}');
+          INSERT INTO ${cfg.database.prefix}user_email (user_id, address) VALUES (@user_id, '${user.email}');
           SELECT LAST_INSERT_ID() INTO @email_id;
-          UPDATE ost_user SET default_email_id=@email_id WHERE id=@user_id;
-          INSERT INTO ost_user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.catPasswordFile user.passwordFile}');
+          UPDATE ${cfg.database.prefix}user SET default_email_id=@email_id WHERE id=@user_id;
+          INSERT INTO ${cfg.database.prefix}user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.catPasswordFile user.passwordFile}');
           COMMIT;
           '';
           userToDML = map (user: (myLib.db.execDML cfg (insertUser user))) cfg.users;

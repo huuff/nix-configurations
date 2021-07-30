@@ -35,7 +35,6 @@ pkgs.nixosTest {
 
       with subtest("units activate only on first boot"):
         machine.succeed("systemctl is-active --quiet deploy-osticket")
-        machine.succeed("systemctl is-active --quiet setup-database")
         machine.succeed("systemctl is-active --quiet install-osticket")
         machine.succeed("systemctl is-active --quiet setup-users")
 
@@ -44,7 +43,6 @@ pkgs.nixosTest {
 
         machine.wait_for_unit("default.target")
         machine.fail("systemctl is-active --quiet deploy-osticket")
-        machine.fail("systemctl is-active --quiet setup-database")
         machine.fail("systemctl is-active --quiet install-osticket")
         machine.fail("systemctl is-active --quiet setup-users")
     '';
