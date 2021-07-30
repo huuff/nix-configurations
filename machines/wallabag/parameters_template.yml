@@ -22,6 +22,7 @@ parameters:
     # with PostgreSQL and SQLite, you must set "utf8"
   database_charset: utf8mb4
 
+    # TODO: Make this configurable
   domain_name: https://your-wallabag-url-instance.com
   server_name: "Your wallabag instance"
 

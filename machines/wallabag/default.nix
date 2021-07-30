@@ -135,6 +135,73 @@ in
       };
     };
 
+    services.nginx = {
+      enable = true;
+      user = cfg.user;
+      group = cfg.user;
+
+      virtualHosts.wallabag = {
+        root = "${cfg.directory}/web";
+        extraConfig = ''
+    location / {
+        # try to serve file directly, fallback to app.php
+        try_files $uri /app.php$is_args$args;
+    }
+    location ~ ^/app\.php(/|$) {
+        # if, for some reason, you are still using PHP 5,
+        # then replace /run/php/php7.0 by /var/run/php5
+        fastcgi_pass unix:${config.services.phpfpm.pools.wallabag.socket};
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        include ${pkgs.nginx}/conf/fastcgi_params;
+        include ${pkgs.nginx}/conf/fastcgi.conf;
+        # When you are using symlinks to link the document root to the
+        # current version of your application, you should pass the real
+        # application path instead of the path to the symlink to PHP
+        # FPM.
+        # Otherwise, PHP's OPcache may not properly detect changes to
+        # your PHP files (see https://github.com/zendtech/ZendOptimizerPlus/issues/126
+        # for more information).
+        fastcgi_param  SCRIPT_FILENAME  $realpath_root$fastcgi_script_name;
+        fastcgi_param DOCUMENT_ROOT $realpath_root;
+        # Prevents URIs that include the front controller. This will 404:
+        # http://domain.tld/app.php/some-path
+        # Remove the internal directive to allow URIs like this
+        internal;
+    }
+
+    # return 404 for all other php files not matching the front controller
+    # this prevents access to other php files you don't want to be accessible.
+    location ~ \.php$ {
+        return 404;
+    }
+
+    error_log /var/log/nginx/wallabag_error.log;
+    access_log /var/log/nginx/wallabag_access.log;
+        '';
+      };
+    };
+
+
+    services.phpfpm = {
+      pools.wallabag = {
+        user = cfg.user;
+        phpPackage = pkgs.php74;
+        settings = {
+          "listen.owner" = config.services.nginx.user;
+          "pm" = "dynamic";
+          "pm.max_children" = 32;
+          "pm.max_requests" = 500;
+          "pm.start_servers" = 2;
+          "pm.min_spare_servers" = 2;
+          "pm.max_spare_servers" = 5;
+          "php_admin_value[error_log]" = "stderr";
+          "php_admin_flag[log_errors]" = true;
+          "catch_workers_output" = true;
+        };
+        phpEnv."PATH" = lib.makeBinPath [ pkgs.php74 ];
+      };
+    };
+
     users.users.${cfg.user} = {
       #isSystemUser = true;
       isNormalUser = true; # TODO: Go back to isSystemUser, I'm using this only for testing
