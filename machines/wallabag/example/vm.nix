@@ -1,12 +1,14 @@
 { config, pkgs, lib, ... }:
 {
   imports = [
-    ./default.nix
+    ../default.nix
   ];
 
   virtualisation.memorySize = "2048M";
 
   services.wallabag = {
     enable = true;
+
+    database.passwordFile = ./dbpass;
   };
 }

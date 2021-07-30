@@ -12,12 +12,12 @@ parameters:
   database_driver: pdo_mysql
   database_host: 127.0.0.1
   database_port: ~
-  database_name: @databaseName@
-  database_user: @databaseUser@
-  database_password: ~
+  database_name: @dbName@
+  database_user: @dbUser@
+  database_password: $(cat @dbPasswordFile@)
     # For SQLite, database_path should be "%kernel.project_dir%/data/db/wallabag.sqlite"
   database_path: null
-  database_table_prefix: wallabag_
+  database_table_prefix: @dbPrefix@
   database_socket: null
     # with PostgreSQL and SQLite, you must set "utf8"
   database_charset: utf8mb4

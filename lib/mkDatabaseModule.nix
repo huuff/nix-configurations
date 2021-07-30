@@ -52,8 +52,8 @@ in
           description = "Create ${cfg.database.name} and give ${cfg.database.user} permissions to it";
 
           script = myLib.db.execDDL ''
-            CREATE DATABASE ${cfg.database.name};
-            CREATE USER '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${myLib.catPasswordFile cfg.database.passwordFile}';
+            CREATE DATABASE IF NOT EXISTS ${cfg.database.name};
+            CREATE USER IF NOT EXISTS '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${myLib.catPasswordFile cfg.database.passwordFile}';
             GRANT ALL PRIVILEGES ON ${cfg.database.name}.* TO '${cfg.database.user}'@${cfg.database.host};
           ''; 
 

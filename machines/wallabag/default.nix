@@ -4,10 +4,16 @@ with lib;
 
 let
   cfg = config.services.wallabag;
+  mkDatabaseModule = import ../../lib/mkDatabaseModule.nix;
   myLib = import ../../lib/default.nix { inherit config lib; };
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
 in
   {
+
+    imports = [
+      (mkDatabaseModule "wallabag")
+    ];
+
     options.services.wallabag = with types; {
       enable = mkEnableOption "Whether to enable the wallabag service";
 
@@ -29,19 +35,6 @@ in
         description = "Path of the wallabag installation";
       };
 
-      database = {
-        name = mkOption {
-          type = str;
-          default = "wallabag";
-          description = "Name of the database for wallabag";
-        };
-
-        user = mkOption {
-          type = str;
-          default = "wallabag";
-          description = "Name of the user for wallabag";
-        };
-      };
     };
 
     config = mkIf cfg.enable {
@@ -52,21 +45,6 @@ in
         gnumake
         bash
       ];
-
-      services.mysql = {
-        enable = true;
-        package = pkgs.mariadb;
-
-        ensureDatabases = [ "wallabag" ];
-        ensureUsers = [
-          {
-            name = "wallabag";
-            ensurePermissions = {
-              "wallabag.*" = "ALL PRIVILEGES";
-            };
-          }
-        ];
-      };
 
       systemd.services = {
 
@@ -98,12 +76,14 @@ in
 
         script =
         let 
-          databaseName = cfg.database.name;
-          databaseUser = cfg.database.user;
+          dbName = cfg.database.name;
+          dbUser = cfg.database.user;
+          dbPrefix = cfg.database.prefix;
+          dbPasswordFile = toString cfg.database.passwordFile;
           openssl = "${pkgs.libressl}/bin/openssl";
           parameters = builtins.readFile (pkgs.substituteAll {
             src = ./parameters_template.yml;
-            inherit databaseName databaseUser openssl;
+            inherit dbName dbUser dbPrefix dbPasswordFile openssl;
           });
         in
         ''
@@ -149,8 +129,8 @@ in
         };
 
         unitConfig = {
-          After = [ "create-parameters.service" "mysql.service" ];
-          Requires = [ "create-parameters.service" "mysql.service" ];
+          After = [ "create-parameters.service" "setup-wallabag-db.service" ];
+          Requires = [ "create-parameters.service" "setup-wallabag-db.service" ];
         };
       };
     };
