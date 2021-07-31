@@ -23,6 +23,7 @@
 * Set up security
 
 ## Wallabag
+* `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important
 * SSL option
 * Default user options
