@@ -23,10 +23,9 @@
 * Set up security
 
 ## Wallabag
-* `copy-wallabag` takes 5 minutes, runs out of RAM if I don't increase it. This must be a QEMU problem, I've tried all reasonable msizes to no avail so maybe it's not 9p? Nothing is mounted anyway (well, `/home` is but that shouldn't matter). UPDATE: I was wrong, `copy-wallabag` copies from the nix store which is definitely mounted so this is an issue with 9p
 * Backup options, there's nothing yet but it's pretty important
 * SSL option
-* Fix `parameters.yml`. Currently the application does not work because of the domain name. Do I have to set one?
+* Default user options
 
 ## Mail/SNM
 * Give it some love

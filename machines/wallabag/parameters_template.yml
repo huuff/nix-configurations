@@ -23,7 +23,7 @@ parameters:
   database_charset: utf8mb4
 
     # TODO: Make this configurable
-  domain_name: https://your-wallabag-url-instance.com
+  domain_name: http://$(curl https://ipinfo.io/ip) # TODO: Fragile? And untestable
   server_name: "Your wallabag instance"
 
   mailer_transport:  smtp
