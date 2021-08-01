@@ -88,7 +88,7 @@ in
       systemd.services = {
         initialize-zettelkasten = {
           description = "Create Zettelkasten directory and clone repository";
-        
+
           script = ''
             echo ">>> Removing previous ${cfg.directory}"
             rm -rf ${cfg.directory}/{,.[!.],..?}* # weird but it will delete hidden files too without returning an error for . and ..
@@ -110,6 +110,20 @@ in
             RemainAfterExit = true;
           };
         };
+
+        neuron = {
+          description = "Watch and generate Neuron zettelkasten";
+
+          serviceConfig = {
+            User = cfg.user;
+            Restart = "always";
+            WorkingDirectory = cfg.directory;
+            ExecStart = "${cfg.package}/bin/neuron rib -w";
+          };
+
+          wantedBy = [ "default.target" ];
+
+        };
       };
 
       services = {
@@ -127,7 +141,7 @@ in
             '' + optionalString (!isNull cfg.passwordFile) ''
                auth_basic "Neuron";
                auth_basic_user_file ${cfg.passwordFile};
-              '';
+            '';
           };
         };
 
@@ -141,20 +155,5 @@ in
           '';
         };
       };
-
-      systemd.services.neuron = {
-        description = "Watch and generate Neuron zettelkasten";
-
-        serviceConfig = {
-          User = cfg.user;
-          Restart = "on-failure";
-          WorkingDirectory = cfg.directory;
-          ExecStart = "${cfg.package}/bin/neuron rib -w";
-        };
-
-        wantedBy = [ "default.target" ];
-
-      };
-
     };
   }

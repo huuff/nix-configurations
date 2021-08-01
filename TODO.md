@@ -6,7 +6,6 @@
 
 ## Neuron
 * Add SSL options
-* `Restart="always"` for `neuron` and `do-on-request`
 * I'm stuck on testing because I really need internet access but nobody replies to me on discourse :(
 
 ## osTicket
