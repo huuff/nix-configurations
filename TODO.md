@@ -1,6 +1,5 @@
 # TODO
 * Maybe Zammad? osTicket seems dated
-* For all systemd services: Put description in the outermost block instead of `unitConfig`
 * What about a library for setting a user and a directory on which to run an application? It could create the options, add the user, the directory, a group for the user... I do this for every module
 * A module or library for PHP + nginx, but I find it difficult since I just copypaste nginx configurations from the internet.
 
