@@ -10,6 +10,14 @@
     enable = true;
 
     database.passwordFile = ./dbpass;
+
+    users = [
+      {
+        username = "user1";
+        passwordFile = ./user1pass;
+        email = "user1@example.com";
+      }
+    ];
   };
 
   virtualisation.qemu.networkingOptions = [

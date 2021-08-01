@@ -5,9 +5,27 @@ with lib;
 let
   cfg = config.services.wallabag;
   mkDatabaseModule = import ../../lib/mkDatabaseModule.nix;
-  myLib = import ../../lib/default.nix { inherit config lib; };
+  myLib = import ../../lib/default.nix { inherit config; };
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
   composerWithTidy = (pkgs.php74Packages.composer.override { php = phpWithTidy; });
+  userModule = with types; submodule {
+    options = {
+      username = mkOption {
+        type = str;
+        description = "Username of the user";
+      };
+
+      passwordFile = mkOption {
+        type = oneOf [ str path ];
+        description = "Path to the file containing the salt in the first line and the encrypted password in the second";
+      };
+
+      email = mkOption {
+        type = str;
+        description = "E-mail address of the user";
+      };
+    };
+  };
 in
   {
 
@@ -34,6 +52,12 @@ in
         type = oneOf [ path str ];
         default = "/var/lib/wallabag";
         description = "Path of the wallabag installation";
+      };
+
+      users = mkOption {
+        type = listOf userModule;
+        default = [];
+        description = "List of initial wallabag users";
       };
 
     };
@@ -135,11 +159,16 @@ in
       setup-users = {
         description = "Create default users";
 
-        script = ''
+        script = 
+        let
+        insertUser = user: "php bin/console fos:user:create ${user.username} ${user.email} ${myLib.catPasswordFile user.passwordFile}";
+        in ''
           echo '>>> Installing dependencies'
           COMPOSER_MEMORY_LIMIT=-1 composer install | true
           echo '>>> Disabling default "wallabag" user'
           php bin/console fos:user:deactivate wallabag
+          echo '>>> Creating all users'
+          ${concatStringsSep "\n" (map (user: insertUser user) cfg.users)}
           '';
 
         wantedBy = [ "multi-user.target" ];
