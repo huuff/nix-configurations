@@ -28,6 +28,7 @@
 * Get `install-wallabag` to run only on first boot
 * SSL option
 * It's definitely time to look into secret management tools like `sops` or `agenix` because I'm deploying user passwords in plaintext. Inserting them directly into the database seems hard because I don't unserstand the `roles` table. Also this would allow me to send passwords without hashing and still being secure, which would help me standarize password management across modules
+* What about auto-importing pocket?
 
 ## Mail/SNM
 * Give it some love
