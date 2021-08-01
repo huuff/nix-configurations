@@ -6,6 +6,7 @@
 ## Neuron
 * Add SSL options
 * Finish test
+* Make activation script a systemd unit and order everthing better. I'm having problems in the test and I'm sure it's because it's trying to clone the repo before `network.target` is reached.
 
 ## osTicket
 * Add backup options
