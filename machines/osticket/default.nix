@@ -132,10 +132,6 @@ in {
           assertion = cfg.admin.passwordFile != null && pathExists cfg.admin.passwordFile;
           message = "admin.passwordFile must be set and point to an existing file!";
         }
-        {
-          assertion = cfg.database.passwordFile != null && pathExists cfg.database.passwordFile;
-          message = "cfg.database.passwordFile must be set and point to an existing file";
-        }
       ];
 
 
@@ -268,6 +264,8 @@ in {
 
     systemd.services = {
       deploy-osticket = {
+        description = "Copy osTicket files and set permissions";
+
         script = ''
             echo ">>> Copying files to ${cfg.directory}"
             cp -r ${cfg.package}/* ${cfg.directory}
@@ -279,7 +277,6 @@ in {
 
         unitConfig = {
           ConditionDirectoryNotEmpty = "!${cfg.directory}";
-          Description = "Copy osTicket files and set permissions";
         };
 
         serviceConfig = {
@@ -290,6 +287,8 @@ in {
       };
 
       install-osticket = {
+        description = "Run osTicket installation script and cleanup";
+
         script = ''
           echo ">>> Setting config file"
           mv ${cfg.directory}/include/ost-sampleconfig.php ${cfg.directory}/include/ost-config.php
@@ -324,7 +323,6 @@ in {
           After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
           Requires = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
           ConditionPathExists = "${cfg.directory}/setup";
-          Description = "Run osTicket installation script and cleanup";
         };
 
         serviceConfig = {
@@ -351,6 +349,8 @@ in {
           '';
           userToDML = map (user: (myLib.db.execDML cfg (insertUser user))) cfg.users;
       in {
+        description = "Create initial osTicket users";
+
         script = ''
           ${myLib.db.execDML cfg updateAdminPass}
 
@@ -366,8 +366,8 @@ in {
           After = [ "install-osticket.service" ];
           Requires = [ "install-osticket.service" ];
           ConditionPathExists = "${cfg.directory}/setup-users";
-          Description = "Create initial osTicket users";
         };
+
 
         serviceConfig = {
           User = cfg.user;
