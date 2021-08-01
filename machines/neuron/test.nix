@@ -22,7 +22,7 @@ pkgs.nixosTest {
   };
 
   testScript = ''
-      machine.wait_for_unit("default.target")
+      machine.wait_for_unit("multi-user.target")
 
       with subtest("units are active"):
         machine.succeed("systemctl is-active --quiet neuron")
@@ -32,12 +32,11 @@ pkgs.nixosTest {
       with subtest("directory is created"):
         machine.succeed("[ -d ${directory} ]")
 
-      print("Try shell_interact")
-      machine.shell_interact()
-      print("End it")
+      machine.succeed("ping -c1 google.com")
 
       with subtest("repository was cloned"):
         machine.succeed("git -C ${directory} rev-parse")
+
 
       with subtest("neuron generates output"):
         machine.wait_until_succeeds("[ -e /home/neuron/.neuron/output/index.html ]")

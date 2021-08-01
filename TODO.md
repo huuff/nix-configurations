@@ -5,7 +5,7 @@
 
 ## Neuron
 * Add SSL options
-* I'm stuck on testing because I really need internet access but nobody replies to me on discourse :(
+* Finish test
 
 ## osTicket
 * Add backup options
