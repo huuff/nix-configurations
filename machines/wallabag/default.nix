@@ -7,6 +7,7 @@ let
   mkDatabaseModule = import ../../lib/mkDatabaseModule.nix;
   myLib = import ../../lib/default.nix { inherit config lib; };
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
+  composerWithTidy = (pkgs.php74Packages.composer.override { php = phpWithTidy; });
 in
   {
 
@@ -38,12 +39,9 @@ in
     };
 
     config = mkIf cfg.enable {
-      # TODO: Remove these, it's just for testing
       environment.systemPackages = with pkgs; [
         phpWithTidy
-        (php74Packages.composer.override { php = phpWithTidy; })
-        gnumake
-        bash
+        composerWithTidy
       ];
 
       systemd.services = {
@@ -107,7 +105,6 @@ in
         description = "Install wallabag";
 
         script = ''
-          set -x
           make clean
           make install
         ''; 
@@ -117,7 +114,7 @@ in
         path = with pkgs; [ 
           gnumake
           bash
-          (php74Packages.composer.override { php = phpWithTidy; })
+          composerWithTidy
           phpWithTidy
         ];
 
@@ -131,6 +128,34 @@ in
         unitConfig = {
           After = [ "create-parameters.service" "setup-wallabag-db.service" ];
           Requires = [ "create-parameters.service" "setup-wallabag-db.service" ];
+        };
+      };
+
+      # TODO: Is this the correct unit for installing dependencies?
+      setup-users = {
+        description = "Create default users";
+
+        script = ''
+          echo '>>> Installing dependencies'
+          COMPOSER_MEMORY_LIMIT=-1 composer install | true
+          echo '>>> Disabling default "wallabag" user'
+          php bin/console fos:user:deactivate wallabag
+          '';
+
+        wantedBy = [ "multi-user.target" ];
+
+        path = [ composerWithTidy phpWithTidy ];
+
+        serviceConfig = {
+          User = cfg.user;
+          Type = "oneshot";
+          WorkingDirectory = cfg.directory;
+          RemainAfterExit = true;
+        };
+
+        unitConfig = {
+          After = [ "install-wallabag.service" ];
+          Requires = [ "install-wallabag.service" ];
         };
       };
     };

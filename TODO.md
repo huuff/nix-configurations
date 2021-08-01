@@ -25,6 +25,7 @@
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important
+* Get `install-wallabag` to run only on first boot
 * SSL option
 * Default user options
 
