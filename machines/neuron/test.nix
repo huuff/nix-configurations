@@ -32,8 +32,6 @@ pkgs.nixosTest {
       with subtest("directory is created"):
         machine.succeed("[ -d ${directory} ]")
 
-      machine.succeed("ping -c1 google.com")
-
       with subtest("repository was cloned"):
         machine.succeed("git -C ${directory} rev-parse")
 
