@@ -37,13 +37,11 @@ pkgs.nixosTest {
       with subtest("repository was cloned"):
         machine.succeed("git -C ${directory} rev-parse")
 
-
       with subtest("neuron generates output"):
         machine.wait_until_succeeds("[ -e /home/neuron/.neuron/output/index.html ]")
 
       with subtest("nginx is serving the zettelkasten"):
-        [status, out] = machine.execute('curl -o /dev/null -s -w "%{http_code}" localhost:80')
-        print(out)
-
+        [status, out] = machine.execute('curl localhost:80')
+        assert '<h1 id="title-h1">Alien Psychology</h1>' in out
     '';
 }

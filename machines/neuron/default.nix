@@ -99,11 +99,11 @@ in
           '';
 
           wantedBy = [ "do-on-request.service" ];
+          wants = [ "network.target" ];
 
           unitConfig = {
             Before = [ "do-on-request.service" ];
             After = [ "network.target" ];
-            Requires = [ "network.target" ];
           };
 
           serviceConfig = {
