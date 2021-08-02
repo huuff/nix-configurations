@@ -1,5 +1,4 @@
 { pkgs, doOnRequest, neuronPkg, ... }:
-# Test are quite expensive to set up, so I'll test everything here
 let
   directory = "/home/neuron";
 in
