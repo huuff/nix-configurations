@@ -121,7 +121,7 @@ in
             ExecStart = "${cfg.package}/bin/neuron rib -w";
           };
 
-          wantedBy = [ "default.target" ];
+          wantedBy = [ "multi-user.target" ];
 
         };
       };
