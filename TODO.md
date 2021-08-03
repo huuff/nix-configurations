@@ -32,6 +32,7 @@
 
 ## mkDatabaseModule
 * Test it
+* `mkIf enable`?
 
 ## Mail/SNM
 * Give it some love

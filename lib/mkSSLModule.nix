@@ -18,7 +18,7 @@ in
       };
     };
 
-    config = {
+    config = mkIf cfg.services.${name}.ssl.enable {
       
       systemd.services."create-${name}-cert" = {
         description = "Create a certificate for ${name}";
