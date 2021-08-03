@@ -45,7 +45,7 @@ in
       assertions = [
         {
           assertion = cfg.database.passwordFile != null;
-          message = "cfg.database.passwordFile must be set";
+          message = "database.passwordFile must be set";
         }
       ];
 
@@ -60,7 +60,7 @@ in
 
           script = myLib.db.execDDL ''
             CREATE DATABASE IF NOT EXISTS ${cfg.database.name};
-            CREATE USER IF NOT EXISTS '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${myLib.catPasswordFile cfg.database.passwordFile}';
+            CREATE USER IF NOT EXISTS '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${myLib.passwd.cat cfg.database.passwordFile}';
             GRANT ALL PRIVILEGES ON ${cfg.database.name}.* TO '${cfg.database.user}'@${cfg.database.host};
           ''; 
 

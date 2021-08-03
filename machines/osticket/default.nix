@@ -309,7 +309,7 @@ in {
             -F "dbhost=${cfg.database.host}" \
             -F "dbname=${cfg.database.name}" \
             -F "dbuser=${cfg.database.user}" \
-            -F "dbpass=${myLib.catPasswordFile cfg.database.passwordFile}"
+            -F "dbpass=${myLib.passwd.cat cfg.database.passwordFile}"
           echo ">>> Performing post-install cleanup"
           chmod 0644 ${cfg.directory}/include/ost-config.php
           rm -r ${cfg.directory}/setup
@@ -335,7 +335,7 @@ in {
       setup-users =
       let
         updateAdminPass = ''
-          UPDATE ${cfg.database.prefix}staff SET passwd='${myLib.catPasswordFile cfg.admin.passwordFile}' WHERE staff_id=1;
+          UPDATE ${cfg.database.prefix}staff SET passwd='${myLib.passwd.cat cfg.admin.passwordFile}' WHERE staff_id=1;
         '';
         insertUser = user: ''
           START TRANSACTION;
@@ -344,7 +344,7 @@ in {
           INSERT INTO ${cfg.database.prefix}user_email (user_id, address) VALUES (@user_id, '${user.email}');
           SELECT LAST_INSERT_ID() INTO @email_id;
           UPDATE ${cfg.database.prefix}user SET default_email_id=@email_id WHERE id=@user_id;
-          INSERT INTO ${cfg.database.prefix}user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.catPasswordFile user.passwordFile}');
+          INSERT INTO ${cfg.database.prefix}user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.passwd.cat user.passwordFile}');
           COMMIT;
           '';
           userToDML = map (user: (myLib.db.execDML cfg (insertUser user))) cfg.users;

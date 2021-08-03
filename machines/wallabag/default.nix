@@ -161,7 +161,7 @@ in
 
         script = 
         let
-        insertUser = user: "php bin/console fos:user:create ${user.username} ${user.email} ${myLib.catPasswordFile user.passwordFile}";
+        insertUser = user: "php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile}";
         in ''
           echo '>>> Installing dependencies'
           COMPOSER_MEMORY_LIMIT=-1 composer install | true
