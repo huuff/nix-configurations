@@ -44,8 +44,8 @@ in
     config = {
       assertions = [
         {
-          assertion = cfg.database.passwordFile != null && pathExists cfg.database.passwordFile;
-          message = "cfg.database.passwordFile must be set and point to an existing file";
+          assertion = cfg.database.passwordFile != null;
+          message = "cfg.database.passwordFile must be set";
         }
       ];
 

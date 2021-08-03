@@ -121,16 +121,16 @@ in {
     config = mkIf cfg.enable {
       assertions = [
         {
-          assertion = all (user: user.passwordFile != null && pathExists user.passwordFile) cfg.users;
-          message = "passwordFile must be set for all users, and point to an existing file!";
+          assertion = all (user: user.passwordFile != null) cfg.users;
+          message = "passwordFile must be set for all users!";
         }
         {
           assertion = all (user: user.email != null) cfg.users;
           message = "email must be set for all users!";
         }
         {
-          assertion = cfg.admin.passwordFile != null && pathExists cfg.admin.passwordFile;
-          message = "admin.passwordFile must be set and point to an existing file!";
+          assertion = cfg.admin.passwordFile != null;
+          message = "admin.passwordFile must be set!";
         }
       ];
 
