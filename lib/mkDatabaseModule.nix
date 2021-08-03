@@ -3,7 +3,7 @@ name:
 with lib;
 let
   cfg = config.services.${name};
-  myLib = import ./default.nix { inherit config; };
+  myLib = import ./default.nix { inherit config pkgs; };
 in
   {
     options = with types; {

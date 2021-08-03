@@ -5,7 +5,7 @@ with lib;
 let
   cfg = config.services.wallabag;
   mkDatabaseModule = import ../../lib/mkDatabaseModule.nix;
-  myLib = import ../../lib/default.nix { inherit config; };
+  myLib = import ../../lib/default.nix { inherit config pkgs; };
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
   composerWithTidy = (pkgs.php74Packages.composer.override { php = phpWithTidy; });
   userModule = with types; submodule {

@@ -1,10 +1,11 @@
 # My own library for things I want to reuse
-{ config }:
+{ config, pkgs, ... }:
 rec {
 
-  passwd = {
+  passwd = rec {
     cat = file: "$(cat ${toString file})";
-
+    bcrypt = string: ''$(${pkgs.apacheHttpd}/bin/htpasswd -nbB "" "${string}" | cut -d: -f2)'';
+    catAndBcrypt = file: bcrypt (cat file);
   };
 
   db = {
