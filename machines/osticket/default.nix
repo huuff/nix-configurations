@@ -6,6 +6,7 @@ let
   cfg = config.services.osticket;
   myLib = import ../../lib/default.nix { inherit config pkgs; };
   mkDatabaseModule = import ../../lib/mkDatabaseModule.nix;
+  mkSSLModule = import ../../lib/mk-ssl-module.nix;
 
   userModule = with types; submodule {
     options = {
@@ -34,6 +35,7 @@ let
 in {
     imports = [
         (mkDatabaseModule "osticket")
+        (mkSSLModule "osticket")
     ];
 
     options.services.osticket = with types; {
@@ -101,20 +103,6 @@ in {
           type = listOf userModule;
           default = [];
           description = "List of initial osTicket users";
-      };
-
-      ssl = {
-        enable = mkEnableOption "Enable SSL in the server";
-
-        certificate = mkOption {
-          type = oneOf [ str path ];
-          description = "SSL certficiate of the server";
-        };
-
-        key = mkOption {
-          type = oneOf [ str path ];
-          description = "Key of the SSL certificate";
-        };
       };
     };
 
@@ -233,8 +221,8 @@ in {
         '';
       } // optionalAttrs cfg.ssl.enable {
         addSSL = true;
-        sslCertificate = cfg.ssl.certificate;
-        sslCertificateKey = cfg.ssl.key;
+        sslCertificate = "${cfg.ssl.path}/cert.pem";
+        sslCertificateKey = "${cfg.ssl.path}/key.pem";
       };
     };
 

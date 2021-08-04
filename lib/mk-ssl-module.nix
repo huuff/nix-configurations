@@ -37,10 +37,10 @@ in
           ${pkgs.libressl}/bin/openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj '/CN=localhost'
         '';
 
-        wantedBy = [ "multi-user.target" ];
+        wantedBy = [ "multi-user.target" ] ++ optional config.services.nginx.enable "nginx.service";
         
         unitConfig = {
-          Before = [ "multi-user.target"];
+          Before = [ "multi-user.target"] ++ optional config.services.nginx.enable "nginx.service" ;
           After = [ "ensure-paths.service" ];
           Requires = [ "ensure-paths.service" ];
           ConditionPathExists = "!${cfg.path}/cert.pem";

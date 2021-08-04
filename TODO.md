@@ -30,6 +30,7 @@
 ## mkDatabaseModule
 * Test it
 * `mkIf enable`?
+* Change name to kebab.case
 
 ## Mail/SNM
 * Give it some love

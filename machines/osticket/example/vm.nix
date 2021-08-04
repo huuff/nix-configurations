@@ -14,12 +14,6 @@ in {
   services.osticket = {
     enable = true;
 
-    ssl = {
-      enable = true;
-      certificate = ./cert.pem;
-      key = ./key.pem;
-    };
-
     admin = {
       username = "root";
       passwordFile = fileFromStore ./adminpass;
@@ -27,6 +21,8 @@ in {
       firstName = "Firstname";
       lastName = "Lastname";
     };
+
+    ssl.enable = true;
 
     database.passwordFile = fileFromStore ./dbpass;
 
