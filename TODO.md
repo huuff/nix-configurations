@@ -27,9 +27,6 @@
 * SSL option
 * What about auto-importing pocket?
 
-## mkSSLModule
-* Ensure the target directory exists and has correct permissions. Test it
-
 ## mkDatabaseModule
 * Test it
 * `mkIf enable`?

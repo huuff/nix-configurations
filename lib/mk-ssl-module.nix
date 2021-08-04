@@ -2,24 +2,34 @@ name:
 { config, lib, pkgs, ... }:
 with lib;
 let
-  cfg = config.services.${name};
+  cfg = config.services.${name}.ssl;
 in
   {
+    imports = [ ./ensure-paths-module.nix ];
+
     options = {
       services.${name}.ssl = with types; {
 
         enable = mkEnableOption "Whether to auto-generate an SSL certificate";
 
+        user = mkOption {
+          type = str;
+          default = "root";
+          description = "User that will own the certificate";
+        };
+
         path = mkOption {
           type = oneOf [ path str ];
-          default = "/var/ssl/";
+          default = "/var/ssl";
           description = "Path of the generated certificate";
         };
       };
     };
 
-    config = mkIf cfg.services.${name}.ssl.enable {
+    config = mkIf cfg.enable {
       
+      services.ensurePaths = [ { path = cfg.path; } ];
+
       systemd.services."create-${name}-cert" = {
         description = "Create a certificate for ${name}";
 
@@ -31,12 +41,15 @@ in
         
         unitConfig = {
           Before = [ "multi-user.target"];
+          After = [ "ensure-paths.service" ];
+          Requires = [ "ensure-paths.service" ];
           ConditionPathExists = "!${cfg.path}/cert.pem";
         };
 
         serviceConfig = {
           User = cfg.user;
           Type = "oneshot";
+          WorkingDirectory = cfg.path;
           RemainAfterExit = true;
         };
       };

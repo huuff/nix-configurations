@@ -27,6 +27,7 @@
       osticket = import ./machines/osticket/test.nix { inherit pkgs; };
 
       ensurePaths = import ./lib/ensure-paths-test.nix { inherit pkgs; };
+      mkSSLModule = import ./lib/mk-ssl-module-test.nix { inherit pkgs; };
     };
   };
 
