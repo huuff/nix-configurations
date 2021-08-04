@@ -42,11 +42,15 @@ pkgs.nixosTest {
       [ _, out ] = machine.execute("stat -c '%a' ${path2}")
       assert out == "755\n"
 
+    with subtest("the unit recreates the directories when one is deleted"):
+      machine.succeed("rm -r ${path1}")
+      machine.systemctl("restart ensure-paths")
+      machine.wait_for_unit("ensure-paths")
+      machine.succeed("[ -d ${path1} ]")
+
     with subtest("the unit is not active when the paths exist"):
       machine.shutdown()
       machine.start()
       machine.fail("systemctl is-active --quiet ensure-paths")
-
-
   '';
 }

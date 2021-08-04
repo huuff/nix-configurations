@@ -51,7 +51,7 @@ in {
       };
 
       unitConfig = {
-        ConditionPathExists = map (path: "!${path.path}") paths;
+        ConditionPathExists = map (path: "|!${path.path}") paths;
       };
     };
   };
