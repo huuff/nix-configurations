@@ -48,7 +48,10 @@ in {
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
-        ConditionPathExists = concatStringsSep " | " (map (path: "!${path.path}") paths);
+      };
+
+      unitConfig = {
+        ConditionPathExists = map (path: "!${path.path}") paths;
       };
     };
   };
