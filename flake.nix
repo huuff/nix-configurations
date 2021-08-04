@@ -25,6 +25,8 @@
     nixosTests = {
       neuron = import ./machines/neuron/test.nix { inherit pkgs doOnRequest neuronPkg; };
       osticket = import ./machines/osticket/test.nix { inherit pkgs; };
+
+      ensurePaths = import ./lib/ensure-paths-test.nix { inherit pkgs; };
     };
   };
 

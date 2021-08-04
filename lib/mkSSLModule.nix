@@ -27,10 +27,11 @@ in
           ${pkgs.libressl}/bin/openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj '/CN=localhost'
         '';
 
-        wantedBy = [ "nginx.service" ];
+        wantedBy = [ "multi-user.target" ];
         
         unitConfig = {
-          Before = [ "nginx.service"];
+          Before = [ "multi-user.target"];
+          ConditionPathExists = "!${cfg.path}/cert.pem";
         };
 
         serviceConfig = {
