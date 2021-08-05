@@ -62,10 +62,6 @@ in
       ];
 
       systemd.services = {
-
-      # I wanted to copy and install in the same unit but copying is too expensive
-      # because it comes with like one trillion files, so just copy in this unit and
-      # install in another one so I can only run install while I test it
       copy-wallabag = {
         description = "Copy wallabag to final directory and setting permissions for installation";
 
