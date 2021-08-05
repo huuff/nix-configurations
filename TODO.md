@@ -26,6 +26,10 @@
 * Test it, even though it's a pain to even run it in some computers
 * What about auto-importing pocket?
 
+## mkSSLModule
+* Option to add own certificate
+* Option to generate one from Let's Encrypt
+
 ## mkDatabaseModule
 * Test it
 * `mkIf enable`?
