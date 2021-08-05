@@ -9,6 +9,7 @@ let
   gitWithoutDeployKey = "${pkgs.git}/bin/git";
   gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no -p ${toString cfg.sshPort}' '';
   gitCommand = if isNull cfg.deployKey then gitWithoutDeployKey else gitWithDeployKey;
+  mkSSLModule = import ../../lib/mk-ssl-module.nix;
 in
   {
     imports = 

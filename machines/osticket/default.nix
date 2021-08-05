@@ -130,7 +130,7 @@ in {
     ];
 
     networking.firewall = {
-      allowedTCPPorts = [ 80 ] ++ optional cfg.ssl.enable 443;
+      allowedTCPPorts = [ 80 ];
     };
 
     # TODO: Creating the directory wouldn't be necessary if createHome were working
@@ -219,10 +219,6 @@ in {
             fastcgi_pass unix:${config.services.phpfpm.pools.osTicket.socket};
         }
         '';
-      } // optionalAttrs cfg.ssl.enable {
-        addSSL = true;
-        sslCertificate = "${cfg.ssl.path}/cert.pem";
-        sslCertificateKey = "${cfg.ssl.path}/key.pem";
       };
     };
 

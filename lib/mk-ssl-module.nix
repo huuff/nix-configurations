@@ -27,6 +27,14 @@ in
     };
 
     config = mkIf cfg.enable {
+
+      networking.firewall.allowedTCPPorts = [ 443 ];
+
+      services.nginx.virtualHosts.${name} = {
+        addSSL = true;
+        sslCertificate = "${cfg.path}/cert.pem";
+        sslCertificateKey = "${cfg.path}/key.pem";
+      };
       
       services.ensurePaths = [ { path = cfg.path; } ];
 
