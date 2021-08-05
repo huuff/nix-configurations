@@ -1,3 +1,4 @@
+# Can't indent this file as it'll fuck YAML up... And the alternatives aren't any better.
 { config, lib, pkgs, ... }:
 
 with lib;
@@ -6,6 +7,7 @@ let
   cfg = config.services.wallabag;
   mkDatabaseModule = import ../../lib/mkDatabaseModule.nix;
   mkSSLModule = import ../../lib/mk-ssl-module.nix;
+  mkInstallationModule = import ../../lib/mk-installation-module.nix;
   myLib = import ../../lib/default.nix { inherit config pkgs; };
 
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
@@ -34,6 +36,7 @@ in
     imports = [
       (mkDatabaseModule "wallabag")
       (mkSSLModule "wallabag")
+      (mkInstallationModule "wallabag")
     ];
 
     options.services.wallabag = with types; {
@@ -45,22 +48,15 @@ in
         description = "The wallabag package to use";
       };
 
-      user = mkOption {
-        type = str;
-        default = "wallabag";
-        description = "User under which to run wallabag";
-      };
-
-      directory = mkOption {
-        type = oneOf [ path str ];
-        default = "/var/lib/wallabag";
-        description = "Path of the wallabag installation";
-      };
-
       users = mkOption {
         type = listOf userModule;
         default = [];
         description = "List of initial wallabag users";
+      };
+      
+      domainName = mkOption {
+        type = str;
+        description = "Domain name where the instance will be run";
       };
 
     };
@@ -73,27 +69,27 @@ in
 
       systemd.services = {
 
-      # I wanted to copy and install in the same unit but copying is too expensive
-      # because it comes with like one trillion files, so just copy in this unit and
-      # install in another one so I can only run install while I test it
       copy-wallabag = {
         description = "Copy wallabag to final directory and setting permissions for installation";
 
         script = ''
-          echo '>>> Copying all wallabag files from the store to ${cfg.directory}'
-          cp -r ${cfg.package}/* ${cfg.directory}
-          echo '>>> Setting write permissions to ${cfg.directory}'
-          chmod -R u+w ${cfg.directory}
+          echo '>>> Copying all wallabag files from the store to ${cfg.installation.path}'
+          cp -r ${cfg.package}/* ${cfg.installation.path}
+          echo '>>> Setting write permissions to ${cfg.installation.path}'
+          chmod -R u+w ${cfg.installation.path}
         '';
 
         serviceConfig = {
-          User = cfg.user;
+          User = cfg.installation.user;
           Type = "oneshot";
-          WorkingDirectory = cfg.directory;
           RemainAfterExit = true;
         };
 
-        unitConfig.ConditionDirectoryNotEmpty = "!${cfg.directory}";
+        unitConfig = {
+          Requires = [ "ensure-paths.service" ];
+          After = [ "ensure-paths.service" ];
+          ConditionDirectoryNotEmpty = "!${cfg.installation.path}";
+        };
       };
 
       create-parameters = {
@@ -127,7 +123,7 @@ parameters:
   database_charset: utf8mb4
 
     # TODO: Make this configurable
-  domain_name: ${if cfg.ssl.enable then "https" else "http"}://$(curl https://ipinfo.io/ip) # TODO: Fragile? And untestable
+  domain_name: ${cfg.domainName}
   server_name: "Your wallabag instance"
 
   mailer_transport:  smtp
@@ -140,7 +136,6 @@ parameters:
 
   locale: en
 
-    # TODO: What happens if this changes?
     # A secret key that's used to generate certain security-related tokens
   secret: $(${pkgs.libressl}/bin/openssl rand -hex 12)
 
@@ -180,12 +175,12 @@ parameters:
             '';
         in
         ''
-          rm ${cfg.directory}/app/config/parameters.yml
-          echo "${parameters}" >> ${cfg.directory}/app/config/parameters.yml
+          rm ${cfg.installation.path}/app/config/parameters.yml
+          echo "${parameters}" >> ${cfg.installation.path}/app/config/parameters.yml
         '';
 
         serviceConfig = {
-          User = cfg.user;
+          User = cfg.installation.user;
           Type = "oneshot";
           RemainAfterExit = true;
         };
@@ -214,9 +209,9 @@ parameters:
         ];
 
         serviceConfig = {
-          User = cfg.user;
+          User = cfg.installation.user;
           Type = "oneshot";
-          WorkingDirectory = cfg.directory;
+          WorkingDirectory = cfg.installation.path;
           RemainAfterExit = true;
         };
 
@@ -247,9 +242,9 @@ parameters:
         path = [ composerWithTidy phpWithTidy ];
 
         serviceConfig = {
-          User = cfg.user;
+          User = cfg.installation.user;
           Type = "oneshot";
-          WorkingDirectory = cfg.directory;
+          WorkingDirectory = cfg.installation.path;
           RemainAfterExit = true;
         };
 
@@ -262,11 +257,11 @@ parameters:
 
     services.nginx = {
       enable = true;
-      user = cfg.user;
-      group = cfg.user;
+      user = cfg.installation.user;
+      group = cfg.installation.user;
 
       virtualHosts.wallabag = {
-        root = "${cfg.directory}/web";
+        root = "${cfg.installation.path}/web";
         extraConfig = ''
     location / {
         # try to serve file directly, fallback to app.php
@@ -309,7 +304,7 @@ parameters:
 
     services.phpfpm = {
       pools.wallabag = {
-        user = cfg.user;
+        user = cfg.installation.user;
         phpPackage = pkgs.php74;
         settings = {
           "listen.owner" = config.services.nginx.user;
@@ -326,16 +321,5 @@ parameters:
         phpEnv."PATH" = lib.makeBinPath [ pkgs.php74 ];
       };
     };
-
-    users.users.${cfg.user} = {
-      #isSystemUser = true;
-      isNormalUser = true; # TODO: Go back to isSystemUser, I'm using this only for testing
-      home = cfg.directory;
-      group = cfg.user;
-      extraGroups = [ "keys" ];
-      createHome = true;
-    };
-
-    users.groups.${cfg.user} = {};
   };
 }

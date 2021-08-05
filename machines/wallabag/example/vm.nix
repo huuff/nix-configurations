@@ -1,4 +1,7 @@
 { config, pkgs, lib, ... }:
+let
+  myLib = import ../../../lib { inherit config pkgs; };
+in
 {
   imports = [
     ../default.nix
@@ -8,14 +11,16 @@
 
   services.wallabag = {
     enable = true;
-    ssl.enable = true;
+    #ssl.enable = true;
 
-    database.passwordFile = ./dbpass;
+    domainName = "http://188.85.208.67";
+
+    database.passwordFile = myLib.fileFromStore ./dbpass;
 
     users = [
       {
         username = "user1";
-        passwordFile = ./user1pass;
+        passwordFile = myLib.fileFromStore ./user1pass;
         email = "user1@example.com";
       }
     ];
