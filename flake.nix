@@ -28,6 +28,7 @@
 
       ensurePaths = import ./lib/ensure-paths-test.nix { inherit pkgs; };
       mkSSLModule = import ./lib/mk-ssl-module-test.nix { inherit pkgs; };
+      mkInstallationModule = import ./lib/mk-installation-module-test.nix { inherit pkgs; };
     };
   };
 

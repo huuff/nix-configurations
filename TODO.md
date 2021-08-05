@@ -30,9 +30,6 @@
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
 
-## mkInstallationModule
-* Test it
-
 ## mkDatabaseModule
 * Test it
 * `mkIf enable`?
