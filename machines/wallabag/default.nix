@@ -4,9 +4,6 @@ with lib;
 
 let
   cfg = config.services.wallabag;
-  mkDatabaseModule = import ../../lib/mkDatabaseModule.nix;
-  mkSSLModule = import ../../lib/mk-ssl-module.nix;
-  mkInstallationModule = import ../../lib/mk-installation-module.nix;
   myLib = import ../../lib/default.nix { inherit config pkgs; };
 
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
@@ -33,9 +30,9 @@ in
   {
 
     imports = [
-      (mkDatabaseModule "wallabag")
-      (mkSSLModule "wallabag")
-      (mkInstallationModule "wallabag")
+      (import ../../lib/mk-database-module.nix "wallabag")
+      (import ../../lib/mk-ssl-module.nix "wallabag")
+      (import ../../lib/mk-installation-module.nix "wallabag")
     ];
 
     options.services.wallabag = with types; {

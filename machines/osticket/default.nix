@@ -5,9 +5,6 @@ with lib;
 let
   cfg = config.services.osticket;
   myLib = import ../../lib/default.nix { inherit config pkgs; };
-  mkDatabaseModule = import ../../lib/mkDatabaseModule.nix;
-  mkSSLModule = import ../../lib/mk-ssl-module.nix;
-  mkInstallationModule = import ../../lib/mk-installation-module.nix;
 
   userModule = with types; submodule {
     options = {
@@ -35,9 +32,9 @@ let
     };
 in {
     imports = [
-        (mkDatabaseModule "osticket")
-        (mkSSLModule "osticket")
-        (mkInstallationModule "osticket")
+        (import ../../lib/mk-database-module.nix "osticket")
+        (import ../../lib/mk-ssl-module.nix "osticket")
+        (import ../../lib/mk-installation-module.nix "osticket")
     ];
 
     options.services.osticket = with types; {

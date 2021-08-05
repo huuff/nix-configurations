@@ -32,8 +32,7 @@
 
 ## mkDatabaseModule
 * Test it
-* `mkIf enable`?
-* Change name to kebab.case
+* `mkIf enable`? UPDATE: Not really, if you imported it, it means you use it. Doesn't it?
 
 ## Mail/SNM
 * Give it some love
