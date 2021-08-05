@@ -2,40 +2,40 @@ name:
 { config, lib, pkgs, ... }:
 with lib;
 let
-  cfg = config.services.${name}.user;
+  cfg = config.services.${name}.installation;
 in
   {
     imports = [ ./ensure-paths-module.nix ];
 
     options = {
-      services.${name}.user = with types; {
+      services.${name}.installation = with types; {
 
-        name = mkOption {
+        user = mkOption {
           type = str;
           default = name;
           description = "User on which ${name} will run";
         };
 
-        home = mkOption {
+        path = mkOption {
           type = oneOf [ path str ];
           default = "/var/lib/${name}";
-          description = "Home of the user";
+          description = "Path of the installation";
         };
       };
     };
 
     config = {
-      services.ensurePaths = [ cfg.home ];
+      services.ensurePaths = [ { path = cfg.path; owner = cfg.user;} ];
 
       users = {
-        users.${cfg.name} = {
+        users.${cfg.user} = {
           isSystemUser = true;
-          home = cfg.home;
-          group = cfg.name;
+          home = cfg.path;
+          group = cfg.user;
           extraGroups = [ "keys" ]; # needed for nixops, to access /run/keys
         };
 
-        groups.${cfg.name} = {}; # create the group
+        groups.${cfg.user} = {}; # create the group
       };
     };
   }

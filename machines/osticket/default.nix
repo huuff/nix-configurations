@@ -7,6 +7,7 @@ let
   myLib = import ../../lib/default.nix { inherit config pkgs; };
   mkDatabaseModule = import ../../lib/mkDatabaseModule.nix;
   mkSSLModule = import ../../lib/mk-ssl-module.nix;
+  mkInstallationModule = import ../../lib/mk-installation-module.nix;
 
   userModule = with types; submodule {
     options = {
@@ -36,22 +37,11 @@ in {
     imports = [
         (mkDatabaseModule "osticket")
         (mkSSLModule "osticket")
+        (mkInstallationModule "osticket")
     ];
 
     options.services.osticket = with types; {
       enable = mkEnableOption "osTicket ticketing system";
-
-      user = mkOption {
-        type = str;
-        default = "osticket";
-        description = "OS user on which to run osTicket";
-      };
-
-      directory = mkOption {
-        type = str;
-        default = "/var/www/osticket";
-        description = "Directory where to install and serve osTicket";
-      };
 
       package = mkOption {
         type = package;
@@ -133,44 +123,16 @@ in {
       allowedTCPPorts = [ 80 ];
     };
 
-    # TODO: Creating the directory wouldn't be necessary if createHome were working
-    # is it that it's badly ordered?
-    # I can't think of any solution to the problem of setting the executable bit
-    system.activationScripts.createDirectory = ''
-        echo ">>> Creating directory and setting permissions"
-        mkdir -p ${cfg.directory}
-        dirsUpToPath=$(namei ${cfg.directory} | tail -n +3 | cut -d' ' -f3)
-
-        currentPath=""
-        for dir in $dirsUpToPath
-        do
-          currentPath="$currentPath/$dir"
-          chmod og+x "$currentPath"
-        done
-    '';
-
-    users = {
-      users.${cfg.user} = {
-        isSystemUser = true;
-        home = cfg.directory;
-        group = cfg.user;
-        extraGroups = [ "keys" ]; # needed for nixops, to access /run/keys
-        createHome = true; # remove it? I'm creating the directory in the activation script anyway
-      };
-
-      groups.${cfg.user} = {}; # create the group
-    };
-
     # is this useful for anything?
-    systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.directory ];
+    systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.installation.path ];
 
     services.nginx = {
       enable = true;
-      user = cfg.user;
-      group = cfg.user;
+      user = cfg.installation.user;
+      group = cfg.installation.user;
 
       virtualHosts.osticket = {
-        root = cfg.directory;
+        root = cfg.installation.path;
         extraConfig = ''
         set $path_info "";
 
@@ -228,7 +190,7 @@ in {
       ''; # better performance
 
       pools.osTicket = {
-        user = cfg.user;
+        user = cfg.installation.user;
         phpPackage = pkgs.php74;
         settings = {
           "listen.owner" = config.services.nginx.user;
@@ -251,20 +213,26 @@ in {
         description = "Copy osTicket files and set permissions";
 
         script = ''
-            echo ">>> Copying files to ${cfg.directory}"
-            cp -r ${cfg.package}/* ${cfg.directory}
+            echo ">>> Copying files to ${cfg.installation.path}"
+            cp -r ${cfg.package}/* ${cfg.installation.path}
 
             echo ">>> Setting permissions for serving"
-            find ${cfg.directory} -type d -print0 | xargs -0 chmod 0755
-            find ${cfg.directory} -type f -print0 | xargs -0 chmod 0644
+            find ${cfg.installation.path} -type d -print0 | xargs -0 chmod 0755
+            find ${cfg.installation.path} -type f -print0 | xargs -0 chmod 0644
         '';
 
         unitConfig = {
-          ConditionDirectoryNotEmpty = "!${cfg.directory}";
+          ConditionDirectoryNotEmpty = "!${cfg.installation.path}";
+        };
+
+        wants = [ "ensure-paths.service" ];
+
+        unitConfig = {
+          After = [ "ensure-paths.service" ];
         };
 
         serviceConfig = {
-          User = cfg.user;
+          User = cfg.installation.user;
           Type = "oneshot";
           RemainAfterExit = true;
         };
@@ -275,8 +243,8 @@ in {
 
         script = ''
           echo ">>> Setting config file"
-          mv ${cfg.directory}/include/ost-sampleconfig.php ${cfg.directory}/include/ost-config.php
-          chmod 0666 ${cfg.directory}/include/ost-config.php
+          mv ${cfg.installation.path}/include/ost-sampleconfig.php ${cfg.installation.path}/include/ost-config.php
+          chmod 0666 ${cfg.installation.path}/include/ost-config.php
 
           echo ">>> Calling install script"
           ${pkgs.curl}/bin/curl "localhost/setup/install.php" \
@@ -295,22 +263,22 @@ in {
             -F "dbuser=${cfg.database.user}" \
             -F "dbpass=${myLib.passwd.cat cfg.database.passwordFile}"
           echo ">>> Performing post-install cleanup"
-          chmod 0644 ${cfg.directory}/include/ost-config.php
-          rm -r ${cfg.directory}/setup
+          chmod 0644 ${cfg.installation.path}/include/ost-config.php
+          rm -r ${cfg.installation.path}/setup
 
           # TODO: This is a temporary hack for running setup-users only on first boot
           # remove it when I get ConditionFirstBoot to work
-          touch ${cfg.directory}/setup-users
+          touch ${cfg.installation.path}/setup-users
         '';
 
         unitConfig = {
           After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
           Requires = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
-          ConditionPathExists = "${cfg.directory}/setup";
+          ConditionPathExists = "${cfg.installation.path}/setup";
         };
 
         serviceConfig = {
-          User = cfg.user;
+          User = cfg.installation.user;
           Type = "oneshot";
           RemainAfterExit = true;
         };
@@ -341,7 +309,7 @@ in {
           ${concatStringsSep "\n" userToDML}
 
           # TODO: Remove it when I get ConditionFirstBoot to work
-          rm ${cfg.directory}/setup-users
+          rm ${cfg.installation.path}/setup-users
           '';
 
         wantedBy = [ "multi-user.target" ];
@@ -349,12 +317,12 @@ in {
         unitConfig = {
           After = [ "install-osticket.service" ];
           Requires = [ "install-osticket.service" ];
-          ConditionPathExists = "${cfg.directory}/setup-users";
+          ConditionPathExists = "${cfg.installation.path}/setup-users";
         };
 
 
         serviceConfig = {
-          User = cfg.user;
+          User = cfg.installation.user;
           Type = "oneshot";
           RemainAfterExit = "true";
         };
