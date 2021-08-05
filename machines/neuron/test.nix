@@ -16,7 +16,7 @@ pkgs.nixosTest {
       enable = true;
       repository = "https://github.com/srid/alien-psychology.git";
       refreshPort = 8999;
-      inherit directory;
+      installation.path = directory;
     };
   };
 
@@ -35,7 +35,7 @@ pkgs.nixosTest {
         machine.succeed("git -C ${directory} rev-parse")
 
       with subtest("neuron generates output"):
-        machine.wait_until_succeeds("[ -e /home/neuron/.neuron/output/index.html ]")
+        machine.wait_until_succeeds("[ -e ${directory}/.neuron/output/index.html ]")
 
       with subtest("nginx is serving the zettelkasten"):
         [status, out] = machine.execute('curl localhost:80')
