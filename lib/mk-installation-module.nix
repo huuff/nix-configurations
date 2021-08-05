@@ -29,7 +29,7 @@ in
 
       users = {
         users.${cfg.user} = {
-          isSystemUser = true;
+          isNormalUser = true;
           home = cfg.path;
           group = cfg.user;
           extraGroups = [ "keys" ]; # needed for nixops, to access /run/keys
