@@ -16,6 +16,7 @@ in
     [
       ./cachix.nix
       doOnRequest
+      (mkSSLModule "neuron")
     ];
 
     options.services.neuron = with types; {
@@ -104,6 +105,7 @@ in
 
           unitConfig = {
             Before = [ "do-on-request.service" ];
+            Requires = [ "network.target" ];
             After = [ "network.target" ];
           };
 
