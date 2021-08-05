@@ -4,7 +4,6 @@
 * A module or library for PHP + nginx, but I find it difficult since I just copypaste nginx configurations from the internet.
 
 ## Neuron
-* Add SSL options
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling
 
 ## osTicket
@@ -24,7 +23,7 @@
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important
 * Get `install-wallabag` to run only on first boot
-* SSL option
+* Test it, even though it's a pain to even run it in some computers
 * What about auto-importing pocket?
 
 ## mkDatabaseModule
