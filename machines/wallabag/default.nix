@@ -282,9 +282,6 @@ parameters:
     location ~ \.php$ {
         return 404;
     }
-
-    error_log /var/log/nginx/wallabag_error.log;
-    access_log /var/log/nginx/wallabag_access.log;
         '';
       };
     };
