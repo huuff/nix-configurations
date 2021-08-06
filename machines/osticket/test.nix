@@ -1,6 +1,8 @@
 { pkgs, ... }:
 let
   path = "/var/www/osticket";
+  adminUsername = "root";
+  adminPassword = "adminpass";
 in
 pkgs.nixosTest {
   name = "osTicket";
@@ -18,11 +20,11 @@ pkgs.nixosTest {
       installation.path = path;
       
       admin = {
-        username = "root";
-        passwordFile = pkgs.writeText "adminpass" "adminpass";
+        username = adminUsername;
+        passwordFile = pkgs.writeText "adminpass" adminPassword;
         email = "root@test.com";
-        firstName = "Admin";
-        lastName = "Admin";
+        firstName = "Firstname";
+        lastName = "Lastname";
       };
     };
   };
@@ -35,6 +37,24 @@ pkgs.nixosTest {
         machine.succeed("systemctl is-active --quiet install-osticket")
         machine.succeed("systemctl is-active --quiet setup-users")
 
+      with subtest("admin can login"):
+        machine.wait_until_succeeds("pgrep -f 'agetty.*tty1'")
+        machine.succeed("useradd -m alice")
+        machine.succeed("(echo foobar; echo foobar) | passwd alice")
+        machine.wait_until_tty_matches(1, "login: ")
+        machine.send_chars("alice\n")
+        machine.wait_until_tty_matches(1, "login: alice")
+        machine.wait_until_succeeds("pgrep login")
+        machine.wait_until_tty_matches(1, "Password: ")
+        machine.send_chars("foobar\n")
+        machine.wait_until_succeeds("pgrep -u alice bash")
+
+        machine.send_chars("${pkgs.php74}/bin/php ${path}/manage.php agent login\n")
+        machine.wait_until_tty_matches(1, "Username: ")
+        machine.send_chars("${adminUsername}\n")
+        machine.wait_until_tty_matches(1, "Password: ")
+        machine.send_chars("${adminPassword}\n")
+        machine.wait_until_tty_matches(1, "Successfully authenticated as 'Firstname Lastname', using 'Local Authentication'")
 
       with subtest("units are inactive on second boot"):
         machine.shutdown()
