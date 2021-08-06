@@ -49,14 +49,4 @@ in {
     "-net nic,netdev=user.0,model=virtio"
     "-netdev user,id=user.0,hostfwd=tcp::8989-:80,hostfwd=tcp::2222-:22,hostfwd=tcp::8988-:443"
   ];
-
-  services.openssh = {
-    enable = true;
-    permitRootLogin = "yes";
-  };
-
-  users = {
-    users.root.password="pass";
-    mutableUsers=false;
-  };
 }
