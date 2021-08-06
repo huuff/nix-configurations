@@ -14,6 +14,8 @@ in {
   services.osticket = {
     enable = true;
 
+    installation.path = "/var/www/osticket";
+
     admin = {
       username = "root";
       passwordFile = fileFromStore ./adminpass;

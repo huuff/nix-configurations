@@ -25,11 +25,15 @@
 * Test it, even though it's a pain to even run it in some computers
 * What about auto-importing pocket?
 
+## ensurePaths
+* Allow to add just a path string instead of a full object
+
 ## mkSSLModule
 * Test it with `nginx`
 * Look into redirecting `http` to `https`
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
+* Better permissions
 
 ## Mail/SNM
 * Give it some love

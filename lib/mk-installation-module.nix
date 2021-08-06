@@ -29,7 +29,7 @@ in
 
       users = {
         users.${cfg.user} = {
-          isNormalUser = true; # TODO: Fix it! Should be isSystemUser, but it breaks things
+          isSystemUser = true;
           home = cfg.path;
           group = cfg.user;
           extraGroups = [ "keys" ]; # needed for nixops, to access /run/keys
