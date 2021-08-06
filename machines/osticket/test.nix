@@ -81,6 +81,10 @@ in
         machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q '${user1.fullName} <${user1.email}>'")
         machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q '${user2.fullName} <${user2.email}>'")
 
+      with subtest("it's being served correctly"):
+        [ _, out ] = machine.execute("curl localhost")
+        assert "<h1>Welcome to the Support Center</h1>" in out
+
       with subtest("units are inactive on second boot"):
         machine.shutdown()
         machine.start()
