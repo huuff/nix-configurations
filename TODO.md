@@ -1,6 +1,5 @@
 # TODO
 * Maybe Zammad? osTicket seems dated
-* What about a library for setting a user and a directory on which to run an application? It could create the options, add the user, the directory, a group for the user... I do this for every module
 * A module or library for PHP + nginx, but I find it difficult since I just copypaste nginx configurations from the internet.
 * Turns out a lot of stuff breaks (wallabag, completely, maybe something in osticket) when I change the user in `installation-module` to a system user. Find out what it is (directory creation? shouldn't matter since I have ensure paths) because these users should definitely be system users.
 
@@ -27,6 +26,8 @@
 * What about auto-importing pocket?
 
 ## mkSSLModule
+* Test it with `nginx`
+* Look into redirecting `http` to `https`
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
 
