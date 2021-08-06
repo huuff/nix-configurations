@@ -53,10 +53,6 @@ in
     };
 
     config = mkIf cfg.enable {
-      environment.systemPackages = with pkgs; [
-        phpWithTidy
-        composerWithTidy
-      ];
 
       systemd.services = {
       copy-wallabag = {

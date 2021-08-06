@@ -10,8 +10,6 @@ pkgs.nixosTest {
       ./default.nix
     ];
 
-    environment.systemPackages = with pkgs; [ git ];
-
     nix.useSandbox = false;
     
     services.osticket = {

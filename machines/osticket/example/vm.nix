@@ -1,4 +1,3 @@
-# Environment for nixos-shell, for testing purposes
 { config, pkgs, lib, ... }:
 
 let

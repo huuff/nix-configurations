@@ -6,6 +6,11 @@
 
   virtualisation.memorySize = "2048M";
 
+  environment.systemPackages = with pkgs; [
+    php74
+    php74Packages.composer
+  ];
+
   services.wallabag = {
     enable = true;
     ssl.enable = true;

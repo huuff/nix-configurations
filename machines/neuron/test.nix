@@ -8,8 +8,6 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ (import ./default.nix { inherit doOnRequest neuronPkg; }) ];
 
-    environment.systemPackages = with pkgs; [ git ];
-
     nix.useSandbox = false;
     
     services.neuron = {
@@ -32,7 +30,7 @@ pkgs.nixosTest {
         machine.succeed("[ -d ${directory} ]")
 
       with subtest("repository was cloned"):
-        machine.succeed("git -C ${directory} rev-parse")
+        machine.succeed("${pkgs.git}/bin/git -C ${directory} rev-parse")
 
       with subtest("neuron generates output"):
         machine.wait_until_succeeds("[ -e ${directory}/.neuron/output/index.html ]")
