@@ -6,32 +6,48 @@ let
   adminFirstName = "Firstname";
   adminLastName = "Lastname";
 in
-pkgs.nixosTest {
-  name = "osTicket";
+  pkgs.nixosTest {
+    name = "osTicket";
 
-  machine = { pkgs, ... }: {
-    imports = [ 
-      ./default.nix
-    ];
+    machine = { pkgs, ... }: {
+      imports = [ 
+        ./default.nix
+      ];
 
-    services.osticket = {
-      enable = true;
+      services.osticket = {
+        enable = true;
 
-      database.passwordFile = pkgs.writeText "dbpass" "dbpass";
-      site.email = "site@test.com";
-      installation.path = path;
-      
-      admin = {
-        username = adminUsername;
-        passwordFile = pkgs.writeText "adminpass" adminPassword;
-        email = "root@test.com";
-        firstName = adminFirstName;
-        lastName = adminLastName;
+        database.passwordFile = pkgs.writeText "dbpass" "dbpass";
+        site.email = "site@test.com";
+        installation.path = path;
+
+        admin = {
+          username = adminUsername;
+          passwordFile = pkgs.writeText "adminpass" adminPassword;
+          email = "root@test.com";
+          firstName = adminFirstName;
+          lastName = adminLastName;
+        };
+
+
+        users = [
+          {
+            username = "user1";
+            fullName = "Mr. User 1";
+            email = "user1@example.com";
+            passwordFile = pkgs.writeText "user1pass" "user1pass";
+          }
+          {
+            username = "user2";
+            fullName = "Ms. User 2";
+            email = "user2@example.com";
+            passwordFile = pkgs.writeText "user2pass" "user2pass";
+          }
+        ];
       };
     };
-  };
 
-  testScript = ''
+    testScript = ''
       ${ builtins.readFile ../../lib/testing-lib.py }
 
       machine.wait_for_unit("multi-user.target")
@@ -51,6 +67,10 @@ pkgs.nixosTest {
         machine.send_chars("${adminPassword}\n")
         machine.wait_until_tty_matches(1, "Successfully authenticated as '${adminFirstName} ${adminLastName}', using 'Local Authentication'")
 
+      with subtest("users are correctly created"):
+        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q 'Mr. User 1 <user1@example.com>'")
+        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q 'Ms. User 2 <user2@example.com>'")
+
       with subtest("units are inactive on second boot"):
         machine.shutdown()
         machine.start()
@@ -59,4 +79,4 @@ pkgs.nixosTest {
         machine.fail("systemctl is-active --quiet install-osticket")
         machine.fail("systemctl is-active --quiet setup-users")
     '';
-}
+  }
