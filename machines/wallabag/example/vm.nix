@@ -2,14 +2,10 @@
 {
   imports = [
     ../default.nix
+    ../../../lib/nixos-shell-base.nix
   ];
 
   virtualisation.memorySize = "2048M";
-
-  environment.systemPackages = with pkgs; [
-    php74
-    php74Packages.composer
-  ];
 
   services.wallabag = {
     enable = true;
@@ -28,6 +24,6 @@
 
   virtualisation.qemu.networkingOptions = [
     "-net nic,netdev=user.0,model=virtio"
-    "-netdev user,id=user.0,hostfwd=tcp::8987-:80,hostfwd=tcp::8986-:443"
+    "-netdev user,id=user.0,hostfwd=tcp::80-:80,hostfwd=tcp::443-:443"
   ];
 }
