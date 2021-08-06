@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  directory = "/home/neuron";
+  path = "/var/www/osticket";
 in
 pkgs.nixosTest {
   name = "osTicket";
@@ -10,13 +10,12 @@ pkgs.nixosTest {
       ./default.nix
     ];
 
-    nix.useSandbox = false;
-    
     services.osticket = {
       enable = true;
 
       database.passwordFile = pkgs.writeText "dbpass" "dbpass";
       site.email = "site@test.com";
+      installation.path = path;
       
       admin = {
         username = "root";
@@ -29,17 +28,18 @@ pkgs.nixosTest {
   };
 
   testScript = ''
-      machine.wait_for_unit("default.target")
+      machine.wait_for_unit("multi-user.target")
 
-      with subtest("units activate only on first boot"):
+      with subtest("units are active"):
         machine.succeed("systemctl is-active --quiet deploy-osticket")
         machine.succeed("systemctl is-active --quiet install-osticket")
         machine.succeed("systemctl is-active --quiet setup-users")
 
+
+      with subtest("units are inactive on second boot"):
         machine.shutdown()
         machine.start()
-
-        machine.wait_for_unit("default.target")
+        machine.wait_for_unit("multi-user.target")
         machine.fail("systemctl is-active --quiet deploy-osticket")
         machine.fail("systemctl is-active --quiet install-osticket")
         machine.fail("systemctl is-active --quiet setup-users")
