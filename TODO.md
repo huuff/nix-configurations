@@ -28,7 +28,6 @@
 * Allow to add just a path string instead of a full object
 
 ## mkSSLModule
-* Test it with `nginx`
 * Look into redirecting `http` to `https`
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
