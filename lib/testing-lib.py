@@ -1,0 +1,11 @@
+def login(machine):
+    machine.wait_until_succeeds("pgrep -f 'agetty.*tty1'")
+    machine.succeed("useradd -m alice")
+    machine.succeed("(echo foobar; echo foobar) | passwd alice")
+    machine.wait_until_tty_matches(1, "login: ")
+    machine.send_chars("alice\n")
+    machine.wait_until_tty_matches(1, "login: alice")
+    machine.wait_until_succeeds("pgrep login")
+    machine.wait_until_tty_matches(1, "Password: ")
+    machine.send_chars("foobar\n")
+    machine.wait_until_succeeds("pgrep -u alice bash")

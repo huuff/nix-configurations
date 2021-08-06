@@ -30,6 +30,8 @@ pkgs.nixosTest {
   };
 
   testScript = ''
+      ${ builtins.readFile ../../lib/testing-lib.py }
+
       machine.wait_for_unit("multi-user.target")
 
       with subtest("units are active"):
@@ -37,18 +39,9 @@ pkgs.nixosTest {
         machine.succeed("systemctl is-active --quiet install-osticket")
         machine.succeed("systemctl is-active --quiet setup-users")
 
-      with subtest("admin can login"):
-        machine.wait_until_succeeds("pgrep -f 'agetty.*tty1'")
-        machine.succeed("useradd -m alice")
-        machine.succeed("(echo foobar; echo foobar) | passwd alice")
-        machine.wait_until_tty_matches(1, "login: ")
-        machine.send_chars("alice\n")
-        machine.wait_until_tty_matches(1, "login: alice")
-        machine.wait_until_succeeds("pgrep login")
-        machine.wait_until_tty_matches(1, "Password: ")
-        machine.send_chars("foobar\n")
-        machine.wait_until_succeeds("pgrep -u alice bash")
+      login(machine)
 
+      with subtest("admin can login"):
         machine.send_chars("${pkgs.php74}/bin/php ${path}/manage.php agent login\n")
         machine.wait_until_tty_matches(1, "Username: ")
         machine.send_chars("${adminUsername}\n")
