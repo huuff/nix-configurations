@@ -11,6 +11,7 @@
 * Add email options
 * Currently, I have a hack for `setup-users` to launch only on first boot. Manage to get `ConditionFirstBoot` to work in order to remove it.
 * Add more tests. I'm genuinely scared I'll break it.
+* I found out you can do all these cool things with `php manage.php`. Perhaps I could install that way instead of using curl? Create users there instead of inserting into the DB? I'm sure I at least can test that the admin can login using `php manage.php agent login`
 
 ## Jenkins
 * ON HOLD. I want to use `withCLI` in the Jenkins module of nixpkgs but it's not available in my version yet. Wait until it's stable? bump to 21.11pre? I realize I know nothing about the nixpkgs release scheme
