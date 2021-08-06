@@ -1,14 +1,20 @@
 { pkgs, ... }:
 let
   path = "/var/www/osticket";
-  adminUsername = "root";
-  adminPassword = "adminpass";
-  adminFirstName = "Firstname";
-  adminLastName = "Lastname";
-  user1FullName = "Mr. User 1";
-  user1Email = "user1@example.com";
-  user2FullName = "Ms. User 2";
-  user2Email = "user2@example.com";
+  admin = {
+    username = "root";
+    password = "adminpass";
+    firstName = "Firstname";
+    lastName = "Lastname";
+  };
+  user1 = {
+    fullName = "Mr. User 1";
+    email = "user1@example.com";
+  };
+  user2 = {
+    fullName = "Ms. User 2";
+    email = "user2@example.com";
+  };
 in
   pkgs.nixosTest {
     name = "osTicket";
@@ -26,25 +32,25 @@ in
         installation.path = path;
 
         admin = {
-          username = adminUsername;
-          passwordFile = pkgs.writeText "adminpass" adminPassword;
+          username = admin.username;
+          passwordFile = pkgs.writeText "adminpass" admin.password;
           email = "root@test.com";
-          firstName = adminFirstName;
-          lastName = adminLastName;
+          firstName = admin.firstName;
+          lastName = admin.lastName;
         };
 
 
         users = [
           {
             username = "user1";
-            fullName = user1FullName;
-            email = user1Email;
+            fullName = user1.fullName;
+            email = user1.email;
             passwordFile = pkgs.writeText "user1pass" "user1pass";
           }
           {
             username = "user2";
-            fullName = user2FullName;
-            email = user2Email;
+            fullName = user2.fullName;
+            email = user2.email;
             passwordFile = pkgs.writeText "user2pass" "user2pass";
           }
         ];
@@ -66,14 +72,14 @@ in
       with subtest("admin can login"):
         machine.send_chars("${pkgs.php74}/bin/php ${path}/manage.php agent login\n")
         machine.wait_until_tty_matches(1, "Username: ")
-        machine.send_chars("${adminUsername}\n")
+        machine.send_chars("${admin.username}\n")
         machine.wait_until_tty_matches(1, "Password: ")
-        machine.send_chars("${adminPassword}\n")
-        machine.wait_until_tty_matches(1, "Successfully authenticated as '${adminFirstName} ${adminLastName}', using 'Local Authentication'")
+        machine.send_chars("${admin.password}\n")
+        machine.wait_until_tty_matches(1, "Successfully authenticated as '${admin.firstName} ${admin.lastName}', using 'Local Authentication'")
 
       with subtest("users are correctly created"):
-        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q '${user1FullName} <${user1Email}>'")
-        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q '${user2FullName} <${user2Email}>'")
+        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q '${user1.fullName} <${user1.email}>'")
+        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q '${user2.fullName} <${user2.email}>'")
 
       with subtest("units are inactive on second boot"):
         machine.shutdown()
