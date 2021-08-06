@@ -64,6 +64,8 @@ in
             GRANT ALL PRIVILEGES ON ${cfg.database.name}.* TO '${cfg.database.user}'@${cfg.database.host};
           ''; 
 
+          wantedBy = [ "multi-user.target" ];
+
           unitConfig = {
             After = [ "mysql.service" ];
             Requires = [ "mysql.service" ];
