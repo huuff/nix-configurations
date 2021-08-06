@@ -1,7 +1,6 @@
 # TODO
 * Maybe Zammad? osTicket seems dated
 * A module or library for PHP + nginx, but I find it difficult since I just copypaste nginx configurations from the internet.
-* Turns out a lot of stuff breaks (wallabag, completely, maybe something in osticket) when I change the user in `installation-module` to a system user. Find out what it is (directory creation? shouldn't matter since I have ensure paths) because these users should definitely be system users.
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling

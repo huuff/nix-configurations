@@ -2,6 +2,9 @@
 { config, pkgs, ... }:
 rec {
 
+
+  fileFromStore = file: pkgs.writeText "${file}" (builtins.readFile file);
+
   passwd = rec {
     cat = file: "$(cat ${toString file})";
     bcrypt = string: ''$(${pkgs.apacheHttpd}/bin/htpasswd -nbB "" "${string}" | cut -d: -f2)'';
