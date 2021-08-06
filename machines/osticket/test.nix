@@ -3,6 +3,8 @@ let
   path = "/var/www/osticket";
   adminUsername = "root";
   adminPassword = "adminpass";
+  adminFirstName = "Firstname";
+  adminLastName = "Lastname";
 in
 pkgs.nixosTest {
   name = "osTicket";
@@ -23,8 +25,8 @@ pkgs.nixosTest {
         username = adminUsername;
         passwordFile = pkgs.writeText "adminpass" adminPassword;
         email = "root@test.com";
-        firstName = "Firstname";
-        lastName = "Lastname";
+        firstName = adminFirstName;
+        lastName = adminLastName;
       };
     };
   };
@@ -47,7 +49,7 @@ pkgs.nixosTest {
         machine.send_chars("${adminUsername}\n")
         machine.wait_until_tty_matches(1, "Password: ")
         machine.send_chars("${adminPassword}\n")
-        machine.wait_until_tty_matches(1, "Successfully authenticated as 'Firstname Lastname', using 'Local Authentication'")
+        machine.wait_until_tty_matches(1, "Successfully authenticated as '${adminFirstName} ${adminLastName}', using 'Local Authentication'")
 
       with subtest("units are inactive on second boot"):
         machine.shutdown()
