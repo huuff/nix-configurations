@@ -7,6 +7,7 @@ let
 in {
   imports = [
     ../default.nix
+    ../../../lib/nixos-shell-base.nix
   ];
 
   networking.firewall.allowedTCPPorts = [ 3306 ];

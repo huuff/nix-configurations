@@ -109,13 +109,6 @@ in {
         }
       ];
 
-
-    environment.systemPackages = with pkgs; [
-      # I'm using these two just for testing on nixos-shell
-      php74 
-      vim
-    ];
-
     networking.firewall = {
       allowedTCPPorts = [ 80 ];
     };
