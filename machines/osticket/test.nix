@@ -5,6 +5,10 @@ let
   adminPassword = "adminpass";
   adminFirstName = "Firstname";
   adminLastName = "Lastname";
+  user1FullName = "Mr. User 1";
+  user1Email = "user1@example.com";
+  user2FullName = "Ms. User 2";
+  user2Email = "user2@example.com";
 in
   pkgs.nixosTest {
     name = "osTicket";
@@ -33,14 +37,14 @@ in
         users = [
           {
             username = "user1";
-            fullName = "Mr. User 1";
-            email = "user1@example.com";
+            fullName = user1FullName;
+            email = user1Email;
             passwordFile = pkgs.writeText "user1pass" "user1pass";
           }
           {
             username = "user2";
-            fullName = "Ms. User 2";
-            email = "user2@example.com";
+            fullName = user2FullName;
+            email = user2Email;
             passwordFile = pkgs.writeText "user2pass" "user2pass";
           }
         ];
@@ -68,8 +72,8 @@ in
         machine.wait_until_tty_matches(1, "Successfully authenticated as '${adminFirstName} ${adminLastName}', using 'Local Authentication'")
 
       with subtest("users are correctly created"):
-        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q 'Mr. User 1 <user1@example.com>'")
-        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q 'Ms. User 2 <user2@example.com>'")
+        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q '${user1FullName} <${user1Email}>'")
+        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q '${user2FullName} <${user2Email}>'")
 
       with subtest("units are inactive on second boot"):
         machine.shutdown()
