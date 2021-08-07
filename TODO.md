@@ -4,6 +4,9 @@
 * Big module idea: One that simplifies creating and running a list of `systemd` units that run one after the other only on first activation.
 * `mkDefault` everything with low priority so it can be overrided by clients.
 
+## Testing library
+* A function to test that the output of a command equals something given
+
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling
 

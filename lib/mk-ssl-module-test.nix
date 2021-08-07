@@ -11,6 +11,7 @@ pkgs.nixosTest {
 
     services.test.ssl = {
       enable = true;
+      httpsOnly = true;
       inherit path;
     };
 
@@ -50,6 +51,10 @@ pkgs.nixosTest {
 
     with subtest("can access nginx with https"):
       machine.succeed("curl -k https://localhost")
+
+    with subtest("cannot access nginx without https"):
+      [ _, out ] = machine.execute("curl -s -o /dev/null -w '%{http_code}' http://localhost")
+      assert out == "301"
 
     with subtest("unit is not started if the certificate exists"):
       machine.systemctl("restart create-test-cert")
