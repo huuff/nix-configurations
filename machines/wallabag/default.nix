@@ -50,9 +50,18 @@ in
         description = "List of initial wallabag users";
       };
 
+      # FORCED to add this
+      domainName = mkOption {
+        type = str;
+        default = if config.services.wallabag.ssl.enable then "https://localhost" else "http://localhost";
+        description = "Domain name of the deployment";
+      };
+
     };
 
     config = mkIf cfg.enable {
+
+      networking.firewall.allowedTCPPorts = [ 80 ];
 
       systemd.services = {
       copy-wallabag = {
@@ -109,8 +118,8 @@ parameters:
     # with PostgreSQL and SQLite, you must set "utf8"
   database_charset: utf8mb4
 
-    # TODO: Make this configurable
-  domain_name: ${if cfg.ssl.enable then "https" else "http"}://$(${pkgs.curl}/bin/curl https://ipinfo.io/ip) # TODO: Fragile? And untestable
+  domain_name: ${cfg.domainName}
+  # TODO: Make this configurable
   server_name: "Your wallabag instance"
 
   mailer_transport:  smtp

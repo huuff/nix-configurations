@@ -11,6 +11,7 @@ in with myLib; {
 
   services.wallabag = {
     enable = true;
+    domainName = "http://localhost:8989";
     ssl.enable = false;
 
     database.passwordFile = fileFromStore ./dbpass;
