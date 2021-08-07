@@ -21,6 +21,8 @@ pkgs.nixosTest {
   };
 
   testScript = ''
+    ${ builtins.readFile ./testing-lib.py }
+
     machine.wait_for_unit("multi-user.target")
 
     with subtest("unit is active"):
@@ -31,16 +33,12 @@ pkgs.nixosTest {
       machine.succeed("[ -d ${path2} ]")
 
     with subtest("paths belong to their owners"):
-      [ _, out ] = machine.execute("stat -c '%U %G' ${path1}")
-      assert out == "user1 user1\n"
-      [ _, out ] = machine.execute("stat -c '%U %G' ${path2}")
-      assert out == "user2 user2\n"
+      outputs(machine, command="stat -c '%U %G' ${path1}", output = "user1 user1")
+      outputs(machine, command="stat -c '%U %G' ${path2}", output = "user2 user2")
 
     with subtest("paths have the stated permissions"):
-      [ _, out ] = machine.execute("stat -c '%a' ${path1}")
-      assert out == "644\n"
-      [ _, out ] = machine.execute("stat -c '%a' ${path2}")
-      assert out == "755\n"
+      outputs(machine, command="stat -c '%a' ${path1}", output="644")
+      outputs(machine, command="stat -c '%a' ${path2}", output="755")
 
     with subtest("the unit recreates the directories when one is deleted"):
       machine.succeed("rm -r ${path1}")

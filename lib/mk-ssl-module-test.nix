@@ -34,6 +34,8 @@ pkgs.nixosTest {
   };
 
   testScript = ''
+    ${ builtins.readFile ./testing-lib.py }
+
     machine.wait_for_unit("multi-user.target")
 
     with subtest("unit is active"):
@@ -54,8 +56,9 @@ pkgs.nixosTest {
       machine.succeed("curl -k https://localhost")
 
     with subtest("cannot access nginx without https"):
-      [ _, out ] = machine.execute("curl -s -o /dev/null -w '%{http_code}' http://localhost")
-      assert out == "301"
+      outputs(machine,
+              command="curl -s -o /dev/null -w '%{http_code}' http://localhost",
+              output="301")
 
     with subtest("unit is not started if the certificate exists"):
       machine.systemctl("restart create-test-cert")
