@@ -218,25 +218,15 @@ parameters:
         };
       };
 
-      # TODO: Is this the correct unit for installing dependencies?
-      setup-users = {
-        description = "Create default users";
-
-        script = 
-        let
-        insertUser = user: "php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile}";
-        in ''
-          echo '>>> Installing dependencies'
-          COMPOSER_MEMORY_LIMIT=-1 composer install | true
-          echo '>>> Disabling default "wallabag" user'
-          php bin/console fos:user:deactivate wallabag
-          echo '>>> Creating all users'
-          ${concatStringsSep "\n" (map (user: insertUser user) cfg.users)}
-          '';
-
-        wantedBy = [ "multi-user.target" ];
+      install-dependencies = {
+        description = "Running composer install";
 
         path = [ composerWithTidy phpWithTidy ];
+
+        script = ''
+          echo '>>> Installing dependencies'
+          COMPOSER_MEMORY_LIMIT=-1 composer install | true
+          '';
 
         serviceConfig = {
           User = cfg.installation.user;
@@ -248,6 +238,36 @@ parameters:
         unitConfig = {
           After = [ "install-wallabag.service" ];
           Requires = [ "install-wallabag.service" ];
+        };
+      };
+
+      setup-users = {
+        description = "Create default users";
+
+        script = 
+        let
+        insertUser = user: "php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile}";
+        in ''
+          echo '>>> Disabling default "wallabag" user'
+          php bin/console fos:user:deactivate wallabag
+          echo '>>> Creating all users'
+          ${concatStringsSep "\n" (map (user: insertUser user) cfg.users)}
+          '';
+
+        wantedBy = [ "multi-user.target" ];
+
+        path = [ phpWithTidy ];
+
+        serviceConfig = {
+          User = cfg.installation.user;
+          Type = "oneshot";
+          WorkingDirectory = cfg.installation.path;
+          RemainAfterExit = true;
+        };
+
+        unitConfig = {
+          After = [ "install-dependencies.service" ];
+          Requires = [ "install-dependencies.service" ];
         };
       };
     };
