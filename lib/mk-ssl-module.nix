@@ -23,6 +23,12 @@ in
           default = "/var/ssl";
           description = "Path of the generated certificate";
         };
+
+        httpsOnly = mkOption {
+          type = bool;
+          default = cfg.enable;
+          description = "Whether to redirect all http traffic to https";
+        };
       };
     };
 
@@ -30,8 +36,9 @@ in
 
       networking.firewall.allowedTCPPorts = [ 443 ];
 
-      services.nginx.virtualHosts.${name} = {
-        addSSL = true;
+      services.nginx.virtualHosts.${name} = mkIf config.services.nginx.enable {
+        addSSL = !cfg.httpsOnly;
+        forceSSL = cfg.httpsOnly;
         sslCertificate = "${cfg.path}/cert.pem";
         sslCertificateKey = "${cfg.path}/key.pem";
       };

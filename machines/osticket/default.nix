@@ -237,7 +237,7 @@ in {
           chmod 0666 ${cfg.installation.path}/include/ost-config.php
 
           echo ">>> Calling install script"
-          ${pkgs.curl}/bin/curl "localhost/setup/install.php" \
+          ${pkgs.curl}/bin/curl ${optionalString cfg.ssl.httpsOnly "-k "} "${if cfg.ssl.httpsOnly then "https" else "http"}://localhost/setup/install.php" \
             -F "s=install" \
             -F "name=${cfg.site.name}" \
             -F "email=${cfg.site.email}" \

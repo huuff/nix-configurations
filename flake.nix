@@ -22,7 +22,7 @@
       osticket = import ./machines/osticket;
     };
 
-    nixosTests = {
+    checks.${system} = {
       neuron = import ./machines/neuron/test.nix { inherit pkgs doOnRequest neuronPkg; };
       osticket = import ./machines/osticket/test.nix { inherit pkgs; };
 

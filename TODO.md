@@ -2,6 +2,7 @@
 * Maybe Zammad? osTicket seems dated
 * A module or library for PHP + nginx, but I find it difficult since I just copypaste nginx configurations from the internet.
 * Big module idea: One that simplifies creating and running a list of `systemd` units that run one after the other only on first activation.
+* `mkDefault` everything with low priority so it can be overrided by clients.
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling
@@ -25,10 +26,9 @@
 * What about auto-importing pocket?
 
 ## ensurePaths
-* Allow to add just a path string instead of a full object
+* Allow to add just a path string instead of a full set
 
 ## mkSSLModule
-* Look into redirecting `http` to `https`
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
 * Better permissions
