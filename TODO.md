@@ -6,6 +6,7 @@
 
 ## Testing library
 * A function to test that the output of a command equals something given
+* A similar one to just print it for debugging
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling
@@ -34,7 +35,7 @@
 ## mkSSLModule
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
-* Better permissions
+* I'm forcing SSL, but am I redirecting `http` to `https`?
 
 ## Mail/SNM
 * Give it some love

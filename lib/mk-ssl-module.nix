@@ -14,13 +14,13 @@ in
 
         user = mkOption {
           type = str;
-          default = "root";
+          default = if (builtins.hasAttr "installation" config.services.${name}) then config.services.${name}.installation.user else "root";
           description = "User that will own the certificate";
         };
 
         path = mkOption {
           type = oneOf [ path str ];
-          default = "/var/ssl";
+          default = "/etc/ssl/${name}";
           description = "Path of the generated certificate";
         };
 
@@ -43,13 +43,18 @@ in
         sslCertificateKey = "${cfg.path}/key.pem";
       };
       
-      services.ensurePaths = [ { path = cfg.path; } ];
+      services.ensurePaths = [ { 
+        path = cfg.path;
+        owner = cfg.user;
+      } ];
 
       systemd.services."create-${name}-cert" = {
         description = "Create a certificate for ${name}";
 
         script = ''
           ${pkgs.libressl}/bin/openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj '/CN=localhost'
+          chmod 644 cert.pem
+          chmod 640 key.pem
         '';
 
         wantedBy = [ "multi-user.target" ] ++ optional config.services.nginx.enable "nginx.service";

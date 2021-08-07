@@ -1,6 +1,6 @@
 { pkgs, ... }:
 let
-  path = "/var/ssl";
+  path = "/etc/ssl/test";
   nginxPath = "/var/www";
 in
 pkgs.nixosTest {
@@ -12,6 +12,7 @@ pkgs.nixosTest {
     services.test.ssl = {
       enable = true;
       httpsOnly = true;
+      user = "nginx";
       inherit path;
     };
 
@@ -43,7 +44,7 @@ pkgs.nixosTest {
       machine.succeed("[ -e ${path}/key.pem ]")
 
     with subtest("unit creates a new certificate if one is missing"):
-      machine.succeed("rm /var/ssl/*")
+      machine.succeed("rm ${path}/*")
       machine.systemctl("restart create-test-cert")
       machine.wait_for_unit("create-test-cert")
       machine.succeed("[ -e ${path}/cert.pem ]")
