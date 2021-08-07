@@ -53,13 +53,22 @@ in
       # FORCED to add this
       domainName = mkOption {
         type = str;
-        default = if config.services.wallabag.ssl.enable then "https://localhost" else "http://localhost";
+        default = if cfg.ssl.enable then "https://localhost" else "http://localhost";
         description = "Domain name of the deployment";
       };
 
     };
 
     config = mkIf cfg.enable {
+
+      assertions = [
+        # Since wallabag forces us to set a domain name and this will include whether it's
+        # http or https, if we choose https then http will not work.
+        {
+          assertion = cfg.ssl.enable -> cfg.ssl.httpsOnly;
+          message = "For wallabag, if SSL is enabled then ssl.httpsOnly must be true!";
+        }
+      ];
 
       networking.firewall.allowedTCPPorts = [ 80 ];
 

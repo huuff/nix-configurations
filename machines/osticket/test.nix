@@ -24,6 +24,8 @@ in
         ./default.nix
       ];
 
+      environment.systemPackages = [ pkgs.php74 ];
+
       services.osticket = {
         enable = true;
 
@@ -70,7 +72,7 @@ in
       login(machine)
 
       with subtest("admin can login"):
-        machine.send_chars("${pkgs.php74}/bin/php ${path}/manage.php agent login\n")
+        machine.send_chars("php ${path}/manage.php agent login\n")
         machine.wait_until_tty_matches(1, "Username: ")
         machine.send_chars("${admin.username}\n")
         machine.wait_until_tty_matches(1, "Password: ")
@@ -78,12 +80,11 @@ in
         machine.wait_until_tty_matches(1, "Successfully authenticated as '${admin.firstName} ${admin.lastName}', using 'Local Authentication'")
 
       with subtest("users are correctly created"):
-        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q '${user1.fullName} <${user1.email}>'")
-        machine.succeed("${pkgs.php74}/bin/php ${path}/manage.php user list | grep -q '${user2.fullName} <${user2.email}>'")
+        machine.succeed("php ${path}/manage.php user list | grep -q '${user1.fullName} <${user1.email}>'")
+        machine.succeed("php ${path}/manage.php user list | grep -q '${user2.fullName} <${user2.email}>'")
 
       with subtest("it's being served correctly"):
-        [ _, out ] = machine.execute("curl localhost")
-        assert "<h1>Welcome to the Support Center</h1>" in out
+        outputContains(machine, 'curl localhost', "<h1>Welcome to the Support Center</h1>")
 
       with subtest("units are inactive on second boot"):
         machine.shutdown()

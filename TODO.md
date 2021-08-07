@@ -8,7 +8,6 @@
 
 ## Testing library
 * Look into adding my functions as some kind of extension methods for `machine`
-* See if I can use `outputContains` somewhere else
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling
@@ -29,7 +28,6 @@
 * Backup options, there's nothing yet but it's pretty important
 * Get `install-wallabag` to run only on first boot
 * What about auto-importing pocket?
-* Assert that if SSL is enabled for wallabag, then it's `httpsOnly`
 
 ## ensurePaths
 * Allow to add just a path string instead of a full set
