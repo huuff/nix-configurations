@@ -118,7 +118,6 @@ in
           group = cfg.installation.user;
 
           virtualHosts.neuron = {
-            enableACME = false;
             root = "${cfg.installation.path}/.neuron/output";
             locations."/".extraConfig = ''
               index index.html index.htm;
