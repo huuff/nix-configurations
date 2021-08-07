@@ -23,7 +23,7 @@ in with myLib; {
       lastName = "Lastname";
     };
 
-    ssl.enable = true;
+    ssl.enable = false;
 
     database.passwordFile = fileFromStore ./dbpass;
 

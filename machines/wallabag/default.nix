@@ -110,7 +110,7 @@ parameters:
   database_charset: utf8mb4
 
     # TODO: Make this configurable
-  domain_name: ${if cfg.ssl.enable then "https" else "http"}://$(curl https://ipinfo.io/ip) # TODO: Fragile? And untestable
+  domain_name: ${if cfg.ssl.enable then "https" else "http"}://$(${pkgs.curl}/bin/curl https://ipinfo.io/ip) # TODO: Fragile? And untestable
   server_name: "Your wallabag instance"
 
   mailer_transport:  smtp

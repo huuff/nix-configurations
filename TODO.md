@@ -28,6 +28,7 @@
 * Get `install-wallabag` to run only on first boot
 * Test it, even though it's a pain to even run it in some computers
 * What about auto-importing pocket?
+* Ensure that if SSL is enabled for wallabag, then it's `httpsOnly`
 
 ## ensurePaths
 * Allow to add just a path string instead of a full set

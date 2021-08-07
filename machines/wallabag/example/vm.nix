@@ -11,7 +11,7 @@ in with myLib; {
 
   services.wallabag = {
     enable = true;
-    ssl.enable = true;
+    ssl.enable = false;
 
     database.passwordFile = fileFromStore ./dbpass;
 
