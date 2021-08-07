@@ -3,6 +3,7 @@
 * A module or library for PHP + nginx, but I find it difficult since I just copypaste nginx configurations from the internet.
 * Big module idea: One that simplifies creating and running a list of `systemd` units that run one after the other only on first activation.
 * `mkDefault` everything with low priority so it can be overrided by clients.
+* I'm making some efforts to get these to work for an installation with multiple modules at the same time, but does it? I've never tested.
 
 ## Testing library
 * A function to test that the output of a command equals something given
@@ -35,6 +36,7 @@
 ## mkSSLModule
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
+* Generate certificates for the name of the service.
 * I'm forcing SSL, but am I redirecting `http` to `https`?
 
 ## Mail/SNM
