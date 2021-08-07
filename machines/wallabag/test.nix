@@ -1,4 +1,4 @@
-{ pkgs, doOnRequest, neuronPkg, ... }:
+{ pkgs, ... }:
 let
   user1 = {
     name = "user1";
@@ -11,37 +11,45 @@ let
     email = "user2@example.com";
   };
   databasePassword = "dbpass";
+  path = "/var/lib/wallabag";
 in
-pkgs.nixosTest {
-  name = "wallabag";
+  pkgs.nixosTest {
+    name = "wallabag";
 
-  machine = { pkgs, ... }: {
-    imports = [ ./default.nix ];
+    machine = { pkgs, ... }: {
+      imports = [ ./default.nix ];
 
-    services.wallabag = {
+      environment.systemPackages = [ pkgs.php74 ];
+
       services.wallabag = {
         enable = true;
         ssl.enable = false;
 
-        database.passwordFile = pkgs.writeText databasePassword;
+        database.passwordFile = pkgs.writeText "dbpass" databasePassword;
+
+        installation.path = path;
 
         users = [
           {
             username = user1.name;
-            passwordFile = pkgs.writeText user1.pass;
+            passwordFile = pkgs.writeText "user1pass" user1.pass;
             email = user1.email;
           }
           {
             username = user2.name;
-            passwordFile = pkgs.writeText user2pass;
+            passwordFile = pkgs.writeText "user1pass" user2.pass;
             email = user2.email;
           }
         ];
       };
     };
-  };
 
-  testScript = ''
+    testScript = ''
+      ${ builtins.readFile ../../lib/testing-lib.py }
+
+      def listUsers():
+        return "cd ${path} && php bin/console wallabag:user:list | tr -s ' '"
+
       machine.wait_for_unit("multi-user.target")
 
       with subtest("units are active"):
@@ -51,10 +59,15 @@ pkgs.nixosTest {
         machine.succeed("systemctl is-active --quiet setup-users")
 
       with subtest("nginx is serving wallabag"):
-        [ _, out ] = machine.execute('curl localhost')
-        assert '<title>Welcome to wallabag! – wallabag</title>' in out
+        outputContains(machine,
+                       command='curl http://localhost/login',
+                       output='<title>Welcome to wallabag! – wallabag</title>')
 
-      with subtest("default user is correctly deactivated"):
-      # TODO 
-  '';
-}
+      with subtest("default user is deactivated"):
+        outputContains(machine, command=listUsers(), output="wallabag wallabag@wallabag.io no yes")
+
+      with subtest("users were created"):
+        outputContains(machine, command=listUsers(), output="user1 user1@example.com yes no")
+        outputContains(machine, command=listUsers(), output="user2 user2@example.com yes no")
+    '';
+  }

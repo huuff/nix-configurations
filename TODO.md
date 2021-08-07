@@ -4,9 +4,11 @@
 * Big module idea: One that simplifies creating and running a list of `systemd` units that run one after the other only on first activation.
 * `mkDefault` everything with low priority so it can be overrided by clients.
 * I'm making some efforts to get these to work for an installation with multiple modules at the same time, but does it? I've never tested.
+* In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
 
 ## Testing library
 * Look into adding my functions as some kind of extension methods for `machine`
+* See if I can use `outputContains` somewhere else
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling
@@ -26,9 +28,8 @@
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important
 * Get `install-wallabag` to run only on first boot
-* Test it, even though it's a pain to even run it in some computers
 * What about auto-importing pocket?
-* Ensure that if SSL is enabled for wallabag, then it's `httpsOnly`
+* Assert that if SSL is enabled for wallabag, then it's `httpsOnly`
 
 ## ensurePaths
 * Allow to add just a path string instead of a full set

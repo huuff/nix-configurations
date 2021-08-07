@@ -15,6 +15,11 @@ def outputs(machine, command, output):
     if (out != output and out != f'{output}\n'):
         raise AssertionError(f'Expected: {output} Got: {out}')
 
+def outputContains(machine, command, output):
+    [ _, out ] = machine.execute(command)
+    if (output not in out):
+        raise AssertionError(f'The string {output} is not in \n{out}\n')
+
 def printOutput(machine, command):
     [ _, out ] = machine.execute(command)
     print(out)

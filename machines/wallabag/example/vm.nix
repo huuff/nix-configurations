@@ -9,10 +9,15 @@ in with myLib; {
 
   virtualisation.memorySize = "2048M";
 
+  environment.systemPackages = with pkgs; [
+    php74
+    php74Packages.composer
+  ];
+
   services.wallabag = {
     enable = true;
-    domainName = "http://localhost:8989";
-    ssl.enable = false;
+    domainName = "https://localhost:8988";
+    ssl.enable = true;
 
     database.passwordFile = fileFromStore ./dbpass;
 

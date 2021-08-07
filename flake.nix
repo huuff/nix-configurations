@@ -24,6 +24,7 @@
 
     checks.${system} = {
       neuron = import ./machines/neuron/test.nix { inherit pkgs doOnRequest neuronPkg; };
+      wallabag = import ./machines/wallabag/test.nix { inherit pkgs; };
       osticket = import ./machines/osticket/test.nix { inherit pkgs; };
 
       ensurePaths = import ./lib/ensure-paths-test.nix { inherit pkgs; };
