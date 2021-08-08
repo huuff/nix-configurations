@@ -49,7 +49,9 @@ let
     };
   };
 
-  mkFirst = {
+  # This creates a unit that is required by all others, running only if the "lock" does not exist
+  # Therefore, if the "lock" exists (which means the initialization is complete) then nothing will run
+  firstUnit = {
     name = "start-${name}-initialization";
 
     value = {
@@ -73,8 +75,8 @@ let
   # This creates a new unit that satisfies the following:
   # * Is after and requires all units in init.
   # * Is wanted by multi-user target, so it will be auto-started and propagate to all others.
-  # * It creates a file and runs only when it's not there. So it runs only once.
-  mkLast = unit: after unit {
+  # * It creates a file that will signify the end of the initialization (the "lock")
+  lastUnit = {
     name = "finish-${name}-initialization";
 
     value = {
@@ -100,10 +102,10 @@ let
     nextCurrent = head unorderedYet;
   in
       if (length unorderedYet) == 0
-      then alreadyOrdered ++ [ (mkLast current) ]
+      then alreadyOrdered ++ [ (after current lastUnit) ]
       else orderUnitsRec (nextCurrent) (alreadyOrdered ++ [ (after current nextCurrent) ]) (tail unorderedYet);
 
-  orderUnits = units: orderUnitsRec (mkFirst) [mkFirst] (units);
+  orderUnits = units: orderUnitsRec (firstUnit) [firstUnit] (units);
 
 in  
   {
