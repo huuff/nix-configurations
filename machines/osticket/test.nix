@@ -85,13 +85,5 @@ in
 
       with subtest("it's being served correctly"):
         outputContains(machine, 'curl localhost', "<h1>Welcome to the Support Center</h1>")
-
-      with subtest("units are inactive on second boot"):
-        machine.shutdown()
-        machine.start()
-        machine.wait_for_unit("multi-user.target")
-        machine.fail("systemctl is-active --quiet deploy-osticket")
-        machine.fail("systemctl is-active --quiet install-osticket")
-        machine.fail("systemctl is-active --quiet setup-users")
     '';
   }

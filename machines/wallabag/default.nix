@@ -33,6 +33,7 @@ in
       (import ../../lib/mk-database-module.nix "wallabag")
       (import ../../lib/mk-ssl-module.nix "wallabag")
       (import ../../lib/mk-installation-module.nix "wallabag")
+      (import ../../lib/mk-init-module.nix "wallabag")
     ];
 
     options.services.wallabag = with types; {
@@ -72,48 +73,26 @@ in
 
       networking.firewall.allowedTCPPorts = [ 80 ];
 
-      systemd.services = {
-      copy-wallabag = {
+    services.wallabag.initialization = [
+      {
+        name = "copy-wallabag";
         description = "Copy wallabag to final directory and setting permissions for installation";
-
         script = ''
           echo '>>> Copying all wallabag files from the store to ${cfg.installation.path}'
           cp -r ${cfg.package}/* ${cfg.installation.path}
           echo '>>> Setting write permissions to ${cfg.installation.path}'
           chmod -R u+w ${cfg.installation.path}
-        '';
+          '';
+        extraDeps = [ "ensure-paths.service" ];
+      }
 
-        serviceConfig = {
-          User = cfg.installation.user;
-          Type = "oneshot";
-          WorkingDirectory = cfg.installation.path;
-          RemainAfterExit = true;
-        };
-
-        unitConfig = {
-          ConditionDirectoryNotEmpty = "!${cfg.installation.path}";
-          After = [ "ensure-paths.service" ];
-          Requires = [ "ensure-paths.service" ];
-        };
-      };
-
-      create-parameters = {
+      {
+        name = "create-parameters";
         description = "Create parameters.yml for installation";
-
-        script =
+        script = 
         let 
-          parameters = ''
+            parameters = ''
 parameters:
-  # Uncomment these settings or manually update your parameters.yml
-  # to use docker-compose
-  #
-  # database_driver: %env.database_driver%
-  # database_host: %env.database_host%
-  # database_port: %env.database_port%
-  # database_name: %env.database_name%
-  # database_user: %env.database_user%
-  # database_password: %env.database_password%
-
   database_driver: pdo_mysql
   database_host: 127.0.0.1
   database_port: ~
@@ -178,108 +157,46 @@ parameters:
 
     # sentry logging
   sentry_dsn: ~
-            '';
-        in
-        ''
+          '';
+          in ''
           rm ${cfg.installation.path}/app/config/parameters.yml
           echo "${parameters}" >> ${cfg.installation.path}/app/config/parameters.yml
-        '';
+            '';
+      }
 
-        serviceConfig = {
-          User = cfg.installation.user;
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
-
-        unitConfig = {
-          After = [ "copy-wallabag.service" ];
-          Requires = [ "copy-wallabag.service"];
-        };
-      };
-
-      install-wallabag = {
+      {
+        name = "install-wallabag";
         description = "Install wallabag";
-
         script = ''
           make clean
           make install
-        ''; 
-
-        wantedBy = [ "multi-user.target" ];
-
-        path = with pkgs; [ 
-          gnumake
-          bash
-          composerWithTidy
-          phpWithTidy
-        ];
-
-        serviceConfig = {
-          User = cfg.installation.user;
-          Type = "oneshot";
-          WorkingDirectory = cfg.installation.path;
-          RemainAfterExit = true;
-        };
-
-        unitConfig = {
-          After = [ "create-parameters.service" "setup-wallabag-db.service" ];
-          Requires = [ "create-parameters.service" "setup-wallabag-db.service" ];
-        };
-      };
-
-      install-dependencies = {
-        description = "Running composer install";
-
-        path = [ composerWithTidy phpWithTidy ];
-
-        script = ''
-          echo '>>> Installing dependencies'
-          COMPOSER_MEMORY_LIMIT=-1 composer install | true
           '';
+        path = with pkgs; [ gnumake bash composerWithTidy phpWithTidy ];
+        extraDeps = [ "setup-wallabag-db.service" ];
+      }
 
-        serviceConfig = {
-          User = cfg.installation.user;
-          Type = "oneshot";
-          WorkingDirectory = cfg.installation.path;
-          RemainAfterExit = true;
-        };
+      {
+        name = "install-dependencies";
+        description = "Run composer install";
+        script = "COMPOSER_MEMORY_LIMIT=-1 composer install || true";
+        path = [ composerWithTidy phpWithTidy ];
+      }
 
-        unitConfig = {
-          After = [ "install-wallabag.service" ];
-          Requires = [ "install-wallabag.service" ];
-        };
-      };
-
-      setup-users = {
+      {
+        name = "setup-users";
         description = "Create default users";
-
         script = 
         let
-        insertUser = user: "php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile}";
+          insertUser = user: "php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile}";
         in ''
           echo '>>> Disabling default "wallabag" user'
           php bin/console fos:user:deactivate wallabag
           echo '>>> Creating all users'
           ${concatStringsSep "\n" (map (user: insertUser user) cfg.users)}
           '';
-
-        wantedBy = [ "multi-user.target" ];
-
         path = [ phpWithTidy ];
-
-        serviceConfig = {
-          User = cfg.installation.user;
-          Type = "oneshot";
-          WorkingDirectory = cfg.installation.path;
-          RemainAfterExit = true;
-        };
-
-        unitConfig = {
-          After = [ "install-dependencies.service" ];
-          Requires = [ "install-dependencies.service" ];
-        };
-      };
-    };
+      }
+    ];
 
     services.nginx = {
       enable = true;

@@ -52,6 +52,7 @@ let
       User = initModule.user;
       Type = "oneshot";
       RemainAfterExit = true;
+      WorkingDirectory = mkIf (hasAttr "installation" config.services.${name}) config.services.${name}.installation.path;
     };
 
     unitConfig = {
