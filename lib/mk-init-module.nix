@@ -18,7 +18,7 @@ let
 
       user = mkOption {
         type = str;
-        default = if (builtins.hasAttr "installation" config.services.${name}) then config.services.${name}.installation.user else null;
+        default = if (builtins.hasAttr "installation" config.services.${name}) then config.services.${name}.installation.user else "root";
         description = "User that will run the unit";
       };
 
@@ -29,8 +29,9 @@ let
     };
   };
 
-  initModuleToUnit = initModule: nameValuePait initModule.name {
-      inherit script description;
+  initModuleToUnit = initModule: nameValuePair initModule.name {
+    script = initModule.script;
+    description = initModule.description;
 
       serviceConfig = {
         User = initModule.user;
@@ -46,7 +47,18 @@ let
     };
   };
 
-  foldl1 = f: list: foldl (head list) (tail list);
+  foldl1 = f: list: foldl f (head list) (tail list);
+
+  orderUnits = let
+    orderUnitsAux = current: alreadyOrdered: unorderedYet: 
+      if unorderedYet == []
+      then alreadyOrdered
+      else
+        let
+          nextCurrent = head unorderedYet;
+        in
+          orderUnitsAux (nextCurrent) (alreadyOrdered ++ [(after current nextCurrent)]) (tail unorderedYet);
+    in units: orderUnitsAux (head units) [(head units)] (tail units);
 
   # Make the last unit so that it's started automatically, thus propagating
   # to all the previous ones.
@@ -57,7 +69,7 @@ in
   {
     options = {
       services.${name}.initialization = mkOption {
-        type = (types) listOf initModule;
+        type = types.listOf initModule;
         default = [];
         description = "Each of the scripts to run for provisioning, in the required order";
       };
@@ -66,9 +78,9 @@ in
     config = {
       systemd.services = 
       let
-        unorderedUnits = map initModuleToUnit cfg;
-        orderedUnits = foldl1 (after) unorderedUnits;
-        autoStartedUnits = (init orderedUnits) ++ (mkLast (last orderedUnits));
+        unorderedUnits = traceVal (map initModuleToUnit cfg);
+        orderedUnits = traceVal (orderUnits (unorderedUnits));
+        autoStartedUnits = (init orderedUnits) ++ [(mkLast (last orderedUnits))];
       in listToAttrs autoStartedUnits;
     };
   }

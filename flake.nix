@@ -31,6 +31,7 @@
       mkSSLModule = import ./lib/mk-ssl-module-test.nix { inherit pkgs; };
       mkInstallationModule = import ./lib/mk-installation-module-test.nix { inherit pkgs; };
       mkDatabaseModule = import ./lib/mk-database-module-test.nix { inherit pkgs; };
+      mkInitModule = import ./lib/mk-init-test.nix { inherit pkgs; };
     };
   };
 
