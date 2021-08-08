@@ -34,8 +34,6 @@
 
 ## mkInitModule
 * Use it in my modules
-* Allow to add paths
-* Allow to add extra dependencies
 * Add an intermediate "lock" for each unit, so these can show at what point of the initialization we are, and thus, restart from an intermediate point instead of from the beginning.
 
 ## mkSSLModule

@@ -18,6 +18,18 @@ let
         description = "Description of the unit";
       };
 
+      path = mkOption {
+        type = listOf package;
+        default = [];
+        description = "Packages to add to the path of the unit";
+      };
+
+      extraDeps = mkOption {
+        type = listOf str;
+        default = [];
+        description = "Services that are also dependencies of the unit";
+      };
+
       user = mkOption {
         type = str;
         default = if (builtins.hasAttr "installation" config.services.${name}) then config.services.${name}.installation.user else "root";
@@ -34,18 +46,24 @@ let
   initModuleToUnit = initModule: nameValuePair initModule.name {
     script = initModule.script;
     description = initModule.description;
+    path = initModule.path;
 
-      serviceConfig = {
-        User = initModule.user;
-        Type = "oneshot";
-        RemainAfterExit = true;
-      };
+    serviceConfig = {
+      User = initModule.user;
+      Type = "oneshot";
+      RemainAfterExit = true;
+    };
+
+    unitConfig = {
+      After = initModule.extraDeps;
+      BindsTo = initModule.extraDeps;
+    };
   };
 
   after = first: second: recursiveUpdate second {
     value.unitConfig = {
-      After = [ "${first.name}.service" ];
-      BindsTo = [ "${first.name}.service" ];
+      After = [ "${first.name}.service" ] ++ second.value.unitConfig.After;
+      BindsTo = [ "${first.name}.service" ] ++ second.value.unitConfig.BindsTo;
     };
   };
 
@@ -94,6 +112,12 @@ let
         Type = "oneshot";
         RemainAfterExit = true;
       };
+
+      # Just so after function works
+      unitConfig = {
+        After = [];
+        BindsTo = [];
+      };
     };
   };
 
@@ -102,9 +126,9 @@ let
   let 
     nextCurrent = head unorderedYet;
   in
-      if (length unorderedYet) == 0
-      then alreadyOrdered ++ [ (after current lastUnit) ]
-      else orderUnitsRec (nextCurrent) (alreadyOrdered ++ [ (after current nextCurrent) ]) (tail unorderedYet);
+  if (length unorderedYet) == 0
+  then alreadyOrdered ++ [ (after current lastUnit) ]
+  else orderUnitsRec (nextCurrent) (alreadyOrdered ++ [ (after current nextCurrent) ]) (tail unorderedYet);
 
   # TODO: a better name
   orderUnits = units: orderUnitsRec (firstUnit) [firstUnit] (units);
