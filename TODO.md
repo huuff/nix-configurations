@@ -36,6 +36,7 @@
 * Test order
 * Allow to add paths
 * Test that the units are not started on reset
+* Allow to add extra dependencies
 
 ## mkSSLModule
 * Option to add own certificate
