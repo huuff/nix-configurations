@@ -24,17 +24,18 @@ let
         description = "File containing the bcrypt hash of the user's password";
       };
 
-       email = mkOption {
+      email = mkOption {
         type = str;
         description = "E-mail address of the user";
-       };
       };
     };
+  };
 in {
-    imports = [
-        (import ../../lib/mk-database-module.nix "osticket")
-        (import ../../lib/mk-ssl-module.nix "osticket")
-        (import ../../lib/mk-installation-module.nix "osticket")
+  imports = [
+    (import ../../lib/mk-database-module.nix "osticket")
+    (import ../../lib/mk-ssl-module.nix "osticket")
+    (import ../../lib/mk-installation-module.nix "osticket")
+    (import ../../lib/mk-init-module.nix "osticket")
     ];
 
     options.services.osticket = with types; {
@@ -87,9 +88,9 @@ in {
       };
 
       users = mkOption {
-          type = listOf userModule;
-          default = [];
-          description = "List of initial osTicket users";
+        type = listOf userModule;
+        default = [];
+        description = "List of initial osTicket users";
       };
     };
 
@@ -109,9 +110,9 @@ in {
         }
       ];
 
-    networking.firewall = {
-      allowedTCPPorts = [ 80 ];
-    };
+      networking.firewall = {
+        allowedTCPPorts = [ 80 ];
+      };
 
     # is this useful for anything?
     systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.installation.path ];
@@ -124,52 +125,52 @@ in {
       virtualHosts.osticket = {
         root = cfg.installation.path;
         extraConfig = ''
-        set $path_info "";
+          set $path_info "";
 
-        location ~ /include {
+          location ~ /include {
             deny all;
             return 403;
-        }
+          }
 
-        if ($request_uri ~ "^/api(/[^\?]+)") {
+          if ($request_uri ~ "^/api(/[^\?]+)") {
             set $path_info $1;
-        }
+          }
 
-        location ~ ^/api/(?:tickets|tasks).*$ {
+          location ~ ^/api/(?:tickets|tasks).*$ {
             try_files $uri $uri/ /api/http.php?$query_string;
-        }
+          }
 
-        if ($request_uri ~ "^/scp/.*\.php(/[^\?]+)") {
+          if ($request_uri ~ "^/scp/.*\.php(/[^\?]+)") {
             set $path_info $1;
-        }
+          }
 
-        if ($request_uri ~ "^/.*\.php(/[^\?]+)") {
+          if ($request_uri ~ "^/.*\.php(/[^\?]+)") {
             set $path_info $1;
-        }
+          }
 
-        location ~ ^/scp/ajax.php/.*$ {
+          location ~ ^/scp/ajax.php/.*$ {
             try_files $uri $uri/ /scp/ajax.php?$query_string;
-        }
+          }
 
-        location ~ ^/ajax.php/.*$ {
+          location ~ ^/ajax.php/.*$ {
             try_files $uri $uri/ /ajax.php?$query_string;
-        }
+          }
 
-        location /scp {
+          location /scp {
             index /scp/admin.php;
-        }
+          }
 
-        location / {
+          location / {
             index index.php;
-        }
+          }
 
-        location ~ \.php$ {
+          location ~ \.php$ {
             fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
             include ${pkgs.nginx}/conf/fastcgi_params;
             include ${pkgs.nginx}/conf/fastcgi.conf;
             fastcgi_param PATH_INFO $path_info;
             fastcgi_pass unix:${config.services.phpfpm.pools.osTicket.socket};
-        }
+          }
         '';
       };
     };
@@ -198,39 +199,23 @@ in {
       };
     };
 
-    systemd.services = {
-      deploy-osticket = {
+    services.osticket.initialization = [
+      {
+        name = "deploy-osticket";
         description = "Copy osTicket files and set permissions";
-
         script = ''
-            echo ">>> Copying files to ${cfg.installation.path}"
-            cp -r ${cfg.package}/* ${cfg.installation.path}
+        echo ">>> Copying files to ${cfg.installation.path}"
+        cp -r ${cfg.package}/* ${cfg.installation.path}
 
             echo ">>> Setting permissions for serving"
             find ${cfg.installation.path} -type d -print0 | xargs -0 chmod 0755
             find ${cfg.installation.path} -type f -print0 | xargs -0 chmod 0644
         '';
-
-        unitConfig = {
-          ConditionDirectoryNotEmpty = "!${cfg.installation.path}";
-        };
-
-        wants = [ "ensure-paths.service" ];
-
-        unitConfig = {
-          After = [ "ensure-paths.service" ];
-        };
-
-        serviceConfig = {
-          User = cfg.installation.user;
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
-      };
-
-      install-osticket = {
+        extraDeps = [ "ensure-paths.service" ];
+      }
+      {
+        name = "install-osticket";
         description = "Run osTicket installation script and cleanup";
-
         script = ''
           echo ">>> Setting config file"
           mv ${cfg.installation.path}/include/ost-sampleconfig.php ${cfg.installation.path}/include/ost-config.php
@@ -255,69 +240,34 @@ in {
           echo ">>> Performing post-install cleanup"
           chmod 0644 ${cfg.installation.path}/include/ost-config.php
           rm -r ${cfg.installation.path}/setup
-
-          # TODO: This is a temporary hack for running setup-users only on first boot
-          # remove it when I get ConditionFirstBoot to work
-          touch ${cfg.installation.path}/setup-users
         '';
-
-        unitConfig = {
-          After = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
-          Requires = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
-          ConditionPathExists = "${cfg.installation.path}/setup";
-        };
-
-        serviceConfig = {
-          User = cfg.installation.user;
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
-      };
-
-      setup-users =
-      let
-        updateAdminPass = ''
-          UPDATE ${cfg.database.prefix}staff SET passwd='${myLib.passwd.catAndBcrypt cfg.admin.passwordFile}' WHERE staff_id=1;
-        '';
-        insertUser = user: ''
-          START TRANSACTION;
-          INSERT INTO ${cfg.database.prefix}user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.fullName}', NOW(), NOW());
-          SELECT LAST_INSERT_ID() INTO @user_id;
-          INSERT INTO ${cfg.database.prefix}user_email (user_id, address) VALUES (@user_id, '${user.email}');
-          SELECT LAST_INSERT_ID() INTO @email_id;
-          UPDATE ${cfg.database.prefix}user SET default_email_id=@email_id WHERE id=@user_id;
-          INSERT INTO ${cfg.database.prefix}user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.passwd.catAndBcrypt user.passwordFile}');
-          COMMIT;
-          '';
-          userToDML = map (user: (myLib.db.execDML cfg (insertUser user))) cfg.users;
-      in {
+        extraDeps = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
+      }
+      {
+        name = "setup-users";
         description = "Create initial osTicket users";
 
-        script = ''
-          ${myLib.db.execDML cfg updateAdminPass}
-
-          ${concatStringsSep "\n" userToDML}
-
-          # TODO: Remove it when I get ConditionFirstBoot to work
-          rm ${cfg.installation.path}/setup-users
+        script = let
+          updateAdminPass = ''
+            UPDATE ${cfg.database.prefix}staff SET passwd='${myLib.passwd.catAndBcrypt cfg.admin.passwordFile}' WHERE staff_id=1;
           '';
+          insertUser = user: ''
+            START TRANSACTION;
+            INSERT INTO ${cfg.database.prefix}user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.fullName}', NOW(), NOW());
+            SELECT LAST_INSERT_ID() INTO @user_id;
+            INSERT INTO ${cfg.database.prefix}user_email (user_id, address) VALUES (@user_id, '${user.email}');
+            SELECT LAST_INSERT_ID() INTO @email_id;
+            UPDATE ${cfg.database.prefix}user SET default_email_id=@email_id WHERE id=@user_id;
+            INSERT INTO ${cfg.database.prefix}user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.passwd.catAndBcrypt user.passwordFile}');
+            COMMIT;
+          '';
+          userToDML = map (user: (myLib.db.execDML cfg (insertUser user))) cfg.users;
+        in ''
+          ${myLib.db.execDML cfg updateAdminPass}
+          ${concatStringsSep "\n" userToDML}
+        '';
+      }
+    ];
 
-        wantedBy = [ "multi-user.target" ];
-
-        unitConfig = {
-          After = [ "install-osticket.service" ];
-          Requires = [ "install-osticket.service" ];
-          ConditionPathExists = "${cfg.installation.path}/setup-users";
-        };
-
-
-        serviceConfig = {
-          User = cfg.installation.user;
-          Type = "oneshot";
-          RemainAfterExit = "true";
-        };
-      };
-
-    };
   };
 }
