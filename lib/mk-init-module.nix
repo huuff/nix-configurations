@@ -47,24 +47,23 @@ let
     };
   };
 
-  foldl1 = f: list: foldl f (head list) (tail list);
-
-  orderUnits = let
-    orderUnitsAux = current: alreadyOrdered: unorderedYet: 
-      if unorderedYet == []
-      then alreadyOrdered
-      else
-        let
-          nextCurrent = head unorderedYet;
-        in
-          orderUnitsAux (nextCurrent) (alreadyOrdered ++ [(after current nextCurrent)]) (tail unorderedYet);
-    in units: orderUnitsAux (head units) [(head units)] (tail units);
-
-  # Make the last unit so that it's started automatically, thus propagating
-  # to all the previous ones.
   mkLast = unit: recursiveUpdate unit {
     value.wantedBy = [ "multi-user.target" ];
   };
+
+  orderUnitsRec = current: alreadyOrdered: unorderedYet: 
+  let 
+    nextCurrent = head unorderedYet;
+    orderedCurrent = after current nextCurrent;
+  in
+      if (length unorderedYet) == 1
+      then alreadyOrdered ++ [ (mkLast orderedCurrent) ]
+      else orderUnitsRec (nextCurrent) (alreadyOrdered ++ [ orderedCurrent ]) (tail unorderedYet);
+
+  orderUnits = units: orderUnitsRec (head units) [(head units)] (tail units);
+
+  # Make the last unit so that it's started automatically, thus propagating
+  # to all the previous ones.
 in  
   {
     options = {
@@ -80,7 +79,6 @@ in
       let
         unorderedUnits = map initModuleToUnit cfg;
         orderedUnits = orderUnits (unorderedUnits);
-        autoStartedUnits = (init orderedUnits) ++ [(mkLast (last orderedUnits))];
-      in listToAttrs autoStartedUnits;
+      in (listToAttrs orderedUnits);
     };
   }
