@@ -43,7 +43,7 @@ let
   after = first: second: recursiveUpdate second {
     value.unitConfig = {
       After = [ "${first.name}.service" ];
-      Requires = [ "${second.name}.service" ];
+      Requires = [ "${first.name}.service" ];
     };
   };
 
@@ -78,8 +78,8 @@ in
     config = {
       systemd.services = 
       let
-        unorderedUnits = traceVal (map initModuleToUnit cfg);
-        orderedUnits = traceVal (orderUnits (unorderedUnits));
+        unorderedUnits = map initModuleToUnit cfg;
+        orderedUnits = orderUnits (unorderedUnits);
         autoStartedUnits = (init orderedUnits) ++ [(mkLast (last orderedUnits))];
       in listToAttrs autoStartedUnits;
     };
