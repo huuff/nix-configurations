@@ -47,23 +47,46 @@ let
     };
   };
 
-  mkLast = unit: recursiveUpdate unit {
-    value.wantedBy = [ "multi-user.target" ];
+  # This creates a new unit that satisfies the following:
+  # * Is after and requires all units in init.
+  # * Is wanted by multi-user target, so it will be auto-started and propagate to all others.
+  # * It creates a file and runs only when it's not there. So it runs only once.
+  mkLast = unit: after unit {
+    name = "finish-${name}-initialization";
+
+    value =
+    let
+      path = "/etc/inits/${name}";
+    in
+      {
+      script = ''
+        mkdir -p /etc/inits
+        touch ${path}
+        chmod 600 ${path}
+      '';
+
+      wantedBy = [ "multi-user.target" ];
+
+      serviceConfig = {
+        User = "root";
+      };
+
+      unitConfig = {
+        ConditionPathExists = "!${path}"; 
+      };
+    };
   };
 
   orderUnitsRec = current: alreadyOrdered: unorderedYet: 
   let 
     nextCurrent = head unorderedYet;
-    orderedCurrent = after current nextCurrent;
   in
-      if (length unorderedYet) == 1
-      then alreadyOrdered ++ [ (mkLast orderedCurrent) ]
-      else orderUnitsRec (nextCurrent) (alreadyOrdered ++ [ orderedCurrent ]) (tail unorderedYet);
+      if (length unorderedYet) == 0
+      then alreadyOrdered ++ [ (mkLast current) ]
+      else orderUnitsRec (nextCurrent) (alreadyOrdered ++ [ (after current nextCurrent) ]) (tail unorderedYet);
 
   orderUnits = units: orderUnitsRec (head units) [(head units)] (tail units);
 
-  # Make the last unit so that it's started automatically, thus propagating
-  # to all the previous ones.
 in  
   {
     options = {
