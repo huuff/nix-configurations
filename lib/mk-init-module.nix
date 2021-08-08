@@ -97,6 +97,7 @@ let
     };
   };
 
+  # TODO: a better name, documentation
   orderUnitsRec = current: alreadyOrdered: unorderedYet: 
   let 
     nextCurrent = head unorderedYet;
@@ -105,6 +106,7 @@ let
       then alreadyOrdered ++ [ (after current lastUnit) ]
       else orderUnitsRec (nextCurrent) (alreadyOrdered ++ [ (after current nextCurrent) ]) (tail unorderedYet);
 
+  # TODO: a better name
   orderUnits = units: orderUnitsRec (firstUnit) [firstUnit] (units);
 
 in  
