@@ -33,9 +33,9 @@
 * Allow to add just a path string instead of a full set
 
 ## mkInitModule
+* Use it in my modules
 * Test order
 * Allow to add paths
-* Test that the units are not started on reset
 * Allow to add extra dependencies
 
 ## mkSSLModule

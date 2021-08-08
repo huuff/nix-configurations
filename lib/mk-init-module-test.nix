@@ -27,5 +27,11 @@ pkgs.nixosTest {
     with subtest("units are active"):
       machine.succeed("systemctl is-active --quiet unit1")
       machine.succeed("systemctl is-active --quiet unit2")
+
+    with subtest("units are not started on restart"):
+      machine.shutdown()
+      machine.start()
+      machine.fail("systemctl is-active --quiet unit1")
+      machine.fail("systemctl is-active --quiet unit2")
   '';
 }

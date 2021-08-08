@@ -4,6 +4,8 @@ with lib;
 let
   cfg = config.services.${name}.initialization;
 
+  lockPath = "/etc/inits/${name}"; # Created when the initialization is finished
+
   initModule = with types; submodule {
     options = {
       name = mkOption {
@@ -43,7 +45,28 @@ let
   after = first: second: recursiveUpdate second {
     value.unitConfig = {
       After = [ "${first.name}.service" ];
-      Requires = [ "${first.name}.service" ];
+      BindsTo = [ "${first.name}.service" ];
+    };
+  };
+
+  mkFirst = {
+    name = "start-${name}-initialization";
+
+    value = {
+      description = "Start the provisioning of ${name}";
+
+      script = "echo 'Start provisioning ${name}'";
+
+      serviceConfig = {
+        User = "root";
+        Type = "oneshot";
+        RemainAfterExit = true;
+      };
+
+      unitConfig = {
+        ConditionPathExists = "!${lockPath}"; 
+      };
+
     };
   };
 
@@ -54,25 +77,20 @@ let
   mkLast = unit: after unit {
     name = "finish-${name}-initialization";
 
-    value =
-    let
-      path = "/etc/inits/${name}";
-    in
-      {
+    value = {
+      description = "Finish the provisioning of ${name}";
       script = ''
         mkdir -p /etc/inits
-        touch ${path}
-        chmod 600 ${path}
+        touch ${lockPath}
+        chmod 600 ${lockPath}
       '';
 
       wantedBy = [ "multi-user.target" ];
 
       serviceConfig = {
         User = "root";
-      };
-
-      unitConfig = {
-        ConditionPathExists = "!${path}"; 
+        Type = "oneshot";
+        RemainAfterExit = true;
       };
     };
   };
@@ -85,7 +103,7 @@ let
       then alreadyOrdered ++ [ (mkLast current) ]
       else orderUnitsRec (nextCurrent) (alreadyOrdered ++ [ (after current nextCurrent) ]) (tail unorderedYet);
 
-  orderUnits = units: orderUnitsRec (head units) [(head units)] (tail units);
+  orderUnits = units: orderUnitsRec (mkFirst) [mkFirst] (units);
 
 in  
   {
