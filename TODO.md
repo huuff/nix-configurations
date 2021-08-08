@@ -32,6 +32,11 @@
 ## ensurePaths
 * Allow to add just a path string instead of a full set
 
+## mkInitModule
+* Test order
+* Allow to add paths
+* Test that the units are not started on reset
+
 ## mkSSLModule
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
