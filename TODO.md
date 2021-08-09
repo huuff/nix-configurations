@@ -12,6 +12,7 @@
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it?
+* Look into importing the `neuron` package directly in the module
 
 ## osTicket
 * Add backup options
@@ -40,7 +41,18 @@
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
 * Generate certificates for the name of the service.
+* Check and generate certificates if they are expired
 * I'm forcing SSL, but am I redirecting `http` to `https`?
+
+## do-on-request
+* I'm sure there are some security issues I've not worked out
+* Open the firewall port here, remember that I do it manually in neuron
+* Test it
+* Refactor it
+
+## autoRsync
+* Test it
+* Refactor it
 
 ## Mail/SNM
 * Give it some love

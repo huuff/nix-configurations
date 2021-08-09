@@ -1,4 +1,4 @@
-{ pkgs, doOnRequest, neuronPkg, ... }:
+{ pkgs, neuronPkg, ... }:
 let
   directory = "/home/neuron";
 in
@@ -6,7 +6,7 @@ pkgs.nixosTest {
   name = "neuron";
 
   machine = { pkgs, ... }: {
-    imports = [ (import ./default.nix { inherit doOnRequest neuronPkg; }) ];
+    imports = [ (import ./default.nix { inherit neuronPkg; }) ];
 
     nix.useSandbox = false;
     

@@ -1,4 +1,4 @@
-{ doOnRequest, neuronPkg }:
+{ neuronPkg }:
 
 { config, pkgs, lib, ... }:
 
@@ -16,7 +16,7 @@ in
     imports = 
     [
       ./cachix.nix
-      doOnRequest
+      ../../lib/do-on-request.nix
       (mkSSLModule "neuron")
       (mkInstallationModule "neuron")
     ];
