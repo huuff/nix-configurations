@@ -24,6 +24,12 @@ let
         type = str;
         description = "E-mail address of the user";
       };
+
+      superAdmin = mkOption {
+        type = bool;
+        default = false;
+        description = "Whether to make this user a super-admin";
+      };
     };
   };
 in
@@ -58,6 +64,26 @@ in
         description = "Domain name of the deployment";
       };
 
+      site = {
+        name = mkOption {
+          type = str;
+          default = "Your wallabag instance";
+          description = "Name of the site";
+        };
+
+        enableRegistration = mkOption {
+          type = bool;
+          default = true;
+          description = "Whether to allow new users to register";
+        };
+
+        requiredActivation = mkOption {
+          type = bool;
+          default = true;
+          description = "Whether to require registered users to be activated via email";
+        };
+
+      };
     };
 
     config = mkIf cfg.enable {
@@ -68,6 +94,10 @@ in
         {
           assertion = cfg.ssl.enable -> cfg.ssl.httpsOnly;
           message = "For wallabag, if SSL is enabled then ssl.httpsOnly must be true!";
+        }
+        {
+          assertion = cfg.site.requiredActivation -> cfg.site.enableRegistration;
+          message = "You must enable cfg.site.enableRegistration to enable cfg.site.requiredActivation";
         }
       ];
 
@@ -107,8 +137,7 @@ parameters:
   database_charset: utf8mb4
 
   domain_name: ${cfg.domainName}
-  # TODO: Make this configurable
-  server_name: "Your wallabag instance"
+  server_name: "${cfg.site.name}"
 
   mailer_transport:  smtp
   mailer_user:       ~
@@ -127,10 +156,9 @@ parameters:
   twofactor_auth: true
   twofactor_sender: no-reply@wallabag.org
 
-  # TODO: Configurable
     # fosuser stuff
-  fosuser_registration: true
-  fosuser_confirmation: true
+  fosuser_registration: ${boolToString cfg.site.enableRegistration}
+  fosuser_confirmation: ${boolToString cfg.site.requiredActivation}
 
     # how long the access token should live in seconds for the API
   fos_oauth_server_access_token_lifetime: 3600
@@ -187,7 +215,7 @@ parameters:
         description = "Create default users";
         script = 
         let
-          insertUser = user: "php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile}";
+          insertUser = user: "php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile} --no-interaction ${optionalString user.superAdmin "--super-admin"}";
         in ''
           echo '>>> Disabling default "wallabag" user'
           php bin/console fos:user:deactivate wallabag

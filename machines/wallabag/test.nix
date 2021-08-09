@@ -39,6 +39,7 @@ in
             username = user2.name;
             passwordFile = pkgs.writeText "user1pass" user2.pass;
             email = user2.email;
+            superAdmin = true;
           }
         ];
       };
@@ -65,8 +66,8 @@ in
       with subtest("default user is deactivated"):
         machine.outputContains(command=listUsers(), output="wallabag wallabag@wallabag.io no yes")
 
-      with subtest("users were created"):
+      with subtest("users were created correctly"):
         machine.outputContains(command=listUsers(), output="user1 user1@example.com yes no")
-        machine.outputContains(command=listUsers(), output="user2 user2@example.com yes no")
+        machine.outputContains(command=listUsers(), output="user2 user2@example.com yes yes")
     '';
   }
