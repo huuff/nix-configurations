@@ -47,9 +47,5 @@
 * I'm sure there are some security issues I've not worked out
 * Currently it also runs the script on initialization. Should it?
 
-## autoRsync
-* Test it
-* Refactor it
-
 ## Mail/SNM
 * Give it some love

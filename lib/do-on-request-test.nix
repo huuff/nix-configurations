@@ -8,7 +8,7 @@ pkgs.nixosTest {
   name = "do-on-request";
 
   machine = { pkgs, ... }: {
-    imports = [ ./do-on-request.nix ];
+    imports = [ ./do-on-request-module.nix ];
 
     services.do-on-request = {
       enable = true;
