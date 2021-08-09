@@ -26,6 +26,7 @@ in
 
       user = mkOption {
         type = nullOr str;
+        default = null;
         description = "User which will run the service";
       };
     };
