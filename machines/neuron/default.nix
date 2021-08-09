@@ -7,7 +7,7 @@ let
   neuronPkg = (builtins.getFlake "github:srid/neuron?rev=998fce27ccc91231ef9757e2bebeb39327850092").packages.x86_64-linux.neuron;
   gitWithoutDeployKey = "${pkgs.git}/bin/git";
   gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no -p ${toString cfg.sshPort}' '';
-  gitCommand = if isNull cfg.deployKey then gitWithoutDeployKey else gitWithDeployKey;
+  gitCommand = if cfg.deployKey == null then gitWithoutDeployKey else gitWithDeployKey;
 in
   {
     imports = 
@@ -105,7 +105,7 @@ in
             locations."/".extraConfig = ''
               index index.html index.htm;
 
-            '' + optionalString (!isNull cfg.passwordFile) ''
+            '' + optionalString (cfg.passwordFile != null) ''
               auth_basic "Neuron";
               auth_basic_user_file ${cfg.passwordFile};
             '';

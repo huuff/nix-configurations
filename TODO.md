@@ -3,7 +3,6 @@
 * A module or library for `PHP` + `nginx`, but I find it difficult since I just copypaste nginx configurations from the internet.
 * I'm making some efforts to get these to work for an installation with multiple modules at the same time, but does it? I've never tested.
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
-* Remove `isNull`'s. It's deprecated.
 * `mkDefaults` in `nginx` users and groups
 
 ## Testing library

@@ -48,7 +48,7 @@ in {
       script = let
          pathScript = path: ''
            mkdir -p ${path.path}
-           ${optionalString (!isNull path.permissions) "chmod ${path.permissions} ${path.path}"}
+           ${optionalString (path.permissions != null) "chmod ${path.permissions} ${path.path}"}
            chown ${path.owner}:${path.owner} ${path.path}
          '';
       in concatStringsSep "\n" (map (pathScript) paths);
