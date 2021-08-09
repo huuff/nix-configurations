@@ -22,6 +22,7 @@
 * Backup options, there's nothing yet but it's pretty important
 * What about auto-importing pocket? UPDATE: Put `pocket_consumer_key` for each user in the `wallabag_config` table. Actually, implement `redis` and `rabbitmq`, both for configuration options and practice.
 * Add email options
+* Seems like `create-parameters` should be an external file, it takes too much space.
 
 ## mkInitModule
 * Add an intermediate "lock" for each unit, so these can show at what point of the initialization we are, and thus, restart from an intermediate point instead of from the beginning.
