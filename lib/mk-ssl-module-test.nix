@@ -56,9 +56,7 @@ pkgs.nixosTest {
       machine.succeed("curl -k https://localhost")
 
     with subtest("cannot access nginx without https"):
-      outputs(machine,
-              command="curl -s -o /dev/null -w '%{http_code}' http://localhost",
-              output="301")
+      machine.outputs("curl -s -o /dev/null -w '%{http_code}' http://localhost", "301")
 
     with subtest("unit is not started if the certificate exists"):
       machine.systemctl("restart create-test-cert")

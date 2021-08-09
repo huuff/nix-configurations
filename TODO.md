@@ -4,10 +4,6 @@
 * I'm making some efforts to get these to work for an installation with multiple modules at the same time, but does it? I've never tested.
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
 
-## Testing library
-* Look into adding my functions as some kind of extension methods for `machine`
-* Function to run command and print output for debugging
-
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all
 

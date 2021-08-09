@@ -69,7 +69,7 @@ in
         machine.succeed("systemctl is-active --quiet install-osticket")
         machine.succeed("systemctl is-active --quiet setup-users")
 
-      login(machine)
+      machine.login()
 
       with subtest("admin can login"):
         machine.send_chars("php ${path}/manage.php agent login\n")
@@ -84,6 +84,6 @@ in
         machine.succeed("php ${path}/manage.php user list | grep -q '${user2.fullName} <${user2.email}>'")
 
       with subtest("it's being served correctly"):
-        outputContains(machine, 'curl localhost', "<h1>Welcome to the Support Center</h1>")
+        machine.outputContains('curl localhost', "<h1>Welcome to the Support Center</h1>")
     '';
   }

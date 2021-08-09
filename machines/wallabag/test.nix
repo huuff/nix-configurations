@@ -59,15 +59,14 @@ in
         machine.succeed("systemctl is-active --quiet setup-users")
 
       with subtest("nginx is serving wallabag"):
-        outputContains(machine,
-                       command='curl http://localhost/login',
-                       output='<title>Welcome to wallabag! – wallabag</title>')
+        machine.outputContains(command='curl http://localhost/login',
+                               output='<title>Welcome to wallabag! – wallabag</title>')
 
       with subtest("default user is deactivated"):
-        outputContains(machine, command=listUsers(), output="wallabag wallabag@wallabag.io no yes")
+        machine.outputContains(command=listUsers(), output="wallabag wallabag@wallabag.io no yes")
 
       with subtest("users were created"):
-        outputContains(machine, command=listUsers(), output="user1 user1@example.com yes no")
-        outputContains(machine, command=listUsers(), output="user2 user2@example.com yes no")
+        machine.outputContains(command=listUsers(), output="user1 user1@example.com yes no")
+        machine.outputContains(command=listUsers(), output="user2 user2@example.com yes no")
     '';
   }

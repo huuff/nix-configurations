@@ -36,12 +36,12 @@ pkgs.nixosTest {
       machine.succeed("[ -d ${path3} ]")
 
     with subtest("paths belong to their owners"):
-      outputs(machine, command="stat -c '%U %G' ${path1}", output = "user1 user1")
-      outputs(machine, command="stat -c '%U %G' ${path2}", output = "user2 user2")
+      machine.outputs(command="stat -c '%U %G' ${path1}", output = "user1 user1")
+      machine.outputs(command="stat -c '%U %G' ${path2}", output = "user2 user2")
 
     with subtest("paths have the stated permissions"):
-      outputs(machine, command="stat -c '%a' ${path1}", output="644")
-      outputs(machine, command="stat -c '%a' ${path2}", output="755")
+      machine.outputs(command="stat -c '%a' ${path1}", output="644")
+      machine.outputs(command="stat -c '%a' ${path2}", output="755")
 
     with subtest("the unit recreates the directories when one is deleted"):
       machine.succeed("rm -r ${path1}")

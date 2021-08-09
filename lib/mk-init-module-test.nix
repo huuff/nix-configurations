@@ -64,7 +64,7 @@ testScript = ''
     # This tests that the echos have been done in the correct ordered
     # and thus, that the units are correctly ordered
     with subtest("units are correctly ordered"):
-      outputs(machine, "cat ${testFilePath}", "unit1 unit2 unit3")
+      machine.outputs("cat ${testFilePath}", "unit1 unit2 unit3")
 
     with subtest("unit fails if extraDeps fail"):
      machineWithoutTestService.wait_for_unit("multi-user.target")

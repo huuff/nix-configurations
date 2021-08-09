@@ -28,7 +28,6 @@ pkgs.nixosTest {
     with subtest("3 requests handled correctly"):
       for i in range(3):
         machine.execute("curl localhost:${toString port} --max-time '0.1'")
-
-    outputs(machine, "cat ${file} | grep ${testWord} | wc -l", "4")
+      machine.outputs("cat ${file} | grep ${testWord} | wc -l", "4")
   '';
 }
