@@ -31,6 +31,8 @@ in
     };
 
     config = mkIf cfg.enable {
+      networking.firewall.allowedTCPPorts = [ cfg.port ];
+
       systemd.services.do-on-request = {
         description = "Run a script when a request is received on port ${toString cfg.port}";
         

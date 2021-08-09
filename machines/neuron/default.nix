@@ -62,7 +62,7 @@ in
 
     config = mkIf cfg.enable {
       networking.firewall = {
-        allowedTCPPorts = [ 80 cfg.refreshPort ];
+        allowedTCPPorts = [ 80 ];
       };
 
       systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
