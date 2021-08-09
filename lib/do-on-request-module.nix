@@ -46,19 +46,14 @@ in
         script = ''
           #!${pkgs.stdenv.shell}
           set -x
-          while true;
-          do {
-            ${cfg.script}
-          } | ${pkgs.netcat}/bin/nc -l ${toString cfg.port};
+          while true; do
+            ${pkgs.netcat}/bin/nc -l ${toString cfg.port} | {
+              ${cfg.script}
+            }
           done
           '';
 
           wantedBy = [ "multi-user.target" ];
-          wants = [ "network.target" ];
-
-          unitConfig = {
-            After = [ "network.target" ];
-          };
       };
     };
 

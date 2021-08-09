@@ -121,6 +121,9 @@ in
           script = "${gitCommand} pull";
         };
       };
+
+      # Too coupled to the name of the unit
+      systemd.services.do-on-request.wants = [ "finish-neuron-initialization.service" ];
     };
   }
 
