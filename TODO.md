@@ -30,7 +30,6 @@
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
 * Check and generate certificates if they are expired
-* I'm forcing SSL, but am I redirecting `http` to `https`? UPDATE: I think `forceSSL` does this, but I can't test it right in the VM, do it on a real machine
 
 ## Mail/SNM
 * Give it some love
