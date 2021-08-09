@@ -1,7 +1,9 @@
 { config, lib, ... }:
 with lib;
 let
-  paths = config.services.ensurePaths;
+  defaultPermissions = null; # Inherit from ACL
+  defaultOwner = "root";
+
   pathModule = types.submodule {
     options = with types; {
       path = mkOption {
@@ -11,21 +13,29 @@ let
 
       permissions = mkOption {
         type = nullOr str;
-        default = null;
+        default = defaultPermissions;
         description = "Permissions to ensure on path";
       };
 
       owner = mkOption {
         type = str;
-        default = "root";
+        default = defaultOwner;
         description = "Owner of path";
       };
     };
   };
+
+  convertToPathModule = obj: if ((builtins.typeOf obj) == "string") then {
+    path = obj;
+    permissions = defaultPermissions;
+    owner = defaultOwner;
+  } else obj;
+
+  paths = map (convertToPathModule) config.services.ensurePaths;
 in {
   options = {
     services.ensurePaths = with types; mkOption {
-      type = listOf pathModule;
+      type = listOf (oneOf [str pathModule]);
       default = [];
       description = "Paths whose existence is to be guaranteed by multi-user.target";
     };

@@ -2,6 +2,7 @@
 let
   path1 = "/var/path1";
   path2 = "/var/midpath/path2";
+  path3 = "/var/path3";
 in
 pkgs.nixosTest {
   name = "ensure-paths";
@@ -12,6 +13,7 @@ pkgs.nixosTest {
     services.ensurePaths = [
       { path = path1; owner = "user1"; permissions = "644"; }
       { path = path2; owner = "user2"; permissions = "755"; }
+      path3 
     ];
 
     users.users.user1.isSystemUser = true;
@@ -31,6 +33,7 @@ pkgs.nixosTest {
     with subtest("paths exist"):
       machine.succeed("[ -d ${path1} ]")
       machine.succeed("[ -d ${path2} ]")
+      machine.succeed("[ -d ${path3} ]")
 
     with subtest("paths belong to their owners"):
       outputs(machine, command="stat -c '%U %G' ${path1}", output = "user1 user1")
