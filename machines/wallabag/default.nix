@@ -200,8 +200,8 @@ parameters:
 
     services.nginx = {
       enable = true;
-      user = cfg.installation.user;
-      group = cfg.installation.user;
+      user = mkDefault cfg.installation.user;
+      group = mkDefault cfg.installation.user;
 
       virtualHosts.wallabag = {
         root = "${cfg.installation.path}/web";
