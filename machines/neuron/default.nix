@@ -9,16 +9,15 @@ let
   gitWithoutDeployKey = "${pkgs.git}/bin/git";
   gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no -p ${toString cfg.sshPort}' '';
   gitCommand = if isNull cfg.deployKey then gitWithoutDeployKey else gitWithDeployKey;
-  mkSSLModule = import ../../lib/mk-ssl-module.nix;
-  mkInstallationModule = import ../../lib/mk-installation-module.nix;
 in
   {
     imports = 
     [
       ./cachix.nix
       ../../lib/do-on-request.nix
-      (mkSSLModule "neuron")
-      (mkInstallationModule "neuron")
+      (import ../../lib/mk-ssl-module.nix "neuron")
+      (import ../../lib/mk-installation-module.nix "neuron")
+      (import ../../lib/mk-init-module.nix "neuron")
     ];
 
     options.services.neuron = with types; {
@@ -67,10 +66,10 @@ in
 
       systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
-      systemd.services = {
-        initialize-zettelkasten = {
+      services.neuron.initialization = [
+        { 
+          name = "initialize-zettelkasten";
           description = "Create Zettelkasten directory and clone repository";
-
           script = ''
             echo ">>> Removing previous ${cfg.installation.path}"
             rm -rf ${cfg.installation.path}/{,.[!.],..?}* # weird but it will delete hidden files too without returning an error for . and ..
@@ -79,35 +78,21 @@ in
             echo ">>> Making ${cfg.installation.user} own ${cfg.installation.path}"
             chown -R ${cfg.installation.user}:${cfg.installation.user} ${cfg.installation.path}
           '';
+          extraDeps = [ "network-online.target" ];
+        }
+      ];
 
-          wantedBy = [ "do-on-request.service" ];
+      systemd.services.neuron = {
+        description = "Watch and generate Neuron zettelkasten";
 
-          unitConfig = {
-            Before = [ "do-on-request.service" ];
-            BindsTo = [ "network.target" ];
-            After = [ "network.target" ];
-          };
-
-          serviceConfig = {
-            User = cfg.installation.user;
-            Type = "oneshot";
-            RemainAfterExit = true;
-          };
+        serviceConfig = {
+          User = cfg.installation.user;
+          Restart = "always";
+          WorkingDirectory = cfg.installation.path;
+          ExecStart = "${cfg.package}/bin/neuron rib -w";
         };
 
-        neuron = {
-          description = "Watch and generate Neuron zettelkasten";
-
-          serviceConfig = {
-            User = cfg.installation.user;
-            Restart = "always";
-            WorkingDirectory = cfg.installation.path;
-            ExecStart = "${cfg.package}/bin/neuron rib -w";
-          };
-
-          wantedBy = [ "multi-user.target" ];
-
-        };
+        wantedBy = [ "multi-user.target" ];
       };
 
       services = {
@@ -122,8 +107,8 @@ in
               index index.html index.htm;
 
             '' + optionalString (!isNull cfg.passwordFile) ''
-               auth_basic "Neuron";
-               auth_basic_user_file ${cfg.passwordFile};
+              auth_basic "Neuron";
+              auth_basic_user_file ${cfg.passwordFile};
             '';
           };
         };
@@ -133,9 +118,7 @@ in
           user = cfg.installation.user;
           port = cfg.refreshPort;
           directory = "${cfg.installation.path}";
-          script = ''
-            ${gitCommand} pull
-          '';
+          script = "${gitCommand} pull";
         };
       };
     };
