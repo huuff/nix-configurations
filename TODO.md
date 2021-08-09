@@ -47,7 +47,6 @@
 * I'm sure there are some security issues I've not worked out
 * Open the firewall port here, remember that I do it manually in neuron
 * Test it
-* Refactor it
 
 ## autoRsync
 * Test it

@@ -81,11 +81,10 @@ in
           '';
 
           wantedBy = [ "do-on-request.service" ];
-          wants = [ "network.target" ];
 
           unitConfig = {
             Before = [ "do-on-request.service" ];
-            Requires = [ "network.target" ];
+            BindsTo = [ "network.target" ];
             After = [ "network.target" ];
           };
 
@@ -130,10 +129,10 @@ in
         };
 
         do-on-request = {
-          user = cfg.installation.user;
           enable = true;
+          user = cfg.installation.user;
           port = cfg.refreshPort;
-          workingDirectory = "${cfg.installation.path}";
+          directory = "${cfg.installation.path}";
           script = ''
             ${gitCommand} pull
           '';
