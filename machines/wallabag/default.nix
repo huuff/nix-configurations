@@ -120,7 +120,6 @@ parameters:
 
   locale: en
 
-    # TODO: What happens if this changes?
     # A secret key that's used to generate certain security-related tokens
   secret: $(${pkgs.libressl}/bin/openssl rand -hex 12)
 
@@ -128,6 +127,7 @@ parameters:
   twofactor_auth: true
   twofactor_sender: no-reply@wallabag.org
 
+  # TODO: Configurable
     # fosuser stuff
   fosuser_registration: true
   fosuser_confirmation: true

@@ -20,7 +20,8 @@
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important
-* What about auto-importing pocket?
+* What about auto-importing pocket? UPDATE: Put `pocket_consumer_key` for each user in the `wallabag_config` table.
+* Option to create super admin users
 * Add email options
 
 ## mkInitModule
