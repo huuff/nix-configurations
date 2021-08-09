@@ -29,7 +29,6 @@
 ## mkSSLModule
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
-* Generate certificates for the name of the service.
 * Check and generate certificates if they are expired
 * I'm forcing SSL, but am I redirecting `http` to `https`?
 
