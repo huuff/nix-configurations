@@ -31,7 +31,9 @@ in
         script = ''
           #!${pkgs.stdenv.shell}
           set -euo pipefail
-          ${pkgs.fd}/bin/fd . ${cfg.startPath} | ${pkgs.entr}/bin/entr -n -s "${pkgs.rsync}/bin/rsync -rtvu ${cfg.startPath}/* ${cfg.endPath}"
+          while true; do
+            echo "${cfg.startPath}" | ${pkgs.entr}/bin/entr -dnrs "${pkgs.rsync}/bin/rsync -rtvu ${cfg.startPath}/* ${cfg.endPath}"
+          done;
         '';
 
       };
