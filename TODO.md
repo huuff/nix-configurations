@@ -12,7 +12,6 @@
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all
-* Look into importing the `neuron` package directly in the module
 
 ## osTicket
 * Add backup options

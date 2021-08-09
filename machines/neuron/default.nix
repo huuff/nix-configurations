@@ -1,11 +1,10 @@
-{ neuronPkg }:
-
 { config, pkgs, lib, ... }:
 
 with lib;
 
 let
   cfg = config.services.neuron;
+  neuronPkg = (builtins.getFlake "github:srid/neuron?rev=998fce27ccc91231ef9757e2bebeb39327850092").packages.x86_64-linux.neuron;
   gitWithoutDeployKey = "${pkgs.git}/bin/git";
   gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no -p ${toString cfg.sshPort}' '';
   gitCommand = if isNull cfg.deployKey then gitWithoutDeployKey else gitWithDeployKey;
