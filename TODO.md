@@ -5,7 +5,7 @@
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
 
 ## Neuron
-* Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all
+* Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all. UPDATE: Yeah but these are integration tests and testing the individual components does not guarantee that they all work together
 
 ## osTicket
 * Add backup options
@@ -26,6 +26,9 @@
 
 ## mkInitModule
 * Add an intermediate "lock" for each unit, so these can show at what point of the initialization we are, and thus, restart from an intermediate point instead of from the beginning.
+
+## mkDatabaseModule
+* Add `postgres`
 
 ## mkSSLModule
 * Option to add own certificate
