@@ -21,7 +21,7 @@
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important
-* What about auto-importing pocket? UPDATE: Put `pocket_consumer_key` for each user in the `wallabag_config` table. Actually, implement `redis` and `rabbitmq`, both for configuration options and practice.
+* What about auto-importing pocket? UPDATE: Put `pocket_consumer_key` for each user in the `wallabag_config` table. Actually, implement `redis` and `rabbitmq`, both for configuration options and practice. UPDATE: I'm putting the pocket key but it doesn't seem to do anything. I think I'll need to use `redis` or `rabbitmq`
 * Add email options
 * Seems like `create-parameters` should be an external file, it takes too much space. UPDATE: What about making it an attribute set and using `toYAML`?
 
@@ -33,6 +33,9 @@
 
 ## ensurePaths
 * Add option to ensure paths based on installation
+
+## mkDatabaseModule
+* Maybe add also socket access to users, not only password
 
 ## mkDatabaseModule
 * Add `postgres`

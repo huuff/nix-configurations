@@ -30,6 +30,12 @@ let
         default = false;
         description = "Whether to make this user a super-admin";
       };
+
+      pocketConsumerKey = mkOption {
+        type = nullOr str;
+        default = null;
+        description = "Pocket consumer key to import collection";
+      };
     };
   };
 in
@@ -215,12 +221,18 @@ parameters:
         description = "Create default users";
         script = 
         let
-          insertUser = user: "php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile} --no-interaction ${optionalString user.superAdmin "--super-admin"}";
+          insertUser = user: ''
+            php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile} --no-interaction ${optionalString user.superAdmin "--super-admin"}
+            ${optionalString (user.pocketConsumerKey != null) (myLib.db.execDML cfg ''
+              SELECT id FROM ${cfg.database.prefix}user WHERE username='${user.username}' INTO @user_id;
+              UPDATE ${cfg.database.prefix}config SET pocket_consumer_key='${user.pocketConsumerKey}' WHERE user_id=@user_id;
+              '')}
+                '';
         in ''
           echo '>>> Disabling default "wallabag" user'
           php bin/console fos:user:deactivate wallabag
           echo '>>> Creating all users'
-          ${concatStringsSep "\n" (map (user: insertUser user) cfg.users)}
+          ${concatStringsSep "\n" (map insertUser cfg.users)}
           '';
         path = [ phpWithTidy ];
       }
