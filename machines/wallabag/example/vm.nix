@@ -26,6 +26,7 @@ in with myLib; {
         username = "user1";
         passwordFile = fileFromStore ./user1pass;
         email = "user1@example.com";
+        pocketKeyFile = fileFromStore ~/pocket-key;
       }
     ];
   };

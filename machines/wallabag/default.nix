@@ -31,8 +31,8 @@ let
         description = "Whether to make this user a super-admin";
       };
 
-      pocketConsumerKey = mkOption {
-        type = nullOr str;
+      pocketKeyFile = mkOption {
+        type = nullOr (oneOf [str path]);
         default = null;
         description = "Pocket consumer key to import collection";
       };
@@ -69,6 +69,8 @@ in
         default = if cfg.ssl.enable then "https://localhost" else "http://localhost";
         description = "Domain name of the deployment";
       };
+
+      enableRedis = mkEnableOption "Whether to start a redis instance to import the articles";
 
       site = {
         name = mkOption {
@@ -223,9 +225,9 @@ parameters:
         let
           insertUser = user: ''
             php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile} --no-interaction ${optionalString user.superAdmin "--super-admin"}
-            ${optionalString (user.pocketConsumerKey != null) (myLib.db.execDML cfg ''
+            ${optionalString (user.pocketKeyFile != null) (myLib.db.execDML cfg ''
               SELECT id FROM ${cfg.database.prefix}user WHERE username='${user.username}' INTO @user_id;
-              UPDATE ${cfg.database.prefix}config SET pocket_consumer_key='${user.pocketConsumerKey}' WHERE user_id=@user_id;
+              UPDATE ${cfg.database.prefix}config SET pocket_consumer_key='${myLib.passwd.cat user.pocketKeyFile}' WHERE user_id=@user_id;
               '')}
                 '';
         in ''

@@ -4,6 +4,7 @@
 * I'm making some efforts to get these to work for an installation with multiple modules at the same time, but does it? I've never tested.
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
 * Realized I fucked up by using the `services` namespace. I can't override its modules comfortable because it fucks a lot of stuff up (my first try was to disable the modules I overrided, but then I had to disable any that depended on them and then just about everything went wrong). Move everything to `machines` which is going to be exhausting.
+* I think I've used `mkEnableOption` wrong every single time. It takes a name, not a description.
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all. UPDATE: Yeah but these are integration tests and testing the individual components does not guarantee that they all work together
@@ -35,10 +36,8 @@
 * Add option to ensure paths based on installation
 
 ## mkDatabaseModule
-* Maybe add also socket access to users, not only password
-
-## mkDatabaseModule
 * Add `postgres`
+* Maybe add also socket access to users, not only password, so I don't have to use the password in each `exec` SQL.
 
 ## mkSSLModule
 * Option to add own certificate
