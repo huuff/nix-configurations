@@ -20,6 +20,7 @@ in with myLib; {
     ssl.enable = true;
 
     database.passwordFile = fileFromStore ./dbpass;
+    enableRedis = true;
 
     users = [
       {
@@ -27,6 +28,7 @@ in with myLib; {
         passwordFile = fileFromStore ./user1pass;
         email = "user1@example.com";
         pocketKeyFile = fileFromStore ~/pocket-key;
+        superAdmin = true;
       }
     ];
   };

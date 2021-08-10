@@ -12,6 +12,7 @@
 ## osTicket
 * Add backup options
 * Add email options
+* A config object, and transform it to the `curl` request (same as for `parameters.yml` in `wallabag`)
 
 ## Jenkins
 * ON HOLD. I want to use `withCLI` in the Jenkins module of nixpkgs but it's not available in my version yet. Wait until it's stable? bump to 21.11pre? I realize I know nothing about the nixpkgs release scheme
@@ -22,12 +23,19 @@
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important
-* What about auto-importing pocket? UPDATE: Put `pocket_consumer_key` for each user in the `wallabag_config` table. Actually, implement `redis` and `rabbitmq`, both for configuration options and practice. UPDATE: I'm putting the pocket key but it doesn't seem to do anything. I think I'll need to use `redis` or `rabbitmq`
 * Add email options
 * Seems like `create-parameters` should be an external file, it takes too much space. UPDATE: What about making it an attribute set and using `toYAML`?
 
+### Auto-import
+It works, but:
+* REMEMBER TO ENABLE IT IN THE DB! But do it tomorrow. It's late now.
+* Seems like `redis` needs write access, but the NixOS module doesn't add any `mkOverride` so I can't give it that. So maybe I'll need to also implement my own `redis` module.
+* Since I'm at it, I could implement also `rabbitmq`
+* Implement other imports? not only `pocket`? Though I don't use them, I'd never know.
+
 ## mkInitModule
 * Add an intermediate "lock" for each unit, so these can show at what point of the initialization we are, and thus, restart from an intermediate point instead of from the beginning.
+* Make it somewhat more terse. My init scripts still look a bit hideous
 
 ## mkInstallationModule
 * Allow to define a group, maybe extra groups, for `postdrop` for example.

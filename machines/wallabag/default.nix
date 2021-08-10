@@ -30,7 +30,7 @@ let
         default = false;
         description = "Whether to make this user a super-admin";
       };
-
+    
       pocketKeyFile = mkOption {
         type = nullOr (oneOf [str path]);
         default = null;
@@ -70,7 +70,7 @@ in
         description = "Domain name of the deployment";
       };
 
-      enableRedis = mkEnableOption "Whether to start a redis instance to import the articles";
+      enableRedis = mkEnableOption "redis for processing imports";
 
       site = {
         name = mkOption {
@@ -187,7 +187,7 @@ parameters:
     # Redis processing
   redis_scheme: tcp
   redis_host: localhost
-  redis_port: 6379
+  redis_port: ${if cfg.enableRedis then (toString config.services.redis.port) else "6379"}
   redis_path: null
   redis_password: null
 
@@ -301,6 +301,27 @@ parameters:
           "catch_workers_output" = true;
         };
         phpEnv."PATH" = lib.makeBinPath [ pkgs.php74 ];
+      };
+    };
+
+    services.redis = mkIf cfg.enableRedis {
+      enable = true;
+    };
+
+    systemd.services.redis-worker = mkIf cfg.enableRedis {
+      description = "Run the redis worker for asynchronous importing";
+
+      after = [ "finish-wallabag-initialization.service" ];
+      wantedBy = [ "multi-user.target" ];
+
+      path = [ phpWithTidy ];
+
+      script = "php bin/console wallabag:import:redis-worker --env=prod pocket -vv";
+
+      serviceConfig = {
+        User = cfg.installation.user;
+        WorkingDirectory = cfg.installation.path;
+        Restart = "on-failure";
       };
     };
   };
