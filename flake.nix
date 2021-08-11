@@ -14,6 +14,7 @@
     nixosModules = {
       neuron = import ./machines/neuron;
       osticket = import ./machines/osticket;
+      wallabag = import ./machines/wallabag;
     };
 
     checks.${system} = {

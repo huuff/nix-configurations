@@ -14,7 +14,7 @@ in with myLib; {
     php74Packages.composer
   ];
 
-  services.wallabag = {
+  machines.wallabag = {
     enable = true;
     domainName = "https://localhost:8988";
     ssl.enable = true;

@@ -31,10 +31,10 @@ let
     owner = defaultOwner;
   } else obj;
 
-  paths = map (convertToPathModule) config.services.ensurePaths;
+  paths = map (convertToPathModule) config.machines.ensurePaths;
 in {
   options = {
-    services.ensurePaths = with types; mkOption {
+    machines.ensurePaths = with types; mkOption {
       type = listOf (oneOf [str pathModule]);
       default = [];
       description = "Paths whose existence is to be guaranteed by multi-user.target";

@@ -10,7 +10,7 @@ in with myLib; {
 
   networking.firewall.allowedTCPPorts = [ 3306 ];
 
-  services.osticket = {
+  machines.osticket = {
     enable = true;
 
     installation.path = "/var/www/osticket";

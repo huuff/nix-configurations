@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 with lib;
 let
-  cfg = config.services.jenkins;
+  cfg = config.machines.jenkins;
 in
   {
     options = {

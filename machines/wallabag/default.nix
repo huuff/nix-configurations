@@ -3,7 +3,7 @@
 with lib;
 
 let
-  cfg = config.services.wallabag;
+  cfg = config.machines.wallabag;
   myLib = import ../../lib/default.nix { inherit config pkgs; };
 
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
@@ -48,7 +48,7 @@ in
       (import ../../lib/mk-init-module.nix "wallabag")
     ];
 
-    options.services.wallabag = with types; {
+    options.machines.wallabag = with types; {
       enable = mkEnableOption "Whether to enable the wallabag service";
 
       package = mkOption {
@@ -111,7 +111,7 @@ in
 
       networking.firewall.allowedTCPPorts = [ 80 ];
 
-    services.wallabag.initialization = [
+    machines.wallabag.initialization = [
       {
         name = "copy-wallabag";
         description = "Copy wallabag to final directory and setting permissions for installation";

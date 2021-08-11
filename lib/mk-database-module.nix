@@ -2,12 +2,12 @@ name:
 { config, lib, pkgs, ... }:
 with lib;
 let
-  cfg = config.services.${name};
+  cfg = config.machines.${name};
   myLib = import ./default.nix { inherit config pkgs; };
 in
   {
     options = with types; {
-      services.${name} = {
+      machines.${name} = {
         database = {
           host = mkOption {
             type = str;

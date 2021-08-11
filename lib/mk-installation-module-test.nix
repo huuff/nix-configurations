@@ -9,7 +9,7 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ ( import ./mk-installation-module.nix "test" ) ];
 
-    services.test.installation = { inherit user path; };
+    machines.test.installation = { inherit user path; };
   };
 
   # That the path exists and belongs to the user is actually a

@@ -3,7 +3,7 @@
 with lib;
 
 let
-  cfg = config.services.neuron;
+  cfg = config.machines.neuron;
   neuronPkg = (builtins.getFlake "github:srid/neuron?rev=998fce27ccc91231ef9757e2bebeb39327850092").packages.x86_64-linux.neuron;
   gitWithoutDeployKey = "${pkgs.git}/bin/git";
   gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no -p ${toString cfg.sshPort}' '';
@@ -19,7 +19,7 @@ in
       (import ../../lib/mk-init-module.nix "neuron")
     ];
 
-    options.services.neuron = with types; {
+    options.machines.neuron = with types; {
       enable = mkEnableOption "Automatically fetch Neuron zettelkasten from git repo and serve it";
 
       refreshPort = mkOption {
@@ -65,7 +65,7 @@ in
 
       systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
-      services.neuron.initialization = [
+      machines.neuron.initialization = [
         { 
           name = "initialize-zettelkasten";
           description = "Create Zettelkasten directory and clone repository";
@@ -112,6 +112,9 @@ in
           };
         };
 
+      };
+
+      machines = {
         do-on-request = {
           enable = true;
           user = cfg.installation.user;

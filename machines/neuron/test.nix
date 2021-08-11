@@ -8,9 +8,7 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ ./default.nix ];
 
-    nix.useSandbox = false;
-    
-    services.neuron = {
+    machines.neuron = {
       enable = true;
       repository = "https://github.com/srid/alien-psychology.git";
       refreshPort = 8999;

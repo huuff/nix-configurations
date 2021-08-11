@@ -26,7 +26,7 @@ in
 
       environment.systemPackages = [ pkgs.php74 ];
 
-      services.osticket = {
+      machines.osticket = {
         enable = true;
 
         database.passwordFile = pkgs.writeText "dbpass" "dbpass";

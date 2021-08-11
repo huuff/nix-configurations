@@ -1,10 +1,10 @@
 { pkgs, lib, config, ... }:
 with lib;
 let
-  cfg = config.services.do-on-request;
+  cfg = config.machines.do-on-request;
 in
   {
-    options.services.do-on-request = with types; {
+    options.machines.do-on-request = with types; {
       enable = mkEnableOption "Run something when receiving a request on some port";
 
       port = mkOption {

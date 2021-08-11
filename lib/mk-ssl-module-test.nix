@@ -9,7 +9,7 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ (import ./mk-ssl-module.nix "test") ];
 
-    services.test.ssl = {
+    machines.test.ssl = {
       enable = true;
       httpsOnly = true;
       user = "nginx";

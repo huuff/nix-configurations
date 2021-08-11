@@ -3,7 +3,7 @@ with lib;
 
 {
   options = with types; {
-    services.mail = {
+    machines.mail = {
       enable = mkEnableOption "Whether to enable a full email server"; 
 
 

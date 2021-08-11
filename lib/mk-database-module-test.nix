@@ -10,7 +10,7 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ (import ./mk-database-module.nix "test") ];
 
-    services.test.database = {
+    machines.test.database = {
       inherit user name;
       passwordFile = pkgs.writeText "dbpass" pass; 
     };

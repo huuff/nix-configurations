@@ -9,12 +9,12 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ ./auto-rsync-module.nix ./ensure-paths-module.nix ];
 
-    services.ensurePaths = [
+    machines.ensurePaths = [
       { path = startPath; }
       { path = endPath; }
     ];
 
-    services.auto-rsync = {
+    machines.auto-rsync = {
       enable = true;
       inherit startPath endPath;
     };
@@ -32,7 +32,7 @@ pkgs.nixosTest {
     with subtest("files added to the startpath are copied to the endpath"):
       machine.execute("touch ${startPath}/file1")
       machine.execute("touch ${startPath}/file2")
-      machine.sleep(1)
+      machine.sleep(2)
       machine.succeed("[ -e ${endPath}/file1 ]")
       machine.succeed("[ -e ${endPath}/file2 ]")
   '';

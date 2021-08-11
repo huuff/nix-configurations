@@ -3,7 +3,7 @@
 with lib;
 
 let
-  cfg = config.services.osticket;
+  cfg = config.machines.osticket;
   myLib = import ../../lib/default.nix { inherit config pkgs; };
 
   userModule = with types; submodule {
@@ -38,7 +38,7 @@ in {
     (import ../../lib/mk-init-module.nix "osticket")
     ];
 
-    options.services.osticket = with types; {
+    options.machines.osticket = with types; {
       enable = mkEnableOption "osTicket ticketing system";
 
       package = mkOption {
@@ -95,21 +95,6 @@ in {
     };
 
     config = mkIf cfg.enable {
-      assertions = [
-        {
-          assertion = all (user: user.passwordFile != null) cfg.users;
-          message = "passwordFile must be set for all users!";
-        }
-        {
-          assertion = all (user: user.email != null) cfg.users;
-          message = "email must be set for all users!";
-        }
-        {
-          assertion = cfg.admin.passwordFile != null;
-          message = "admin.passwordFile must be set!";
-        }
-      ];
-
       networking.firewall = {
         allowedTCPPorts = [ 80 ];
       };
@@ -199,7 +184,7 @@ in {
       };
     };
 
-    services.osticket.initialization = [
+    machines.osticket.initialization = [
       {
         name = "deploy-osticket";
         description = "Copy osTicket files and set permissions";

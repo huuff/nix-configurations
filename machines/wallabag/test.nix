@@ -21,7 +21,7 @@ in
 
       environment.systemPackages = [ pkgs.php74 ];
 
-      services.wallabag = {
+      machines.wallabag = {
         enable = true;
         ssl.enable = false;
 

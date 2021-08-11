@@ -10,7 +10,7 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ ./do-on-request-module.nix ];
 
-    services.do-on-request = {
+    machines.do-on-request = {
       enable = true;
       script = "echo '${testWord}' >> ${file}";
       inherit port;

@@ -12,7 +12,7 @@ in
 
         system.activationScripts.createTestFile.text = "touch ${testFilePath}";
 
-        services.test.initialization = [
+        machines.test.initialization = [
           {
             name = "unit1";
             description = "First unit";

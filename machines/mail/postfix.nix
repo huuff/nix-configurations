@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 with lib;
 let
-  cfg = config.services.postfix;
+  cfg = config.machines.postfix;
 in
   {
 
@@ -52,7 +52,7 @@ in
       inet_interfaces = all
     '';
     defaultMasterCf = pkgs.writeText "master.cf" ''
-      # ==========================================================================
+# ==========================================================================
 # service type  private unpriv  chroot  wakeup  maxproc command + args
 #               (yes)   (yes)   (no)    (never) (100)
 # ==========================================================================
@@ -93,12 +93,8 @@ scache    unix  -       -       n       -       1       scache
       };
     };
 
-    services.ensurePaths = 
-    let
-      installation = config.services.postfix.installation;
-    in
-    [
-      { path = "${installation.path}/queue"; owner = installation.user; }
+    machines.ensurePaths = [
+      { path = "${cfg.installation.path}/queue"; owner = cfg.installation.user; }
       "/etc/aliases"
     ];
 

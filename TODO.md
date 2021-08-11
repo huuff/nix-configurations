@@ -3,7 +3,7 @@
 * A module or library for `PHP` + `nginx`, but I find it difficult since I just copypaste nginx configurations from the internet.
 * I'm making some efforts to get these to work for an installation with multiple modules at the same time, but does it? I've never tested.
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
-* Realized I fucked up by using the `services` namespace. I can't override its modules comfortable because it fucks a lot of stuff up (my first try was to disable the modules I overrided, but then I had to disable any that depended on them and then just about everything went wrong). Move everything to `machines` which is going to be exhausting.
+* Realized I fucked up by using the `services` namespace. I can't override its modules comfortable because it fucks a lot of stuff up (my first try was to disable the modules I overrided, but then I had to disable any that depended on them and then just about everything went wrong). Move everything to `machines` which is going to be exhausting. UPDATE: Crisis averted? The `machines` namespace looks a bit weird. I realize that maybe, my lib modules should be on `services` and my machines in `machines` since the lib modules are general purpose and usually not really useful by themselves? Or maybe another namespace is needed. Wish Nix made this easier.
 * I think I've used `mkEnableOption` wrong every single time. It takes a name, not a description.
 
 ## Neuron
@@ -15,7 +15,7 @@
 * A config object, and transform it to the `curl` request (same as for `parameters.yml` in `wallabag`)
 
 ## Jenkins
-* ON HOLD. I want to use `withCLI` in the Jenkins module of nixpkgs but it's not available in my version yet. Wait until it's stable? bump to 21.11pre? I realize I know nothing about the nixpkgs release scheme
+* ON HOLD. I want to use `withCLI` in the Jenkins module of nixpkgs but it's not available in my version yet. Wait until it's stable? bump to 21.11pre? I realize I know nothing about the nixpkgs release scheme. UPDATE: Maybe just implement the module myself, there's a good chance I'll have to anyway
 * Set up JDKs (in `configuration.xml`)
 * Set up credentials (in `credentials.xml`)
 * Set up security
