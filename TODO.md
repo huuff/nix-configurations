@@ -28,6 +28,7 @@
 * Backup options, there's nothing yet but it's pretty important
 * Add email options
 * Seems like `create-parameters` should be an external file, it takes too much space. UPDATE: What about making it an attribute set and using `toYAML`?
+* I think the DB can be authenticated as a Unix socket, check it.
 
 ### Auto-import
 It works, but:
