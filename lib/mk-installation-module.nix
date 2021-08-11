@@ -25,7 +25,7 @@ in
     };
 
     config = {
-      machines.ensurePaths = [ { path = cfg.path; owner = cfg.user;} ];
+      services.ensurePaths = [ { path = cfg.path; owner = cfg.user;} ];
 
       users = {
         users.${cfg.user} = {

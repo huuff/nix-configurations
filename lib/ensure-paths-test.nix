@@ -10,7 +10,7 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ ./ensure-paths-module.nix ];
 
-    machines.ensurePaths = [
+    services.ensurePaths = [
       { path = path1; owner = "user1"; permissions = "644"; }
       { path = path2; owner = "user2"; permissions = "755"; }
       path3 

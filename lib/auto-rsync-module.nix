@@ -1,11 +1,11 @@
 { pkgs, lib, config, ...}:
 with lib;
 let
-  cfg = config.machines.auto-rsync;
+  cfg = config.services.auto-rsync;
 in
   {
     options = with types; {
-      machines.auto-rsync = {
+      services.auto-rsync = {
         enable = mkEnableOption "Enable auto-rsync";
 
         startPath = mkOption {

@@ -114,7 +114,7 @@ in
 
       };
 
-      machines = {
+      services = {
         do-on-request = {
           enable = true;
           user = cfg.installation.user;

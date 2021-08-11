@@ -9,12 +9,12 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ ./auto-rsync-module.nix ./ensure-paths-module.nix ];
 
-    machines.ensurePaths = [
+    services.ensurePaths = [
       { path = startPath; }
       { path = endPath; }
     ];
 
-    machines.auto-rsync = {
+    services.auto-rsync = {
       enable = true;
       inherit startPath endPath;
     };

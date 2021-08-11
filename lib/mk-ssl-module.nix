@@ -43,7 +43,7 @@ in
         sslCertificateKey = "${cfg.path}/key.pem";
       };
       
-      machines.ensurePaths = [ { 
+      services.ensurePaths = [ { 
         path = cfg.path;
         owner = cfg.user;
       } ];
