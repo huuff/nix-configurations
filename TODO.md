@@ -5,9 +5,13 @@
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
 * Realized I fucked up by using the `services` namespace. I can't override its modules comfortable because it fucks a lot of stuff up (my first try was to disable the modules I overrided, but then I had to disable any that depended on them and then just about everything went wrong). Move everything to `machines` which is going to be exhausting. UPDATE: Crisis averted? The `machines` namespace looks a bit weird. I realize that maybe, my lib modules should be on `services` and my machines in `machines` since the lib modules are general purpose and usually not really useful by themselves? Or maybe another namespace is needed. Wish Nix made this easier.
 * I think I've used `mkEnableOption` wrong every single time. It takes a name, not a description.
+* Harden long-standing systemd services (`do-on-request`, `auto-rsync`)
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all. UPDATE: Yeah but these are integration tests and testing the individual components does not guarantee that they all work together
+
+## Testing library
+* Switch to `snake_case`
 
 ## osTicket
 * Add backup options
@@ -54,11 +58,6 @@ It works, but:
 * Definitely needs to follow the path convention
 
 ## Mail
-* Took into the absurd endeavour of implementing my own mail server in Nix, not without copying chunks of code from `nixpkgs` or `snm`, of course. I decided to begin little by little, with a module for `postfix`, `dovecot`, `roundcube`, etc..
-
-### Postfix
-* Mostly everything really
-* Test it. For starters, that I can write a mail from root to root and get it.
-* Try to get it to work for several users and see what happens, maybe test if they get the mails.
-* Add aliases
-* Make some substitutions in the config
+* I've decided to abandon my mission to implement everything about mail (for now).
+* Test that I can send and receive mail to and from users (`postfix`). UPDATE: Test mail between two machines running the same configuration.
+* Test that I can access the mail from outside (`dovecot`)
