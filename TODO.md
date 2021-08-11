@@ -44,7 +44,7 @@ It works, but:
 * Allow to define a group, maybe extra groups, for `postdrop` for example.
 
 ## ensurePaths
-* Add option to ensure paths based on installation
+* Add option to ensure paths based on installation. UPDATE: default owner to `cfg.installation.owner`?
 
 ## mkDatabaseModule
 * Add `postgres`
