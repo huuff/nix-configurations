@@ -63,39 +63,16 @@ in
         description = "List of initial wallabag users";
       };
 
-      # FORCED to add this
-      domainName = mkOption {
-        type = str;
-        default = if cfg.ssl.enable then "https://localhost" else "http://localhost";
-        description = "Domain name of the deployment";
-      };
-
       enableRedis = mkEnableOption "redis for processing imports";
 
-      site = {
-        name = mkOption {
-          type = str;
-          default = "Your wallabag instance";
-          description = "Name of the site";
-        };
-
-        enableRegistration = mkOption {
-          type = bool;
-          default = true;
-          description = "Whether to allow new users to register";
-        };
-
-        requiredActivation = mkOption {
-          type = bool;
-          default = true;
-          description = "Whether to require registered users to be activated via email";
-        };
-
+      parameters = mkOption {
+        type = attrs;
+        default = {};
+        description = "parameters.yml used for installing wallabag";
       };
     };
 
     config = mkIf cfg.enable {
-
       assertions = [
         # Since wallabag forces us to set a domain name and this will include whether it's
         # http or https, if we choose https then http will not work.
@@ -104,10 +81,66 @@ in
           message = "For wallabag, if SSL is enabled then ssl.httpsOnly must be true!";
         }
         {
-          assertion = cfg.site.requiredActivation -> cfg.site.enableRegistration;
-          message = "You must enable cfg.site.enableRegistration to enable cfg.site.requiredActivation";
+          assertion = cfg.parameters.fosuser_confirmation -> cfg.parameters.fosuser_registration;
+          message = "If parameters.fosuser_confirmation is true, then parameters.fosuser_registration must also be true!";
         }
       ];
+
+      machines.wallabag.parameters = {
+          database_driver = "pdo_mysql";
+          database_host = "127.0.0.1";
+          database_port = "~";
+          database_name = cfg.database.name;
+          database_user = cfg.database.user;
+          database_password = myLib.passwd.cat cfg.database.passwordFile;
+          database_path = null;
+          database_table_prefix = cfg.database.prefix;
+          database_socket = null;
+          database_charset = "utf8mb4";
+
+          domain_name = if cfg.ssl.enable then "https://localhost" else "http://localhost";
+          server_name = "Your wallabag instance";
+
+          mailer_transport = "smtp";
+          mailer_user = "~";
+          mailer_password = "~";
+          mailer_host = "127.0.0.1";
+          mailer_port = "false";
+          mailer_encryption = "~";
+          mailer_auth_mode = "~";
+
+          locale = "en";
+
+          secret = "$(${pkgs.libressl}/bin/openssl rand -hex 12)";
+
+          twofactor_auth = true;
+          twofactor_sender = "noreply@wallabag.org";
+
+          fosuser_registration = true;
+          fosuser_confirmation = true;
+          fos_oauth_server_access_token_lifetime = 3600;
+          fos_oauth_server_refresh_token_lifetime = 1209600;
+          
+          from_email = "no-reply@wallabag.org";
+
+          rss_limit = 50;
+
+          rabbitmq_host = "localhost";
+          rabbitmq_port = 5679;
+          rabbitmq_user = "guest";
+          rabbitmq_password = "guest";
+          rabbitmq_prefetch_count = 10;
+
+          redis_scheme = "tcp";
+          redis_host = "localhost";
+          redis_port = if cfg.enableRedis then config.services.redis.port else "6379";
+          redis_path = null;
+          redis_password = null;
+
+          sentry_dsn = "~";
+        };
+
+
 
       networking.firewall.allowedTCPPorts = [ 80 ];
 
@@ -127,76 +160,9 @@ in
       {
         name = "create-parameters";
         description = "Create parameters.yml for installation";
-        script = 
-        let 
-            parameters = ''
-parameters:
-  database_driver: pdo_mysql
-  database_host: 127.0.0.1
-  database_port: ~
-  database_name: ${cfg.database.name}
-  database_user: ${cfg.database.user}
-  database_password: ${myLib.passwd.cat cfg.database.passwordFile}
-    # For SQLite, database_path should be "%kernel.project_dir%/data/db/wallabag.sqlite"
-  database_path: null
-  database_table_prefix: ${cfg.database.prefix}
-  database_socket: null
-    # with PostgreSQL and SQLite, you must set "utf8"
-  database_charset: utf8mb4
-
-  domain_name: ${cfg.domainName}
-  server_name: "${cfg.site.name}"
-
-  mailer_transport:  smtp
-  mailer_user:       ~
-  mailer_password:   ~
-  mailer_host:       127.0.0.1
-  mailer_port:       false
-  mailer_encryption: ~
-  mailer_auth_mode:  ~
-
-  locale: en
-
-    # A secret key that's used to generate certain security-related tokens
-  secret: $(${pkgs.libressl}/bin/openssl rand -hex 12)
-
-    # two factor stuff
-  twofactor_auth: true
-  twofactor_sender: no-reply@wallabag.org
-
-    # fosuser stuff
-  fosuser_registration: ${boolToString cfg.site.enableRegistration}
-  fosuser_confirmation: ${boolToString cfg.site.requiredActivation}
-
-    # how long the access token should live in seconds for the API
-  fos_oauth_server_access_token_lifetime: 3600
-    # how long the refresh token should life in seconds for the API
-  fos_oauth_server_refresh_token_lifetime: 1209600
-
-  from_email: no-reply@wallabag.org
-
-  rss_limit: 50
-
-    # RabbitMQ processing
-  rabbitmq_host: localhost
-  rabbitmq_port: 5672
-  rabbitmq_user: guest
-  rabbitmq_password: guest
-  rabbitmq_prefetch_count: 10
-
-    # Redis processing
-  redis_scheme: tcp
-  redis_host: localhost
-  redis_port: ${if cfg.enableRedis then (toString config.services.redis.port) else "6379"}
-  redis_path: null
-  redis_password: null
-
-    # sentry logging
-  sentry_dsn: ~
-          '';
-          in ''
-          rm ${cfg.installation.path}/app/config/parameters.yml
-          echo "${parameters}" >> ${cfg.installation.path}/app/config/parameters.yml
+        script =  ''
+          rm -f ${cfg.installation.path}/app/config/parameters.yml
+          echo "${builtins.toJSON { parameters = cfg.parameters; }}" >> ${cfg.installation.path}/app/config/parameters.yml
             '';
       }
 

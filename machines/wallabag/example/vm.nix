@@ -20,8 +20,8 @@ in with myLib; {
 
   machines.wallabag = {
     enable = true;
-    domainName = "https://localhost:8988";
     ssl.enable = true;
+    parameters.domain_name = "https://localhost:8988";
 
     database.passwordFile = fileFromStore ./dbpass;
     enableRedis = true;
