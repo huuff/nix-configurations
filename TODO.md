@@ -38,15 +38,12 @@
 * Add an intermediate "lock" for each unit, so these can show at what point of the initialization we are, and thus, restart from an intermediate point instead of from the beginning.
 * Make it somewhat more terse. My init scripts still look a bit hideous
 
-## mkInstallationModule
-* Allow to define a group, maybe extra groups, for `postdrop` for example.
-
 ## ensurePaths
 * Add option to ensure paths based on installation. UPDATE: default owner to `cfg.installation.owner`?
 
 ## mkDatabaseModule
 * Add `postgres`
-* Maybe add also socket access to users, not only password, so I don't have to use the password in each `exec` SQL.UPDATE: Turns out this is impossible, at least have some way of having both.
+* Allow also UNIX socket users.
 * `execDDL` and `execDML` would be better as `runDDL` and `runDML`, also, `execDDL` isn't even really for DDL
 
 ## mkSSLModule
