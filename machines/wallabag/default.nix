@@ -238,7 +238,12 @@ parameters:
           '';
         path = [ phpWithTidy ];
       }
-    ];
+
+    ] ++ optional cfg.enableRedis {
+        name = "enable-redis";
+        description = "Enable redis for importing in the database";
+        script = myLib.db.execDML cfg "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_redis';";
+      };
 
     services.nginx = {
       enable = true;

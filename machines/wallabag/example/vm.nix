@@ -8,11 +8,15 @@ in with myLib; {
   ];
 
   virtualisation.memorySize = "2048M";
+  virtualisation.diskSize = 5 * 1024;
 
   environment.systemPackages = with pkgs; [
     php74
     php74Packages.composer
   ];
+  
+  services.redis.logfile = "stdout";
+  services.redis.logLevel = "debug";
 
   services.wallabag = {
     enable = true;

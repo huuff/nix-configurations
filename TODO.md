@@ -25,17 +25,14 @@
 * Backup options, there's nothing yet but it's pretty important
 * Add email options
 * Seems like `create-parameters` should be an external file, it takes too much space. UPDATE: What about making it an attribute set and using `toYAML`?
-
-### Auto-import
-It works, but:
-* REMEMBER TO ENABLE IT IN THE DB! But do it tomorrow. It's late now.
-* Seems like `redis` needs write access, but the NixOS module doesn't add any `mkOverride` so I can't give it that. So maybe I'll need to also implement my own `redis` module.
+* HTTPS redirect not really working
 * Since I'm at it, I could implement also `rabbitmq`
 * Implement other imports? not only `pocket`? Though I don't use them, I'd never know.
 
 ## mkInitModule
 * Add an intermediate "lock" for each unit, so these can show at what point of the initialization we are, and thus, restart from an intermediate point instead of from the beginning.
 * Make it somewhat more terse. My init scripts still look a bit hideous
+* Make it work with some `mkIf` or `optionalAttrs`, look `wallabag`, I'm currently concatenating but something better is needed so I can optionally add more scripts in the order I want
 
 ## mkInstallationModule
 * Allow to define a group, maybe extra groups, for `postdrop` for example.
@@ -55,6 +52,7 @@ It works, but:
 
 ## Mail
 * Took into the absurd endeavour of implementing my own mail server in Nix, not without copying chunks of code from `nixpkgs` or `snm`, of course. I decided to begin little by little, with a module for `postfix`, `dovecot`, `roundcube`, etc..
+* UPDATE: Or maybe I will implement them actually? I'll see it in time
 
 ### Postfix
 * Mostly everything really
