@@ -27,7 +27,6 @@
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important
 * Add email options
-* HTTPS redirect not really working
 * I think the DB can be authenticated as a Unix socket, check it.
 
 ### Auto-import

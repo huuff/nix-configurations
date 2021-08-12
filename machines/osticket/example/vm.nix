@@ -24,6 +24,7 @@ in with myLib; {
     };
 
     ssl.enable = true;
+    ssl.httpsOnly = true;
 
     database.passwordFile = fileFromStore ./dbpass;
 
