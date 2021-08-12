@@ -36,6 +36,6 @@ pkgs.nixosTest {
         machine.wait_until_succeeds("[ -e ${directory}/.neuron/output/index.html ]")
 
       with subtest("nginx is serving the zettelkasten"):
-        machine.outputContains('curl localhost', '<h1 id="title-h1">Alien Psychology</h1>')
+        machine.output_contains('curl localhost', '<h1 id="title-h1">Alien Psychology</h1>')
     '';
 }

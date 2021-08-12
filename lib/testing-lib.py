@@ -48,11 +48,11 @@ def outputs(self, command, output):
         raise AssertionError(f'Expected: {output} Got: {out}')
 
 # TODO: Better name for the argument, expected instead of output
-def outputContains(self, command, output):
+def output_contains(self, command, output):
     [ _, out ] = self.execute(command)
     contains(out, output)
 
-def printOutput(self, command):
+def print_output(self, command):
     [ _, out ] = self.execute(command)
     print(out)
 
@@ -60,13 +60,13 @@ Machine.login = login
 Machine.create_user_and_login = create_user_and_login
 Machine.create_user = create_user
 Machine.outputs = outputs
-Machine.outputContains = outputContains
-Machine.printOutput = printOutput
+Machine.output_contains = output_contains
+Machine.print_output = print_output
 Machine.switch_tty = switch_tty
 del(login)
 del(create_user_and_login)
 del(create_user)
 del(outputs)
-del(outputContains)
-del(printOutput)
+del(output_contains)
+del(print_output)
 del(switch_tty)
