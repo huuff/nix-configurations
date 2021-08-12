@@ -24,6 +24,7 @@
 * Backup options, there's nothing yet but it's pretty important
 * Add email options
 * I think the DB can be authenticated as a Unix socket, check it.
+* `nginx` locations to nix, using `priority`
 
 ### Auto-import
 * Since I'm at it, I could implement also `rabbitmq`
