@@ -26,7 +26,7 @@ in
 
       environment.systemPackages = [ pkgs.php74 ];
 
-      services.osticket = {
+      machines.osticket = {
         enable = true;
 
         database.passwordFile = pkgs.writeText "dbpass" "dbpass";
@@ -69,7 +69,7 @@ in
         machine.succeed("systemctl is-active --quiet install-osticket")
         machine.succeed("systemctl is-active --quiet setup-users")
 
-      machine.login()
+      machine.create_user_and_login()
 
       with subtest("admin can login"):
         machine.send_chars("php ${path}/manage.php agent login\n")

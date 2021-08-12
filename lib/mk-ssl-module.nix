@@ -2,13 +2,13 @@ name:
 { config, lib, pkgs, ... }:
 with lib;
 let
-  cfg = config.services.${name}.ssl;
+  cfg = config.machines.${name}.ssl;
 in
   {
     imports = [ ./ensure-paths-module.nix ];
 
     options = {
-      services.${name}.ssl = with types; {
+      machines.${name}.ssl = with types; {
 
         enable = mkEnableOption "Whether to auto-generate an SSL certificate";
 

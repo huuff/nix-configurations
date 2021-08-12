@@ -18,7 +18,7 @@ in with myLib; {
   services.redis.logfile = "stdout";
   services.redis.logLevel = "debug";
 
-  services.wallabag = {
+  machines.wallabag = {
     enable = true;
     domainName = "https://localhost:8988";
     ssl.enable = true;

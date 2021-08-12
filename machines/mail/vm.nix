@@ -15,7 +15,7 @@
     alice.isNormalUser = true;
   };
 
-  services.mail = {
+  machines.mail = {
     enable = true;
   };
 }

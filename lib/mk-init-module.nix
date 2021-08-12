@@ -2,7 +2,7 @@ name:
 { lib, config, ... }:
 with lib;
 let
-  cfg = config.services.${name}.initialization;
+  cfg = config.machines.${name};
 
   lockPath = "/etc/inits/${name}"; # Created when the initialization is finished
 
@@ -32,7 +32,7 @@ let
 
       user = mkOption {
         type = str;
-        default = if (builtins.hasAttr "installation" config.services.${name}) then config.services.${name}.installation.user else "root";
+        default = if (builtins.hasAttr "installation" cfg) then cfg.installation.user else "root";
         description = "User that will run the unit";
       };
 
@@ -52,7 +52,7 @@ let
       User = initModule.user;
       Type = "oneshot";
       RemainAfterExit = true;
-      WorkingDirectory = mkIf (hasAttr "installation" config.services.${name}) config.services.${name}.installation.path;
+      WorkingDirectory = mkIf (hasAttr "installation" cfg) cfg.installation.path;
     };
 
     unitConfig = {
@@ -137,7 +137,7 @@ let
 in  
   {
     options = {
-      services.${name}.initialization = mkOption {
+      machines.${name}.initialization = mkOption {
         type = types.listOf initModule;
         default = [];
         description = "Each of the scripts to run for provisioning, in the required order";
@@ -147,7 +147,7 @@ in
     config = {
       systemd.services = 
       let
-        unorderedUnits = map initModuleToUnit cfg;
+        unorderedUnits = map initModuleToUnit cfg.initialization;
         orderedUnits = orderUnits (unorderedUnits);
       in (listToAttrs orderedUnits);
     };

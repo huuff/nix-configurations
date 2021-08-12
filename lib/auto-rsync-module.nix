@@ -4,17 +4,19 @@ let
   cfg = config.services.auto-rsync;
 in
   {
-    options.services.auto-rsync = with types; {
-      enable = mkEnableOption "Enable auto-rsync";
+    options = with types; {
+      services.auto-rsync = {
+        enable = mkEnableOption "Enable auto-rsync";
 
-      startPath = mkOption {
-        type = oneOf [path str];
-        description = "Path of the input";
-      };
+        startPath = mkOption {
+          type = oneOf [path str];
+          description = "Path of the input";
+        };
 
-      endPath = mkOption {
-        type = oneOf [path str];
-        description = "Path of the output";
+        endPath = mkOption {
+          type = oneOf [path str];
+          description = "Path of the output";
+        };
       };
     };
 
@@ -26,14 +28,15 @@ in
           Restart = mkDefault "always";
         };
 
+        path = with pkgs; [ inotify-tools rsync ];
+
         wantedBy = [ "multi-user.target" ];
 
         script = ''
-          #!${pkgs.stdenv.shell}
-          set -euo pipefail
-          while true; do
-            echo "${cfg.startPath}" | ${pkgs.entr}/bin/entr -dnrs "${pkgs.rsync}/bin/rsync -rtvu ${cfg.startPath}/* ${cfg.endPath}"
-          done;
+          inotifywait -m "${cfg.startPath}" -e create -e moved_to -e modify |
+            while read dir action file; do
+              rsync -rtvu ${cfg.startPath}/* ${cfg.endPath}
+            done
         '';
 
       };

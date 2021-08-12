@@ -2,13 +2,13 @@ name:
 { config, lib, pkgs, ... }:
 with lib;
 let
-  cfg = config.services.${name}.installation;
+  cfg = config.machines.${name}.installation;
 in
   {
     imports = [ ./ensure-paths-module.nix ];
 
     options = {
-      services.${name}.installation = with types; {
+      machines.${name}.installation = with types; {
 
         user = mkOption {
           type = str;
