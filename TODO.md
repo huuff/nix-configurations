@@ -26,10 +26,6 @@
 * I think the DB can be authenticated as a Unix socket, check it.
 * `nginx` locations to nix, using `priority`
 
-### Auto-import
-* Since I'm at it, I could implement also `rabbitmq`
-* Implement other imports? not only `pocket`? Though I don't use them, I'd never know.
-
 ## mkInitModule
 * Add an intermediate "lock" for each unit, so these can show at what point of the initialization we are, and thus, restart from an intermediate point instead of from the beginning.
 * Make it somewhat more terse. My init scripts still look a bit hideous

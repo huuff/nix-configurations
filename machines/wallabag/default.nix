@@ -63,7 +63,11 @@ in
         description = "List of initial wallabag users";
       };
 
-      enableRedis = mkEnableOption "redis for processing imports";
+      importTool = mkOption {
+        type = enum [ "none" "redis" "rabbitmq" ];
+        default = "none";
+        description = "Tool to use for importing. Use 'none' for synchronous import";
+      };
 
       parameters = mkOption {
         type = attrs;
@@ -125,19 +129,19 @@ in
 
           rss_limit = 50;
 
+          sentry_dsn = "~";
+        } // optionalAttrs (cfg.importTool == "redis") {
+          redis_scheme = "tcp";
+          redis_host = "localhost";
+          redis_port = config.services.redis.port;
+          redis_path = null;
+          redis_password = if (config.services.redis.requirePassFile != null) then myLib.passwd.cat else null;
+        } // optionalAttrs (cfg.importTool == "rabbitmq") {
           rabbitmq_host = "localhost";
-          rabbitmq_port = 5679;
+          rabbitmq_port = config.services.rabbitmq.port;
           rabbitmq_user = "guest";
           rabbitmq_password = "guest";
           rabbitmq_prefetch_count = 10;
-
-          redis_scheme = "tcp";
-          redis_host = "localhost";
-          redis_port = if cfg.enableRedis then config.services.redis.port else "6379";
-          redis_path = null;
-          redis_password = null;
-
-          sentry_dsn = "~";
         };
 
 
@@ -205,10 +209,10 @@ in
         path = [ phpWithTidy ];
       }
 
-      (mkIf (cfg.enableRedis) {
-        name = "enable-redis";
-        description = "Enable redis for importing in the database";
-        script = myLib.db.execDML cfg "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_redis';";
+      (mkIf (cfg.importTool != "none") {
+        name = "enable-${cfg.importTool}";
+        description = "Enable ${cfg.importTool} for importing in the database";
+        script = myLib.db.execDML cfg "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_${cfg.importTool}';";
       })
 
     ];
@@ -277,19 +281,29 @@ in
       };
     };
 
-    services.redis = mkIf cfg.enableRedis {
+    services.redis = mkIf (cfg.importTool == "redis") {
       enable = true;
     };
 
-    systemd.services.redis-worker = mkIf cfg.enableRedis {
-      description = "Run the redis worker for asynchronous importing";
+    services.rabbitmq = mkIf (cfg.importTool == "rabbitmq") {
+      enable = true;
+    };
+
+    systemd.services.import-worker = mkIf (cfg.importTool != "none") {
+      description = "Run the worker for asynchronous importing";
 
       after = [ "finish-wallabag-initialization.service" ];
+      requires = [ "${cfg.importTool}.service" ];
       wantedBy = [ "multi-user.target" ];
 
       path = [ phpWithTidy ];
 
-      script = "php bin/console wallabag:import:redis-worker --env=prod pocket -vv";
+      # If it's not redis, then it's rabbitmq
+      script =
+      let
+        command = if (cfg.importTool == "redis") then "wallabag:import:redis-worker" else "rabbitmq:consumer";
+        importer = if (cfg.importTool == "redis") then "pocket" else "import_pocket";
+      in "php bin/console ${command} --env=prod ${importer} -vv";
 
       serviceConfig = {
         User = cfg.installation.user;

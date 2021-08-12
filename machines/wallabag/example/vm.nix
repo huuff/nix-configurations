@@ -24,7 +24,7 @@ in with myLib; {
     parameters.domain_name = "https://localhost:8988";
 
     database.passwordFile = fileFromStore ./dbpass;
-    enableRedis = true;
+    importTool = "rabbitmq";
 
     users = [
       {
