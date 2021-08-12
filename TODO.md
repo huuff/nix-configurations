@@ -15,7 +15,6 @@
 ## osTicket
 * Add backup options
 * Add email options
-* A config object, and transform it to the `curl` request (same as for `parameters.yml` in `wallabag`)
 
 ## Jenkins
 * ON HOLD. I want to use `withCLI` in the Jenkins module of nixpkgs but it's not available in my version yet. Wait until it's stable? bump to 21.11pre? I realize I know nothing about the nixpkgs release scheme. UPDATE: Maybe just implement the module myself, there's a good chance I'll have to anyway
