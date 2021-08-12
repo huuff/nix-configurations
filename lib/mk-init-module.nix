@@ -124,14 +124,17 @@ let
 
   # TODO: a better name, documentation
   orderUnitsRec = current: alreadyOrdered: unorderedYet: 
-  let 
-    nextCurrent = head unorderedYet;
-  in
   if (length unorderedYet) == 0
-  then alreadyOrdered ++ [ (after current lastUnit) ]
-  else orderUnitsRec (nextCurrent) (alreadyOrdered ++ [ (after current nextCurrent) ]) (tail unorderedYet);
+  then
+    alreadyOrdered ++ [ (after current lastUnit) ]
+  else let 
+    next = head unorderedYet;
+    nextAfterCurrent = after current next;
+    rest = tail unorderedYet;
+  in
+    orderUnitsRec next (alreadyOrdered ++ [nextAfterCurrent]) rest;
 
-  # TODO: a better name
+  # TODO: a better name, documentation
   orderUnits = units: orderUnitsRec (firstUnit) [firstUnit] (units);
 
 in  
@@ -148,7 +151,7 @@ in
       systemd.services = 
       let
         unorderedUnits = map initModuleToUnit cfg.initialization;
-        orderedUnits = orderUnits (unorderedUnits);
+        orderedUnits = orderUnits unorderedUnits;
       in (listToAttrs orderedUnits);
     };
   }

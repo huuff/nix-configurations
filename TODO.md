@@ -32,14 +32,12 @@
 * I think the DB can be authenticated as a Unix socket, check it.
 
 ### Auto-import
-It works, but:
 * Since I'm at it, I could implement also `rabbitmq`
 * Implement other imports? not only `pocket`? Though I don't use them, I'd never know.
 
 ## mkInitModule
 * Add an intermediate "lock" for each unit, so these can show at what point of the initialization we are, and thus, restart from an intermediate point instead of from the beginning.
 * Make it somewhat more terse. My init scripts still look a bit hideous
-* Make it work with some `mkIf` or `optionalAttrs`, look `wallabag`, I'm currently concatenating but something better is needed so I can optionally add more scripts in the order I want
 
 ## mkInstallationModule
 * Allow to define a group, maybe extra groups, for `postdrop` for example.
@@ -49,7 +47,8 @@ It works, but:
 
 ## mkDatabaseModule
 * Add `postgres`
-* Maybe add also socket access to users, not only password, so I don't have to use the password in each `exec` SQL.UPDATE: Turns out this is impossible.
+* Maybe add also socket access to users, not only password, so I don't have to use the password in each `exec` SQL.UPDATE: Turns out this is impossible, at least have some way of having both.
+* `execDDL` and `execDML` would be better as `runDDL` and `runDML`, also, `execDDL` isn't even really for DDL
 
 ## mkSSLModule
 * Option to add own certificate
