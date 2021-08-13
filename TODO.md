@@ -5,6 +5,7 @@
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
 * I think I've used `mkEnableOption` wrong every single time. It takes a name, not a description.
 * Harden long-standing systemd services (`do-on-request`, `auto-rsync`)
+* A hardened `openssh` module like that in [this post](https://christine.website/blog/paranoid-nixos-2021-07-18)
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all. UPDATE: Yeah but these are integration tests and testing the individual components does not guarantee that they all work together
@@ -47,3 +48,10 @@
 ## Mail
 * Test that I can send and receive mail to and from users (`postfix`). UPDATE: Test mail between two machines running the same configuration.
 * Test that I can access the mail from outside (`dovecot`)
+
+## Postfix
+Okay I've decided to try again to implement it myself:
+* A format for specifying any map
+* Get it working with virtual mailboxes since that is what I care about the most.
+* Remove the todos from `mail`?
+* My current test for `mail` should be for `postfix`
