@@ -10,7 +10,7 @@ let
   };
 in
 pkgs.nixosTest {
-  name = "mail";
+  name = "postfix";
 
   machine = { pkgs, ... }: {
     imports = [
@@ -19,7 +19,7 @@ pkgs.nixosTest {
 
     environment.systemPackages = with pkgs; [ mailutils ];
 
-    machines.mail = {
+    machines.postfix = {
       enable = true;
     };
 
@@ -36,13 +36,12 @@ pkgs.nixosTest {
   };
 
   testScript = ''
-    ${ builtins.readFile ../../lib/testing-lib.py }
+    ${ builtins.readFile ../../../lib/testing-lib.py }
 
     machine.wait_for_unit("multi-user.target")
 
     with subtest("units are active"):
       machine.succeed("systemctl is-active --quiet postfix")
-      machine.succeed("systemctl is-active --quiet dovecot2")
 
     with subtest("mails are delivered"):
       # Send mail from alice to bob

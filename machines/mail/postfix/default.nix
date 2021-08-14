@@ -61,9 +61,13 @@ let
 
   boolToYN = bool: if bool then "y" else "n";
 
+  boolToYesNo = bool: if bool then "yes" else "no";
+
   wakeupToStr = wakeup: if (wakeup == null) then "never" else (toString wakeup);
 
-  attrsToMainCf = name: value: "${name} = ${value}";
+  mainAttrToStr = value: if (builtins.typeOf value == "bool") then (boolToYesNo value) else (toString value);
+
+  attrsToMainCf = name: value: "${name} = ${mainAttrToStr value}";
 
   # TODO: A concatStringsSep with this and spaces (or tabs) and a list for the strings.
   attrsToMasterCf = name: value: "${if (value.name == null) then name else value.name} ${value.type} ${boolToYN value.private} ${boolToYN value.unpriv} ${boolToYN value.chroot} ${wakeupToStr value.wakeup} ${toString value.maxproc} ${value.command} ${concatStringsSep " " value.args}";
@@ -101,9 +105,20 @@ in
       in
       {
       # TODO: Default main.cf
+      # TODO: Find out what these mean exactly
       machines.postfix.main = {
-        myhostname = "nixos";
-        mydestination = "localhost";
+        biff = false;
+        mailbox_size_limit = 0;
+        recipient_delimiter = "+";
+        readme_directory = false;
+        myhostname = "nixos"; # TODO: Actual hostname
+        mydestination = "localhost"; #TODO: Actual destination
+        append_dot_mydomain = false;
+        relayhost = "";
+        alias_maps = "hash:/etc/aliases";
+        alias_database = "hash:/etc/aliases";
+        mynetworks = "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128";
+        inet_interfaces = "all";
       };
 
       # TODO: I'm sure I don't need all this shit
@@ -295,9 +310,18 @@ in
         installation = config.machines.postfix.installation;
       in
       [
-        { path = "${installation.path}/queue"; owner = installation.user; }
+        { path = "${installation.path}/queue"; owner = "root"; }
         "/etc/aliases"
       ];
+
+     # TODO: What's this? 
+      services.mail.sendmailSetuidWrapper = mkIf config.services.postfix.setSendmail {
+        program = "sendmail";
+        source = "${pkgs.postfix}/bin/sendmail";
+        group = "postdrop";
+        setuid = false;
+        setgid = true;
+      };
 
       systemd.services.postfix = {
         description = "Postfix SMTP server";

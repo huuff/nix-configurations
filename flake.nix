@@ -22,7 +22,7 @@
       neuron = import ./machines/neuron/test.nix { inherit pkgs; };
       wallabag = import ./machines/wallabag/test.nix { inherit pkgs; };
       osticket = import ./machines/osticket/test.nix { inherit pkgs; };
-      mail = import ./machines/mail/test.nix { inherit pkgs; };
+      postfix = import ./machines/mail/postfix/test.nix { inherit pkgs; };
 
       ensurePaths = import ./lib/ensure-paths-test.nix { inherit pkgs; };
       doOnRequest = import ./lib/do-on-request-test.nix { inherit pkgs; };
