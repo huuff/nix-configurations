@@ -283,7 +283,7 @@ in
       systemd.services.import-worker = mkIf (cfg.importTool != "none") {
         description = "Run the worker for asynchronous importing";
 
-        after = [ "finish-wallabag-initialization.service" ];
+        after = [ "${cfg.importTool}.service" "finish-wallabag-initialization.service" ];
         requires = [ "${cfg.importTool}.service" ];
         wantedBy = [ "multi-user.target" ];
 
