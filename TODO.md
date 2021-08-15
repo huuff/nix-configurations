@@ -30,6 +30,7 @@
 * Backup options, there's nothing yet but it's pretty important
 * Add email options
 * I think the DB can be authenticated as a Unix socket, check it.
+* `install-dependencies` should definitely fail when it fails or else `setup-users` fails.
 
 ## mkInitModule
 * Add an intermediate "lock" for each unit, so these can show at what point of the initialization we are, and thus, restart from an intermediate point instead of from the beginning.
