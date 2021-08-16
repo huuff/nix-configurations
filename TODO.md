@@ -46,6 +46,14 @@
 * Check and generate certificates if they are expired
 * Definitely needs to follow the path convention
 
+## mkBackupModule
+* Test the timer
+* Use initialization module to setup the database
+* A way to restore the backup. Test it.
+* Backup using `borg` to the same machine. Test it.
+* Backup using `borg` to another machine. Test it.
+* Backup using `borg` to S3. The final frontier.
+
 ## Mail
 * Test that I can send and receive mail to and from users (`postfix`). UPDATE: Test mail between two machines running the same configuration.
 * Test that I can access the mail from outside (`dovecot`)
