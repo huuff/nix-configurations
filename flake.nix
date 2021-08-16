@@ -31,6 +31,7 @@
       mkInstallationModule = import ./lib/mk-installation-module-test.nix { inherit pkgs; };
       mkDatabaseModule = import ./lib/mk-database-module-test.nix { inherit pkgs; };
       mkInitModule = import ./lib/mk-init-module-test.nix { inherit pkgs; };
+      mkBackupModule = import ./lib/mk-backup-module-test.nix { inherit pkgs; };
     };
   };
 

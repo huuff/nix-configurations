@@ -9,6 +9,8 @@ in
     options = with types; {
       machines.${name} = {
         database = {
+          enable = mkEnableOption "${name} database";
+
           host = mkOption {
             type = str;
             default = "localhost";
@@ -41,7 +43,7 @@ in
       };
     };
 
-    config = {
+    config = mkIf cfg.database.enable {
       assertions = [
         {
           assertion = cfg.database.passwordFile != null;
