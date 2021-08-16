@@ -5,8 +5,6 @@ let
   cfg = config.machines.${name}.ssl;
 in
   {
-    imports = [ ./ensure-paths-module.nix ];
-
     options = {
       machines.${name}.ssl = with types; {
 
@@ -43,10 +41,7 @@ in
         sslCertificateKey = "${cfg.path}/key.pem";
       };
       
-      services.ensurePaths = [ { 
-        path = cfg.path;
-        owner = cfg.user;
-      } ];
+      systemd.tmpfiles.rules = [ "d ${cfg.path} 0700 ${cfg.user} ${cfg.user} - - "];
 
       systemd.services."create-${name}-cert" = {
         description = "Create a certificate for ${name}";
@@ -61,8 +56,6 @@ in
         
         unitConfig = {
           Before = [ "multi-user.target"] ++ optional config.services.nginx.enable "nginx.service" ;
-          After = [ "ensure-paths.service" ];
-          Requires = [ "ensure-paths.service" ];
           ConditionPathExists = "!${cfg.path}/cert.pem";
         };
 

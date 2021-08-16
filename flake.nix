@@ -24,7 +24,6 @@
       osticket = import ./machines/osticket/test.nix { inherit pkgs; };
       postfix = import ./machines/mail/postfix/test.nix { inherit pkgs; };
 
-      ensurePaths = import ./lib/ensure-paths-test.nix { inherit pkgs; };
       doOnRequest = import ./lib/do-on-request-test.nix { inherit pkgs; };
       autoRsync = import ./lib/auto-rsync-test.nix { inherit pkgs; };
 

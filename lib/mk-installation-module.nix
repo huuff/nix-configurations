@@ -5,8 +5,6 @@ let
   cfg = config.machines.${name}.installation;
 in
   {
-    imports = [ ./ensure-paths-module.nix ];
-
     options = {
       machines.${name}.installation = with types; {
 
@@ -25,7 +23,7 @@ in
     };
 
     config = {
-      services.ensurePaths = [ { path = cfg.path; owner = cfg.user;} ];
+      systemd.tmpfiles.rules = [ "d ${cfg.path} - ${cfg.user} ${cfg.user} - -" ];
 
       users = {
         users.${cfg.user} = {

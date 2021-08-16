@@ -7,11 +7,11 @@ pkgs.nixosTest {
   name = "auto-rsync";
 
   machine = { pkgs, ... }: {
-    imports = [ ./auto-rsync-module.nix ./ensure-paths-module.nix ];
+    imports = [ ./auto-rsync-module.nix ];
 
-    services.ensurePaths = [
-      { path = startPath; }
-      { path = endPath; }
+    systemd.tmpfiles.rules = [
+      "d ${startPath} 0777 root root - -"
+      "d ${endPath} 0777 root root - -"
     ];
 
     services.auto-rsync = {

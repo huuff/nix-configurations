@@ -158,7 +158,6 @@ in
             echo '>>> Setting write permissions to ${cfg.installation.path}'
             chmod -R u+w ${cfg.installation.path}
           '';
-          extraDeps = [ "ensure-paths.service" ];
         }
 
         {

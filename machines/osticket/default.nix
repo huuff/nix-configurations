@@ -196,7 +196,6 @@ in {
             find ${cfg.installation.path} -type d -print0 | xargs -0 chmod 0755
             find ${cfg.installation.path} -type f -print0 | xargs -0 chmod 0644
         '';
-        extraDeps = [ "ensure-paths.service" ];
       }
       {
         name = "install-osticket";

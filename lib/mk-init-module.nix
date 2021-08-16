@@ -78,8 +78,6 @@ let
 
       script = "echo 'Start provisioning ${name}'";
 
-      after = [ "ensure-paths.service" ];
-
       serviceConfig = {
         User = "root";
         Type = "oneshot";

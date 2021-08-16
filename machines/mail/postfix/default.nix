@@ -305,13 +305,9 @@ in
 
       users.groups.postdrop = {};
 
-      services.ensurePaths = 
-      let
-        installation = config.machines.postfix.installation;
-      in
-      [
-        { path = "${installation.path}/queue"; owner = "root"; }
-        "/etc/aliases"
+      systemd.tmpfiles.rules = [
+        "d ${cfg.installation.path}/queue - root root - -"
+        "f /etc/aliases - root root - -"
       ];
 
      # TODO: What's this? 
@@ -329,7 +325,7 @@ in
         path = [ pkgs.postfix ];
 
         wantedBy = [ "multi-user.target" ];
-        after = [ "network.target" "ensure-paths.service" ];
+        after = [ "network.target" ];
 
         serviceConfig = {
           Type = "forking";
