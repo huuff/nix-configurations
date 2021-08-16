@@ -11,6 +11,7 @@ pkgs.nixosTest {
     imports = [ (import ./mk-database-module.nix "test") ];
 
     machines.test.database = {
+      enable = true;
       inherit user name;
       passwordFile = pkgs.writeText "dbpass" pass; 
     };

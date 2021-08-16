@@ -36,68 +36,68 @@ in {
     (import ../../lib/mk-ssl-module.nix "osticket")
     (import ../../lib/mk-installation-module.nix "osticket")
     (import ../../lib/mk-init-module.nix "osticket")
-    ];
+  ];
 
-    options.machines.osticket = with types; {
-      enable = mkEnableOption "osTicket ticketing system";
+  options.machines.osticket = with types; {
+    enable = mkEnableOption "osTicket ticketing system";
 
-      package = mkOption {
-        type = package;
-        default = pkgs.callPackage ./derivation.nix {};
-        description = "The package that provides osTicket";
+    package = mkOption {
+      type = package;
+      default = pkgs.callPackage ./derivation.nix {};
+      description = "The package that provides osTicket";
+    };
+
+    admin = {
+      username = mkOption {
+        type = str;
+        description = "Username of the admin account";
       };
 
-      admin = {
-        username = mkOption {
-          type = str;
-          description = "Username of the admin account";
-        };
-
-        email = mkOption {
-          type = str;
-          description = "Email of the admin account";
-        };
-
-        passwordFile = mkOption {
-          type = oneOf [ str path ];
-          description = "Path to the file with the hashed password of the admin user";
-        };
-
-        firstName = mkOption {
-          type = str;
-          description = "First name of the admin";
-        };
-
-        lastName = mkOption {
-          type = str;
-          description = "Last name of the admin";
-        };
+      email = mkOption {
+        type = str;
+        description = "Email of the admin account";
       };
 
-      site = {
-        name = mkOption {
-          type = str;
-          default = "osTicket";
-          description = "Name of the site";
-        };
-
-        email = mkOption {
-          type = str;
-          description = "E-mail of the site";
-        };
+      passwordFile = mkOption {
+        type = oneOf [ str path ];
+        description = "Path to the file with the hashed password of the admin user";
       };
 
-      users = mkOption {
-        type = listOf userModule;
-        default = [];
-        description = "List of initial osTicket users";
+      firstName = mkOption {
+        type = str;
+        description = "First name of the admin";
+      };
+
+      lastName = mkOption {
+        type = str;
+        description = "Last name of the admin";
       };
     };
 
-    config = mkIf cfg.enable {
-      networking.firewall = {
-        allowedTCPPorts = [ 80 ];
+    site = {
+      name = mkOption {
+        type = str;
+        default = "osTicket";
+        description = "Name of the site";
       };
+
+      email = mkOption {
+        type = str;
+        description = "E-mail of the site";
+      };
+    };
+
+    users = mkOption {
+      type = listOf userModule;
+      default = [];
+      description = "List of initial osTicket users";
+    };
+  };
+
+  config = mkIf cfg.enable {
+    networking.firewall = {
+      allowedTCPPorts = [ 80 ];
+    };
 
     # is this useful for anything?
     systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.installation.path ];
@@ -184,29 +184,32 @@ in {
       };
     };
 
-    machines.osticket.initialization = [
-      {
-        name = "deploy-osticket";
-        description = "Copy osTicket files and set permissions";
-        script = ''
-        echo ">>> Copying files to ${cfg.installation.path}"
-        cp -r ${cfg.package}/* ${cfg.installation.path}
+    machines.osticket = {
+      database.enable = true;
+
+      initialization = [
+        {
+          name = "deploy-osticket";
+          description = "Copy osTicket files and set permissions";
+          script = ''
+            echo ">>> Copying files to ${cfg.installation.path}"
+            cp -r ${cfg.package}/* ${cfg.installation.path}
 
             echo ">>> Setting permissions for serving"
             find ${cfg.installation.path} -type d -print0 | xargs -0 chmod 0755
             find ${cfg.installation.path} -type f -print0 | xargs -0 chmod 0644
-        '';
-      }
-      {
-        name = "install-osticket";
-        description = "Run osTicket installation script and cleanup";
-        script = ''
-          echo ">>> Setting config file"
-          mv ${cfg.installation.path}/include/ost-sampleconfig.php ${cfg.installation.path}/include/ost-config.php
-          chmod 0666 ${cfg.installation.path}/include/ost-config.php
+          '';
+        }
+        {
+          name = "install-osticket";
+          description = "Run osTicket installation script and cleanup";
+          script = ''
+            echo ">>> Setting config file"
+            mv ${cfg.installation.path}/include/ost-sampleconfig.php ${cfg.installation.path}/include/ost-config.php
+            chmod 0666 ${cfg.installation.path}/include/ost-config.php
 
-          echo ">>> Calling install script"
-          ${pkgs.curl}/bin/curl ${optionalString cfg.ssl.httpsOnly "-k "} "${if cfg.ssl.httpsOnly then "https" else "http"}://localhost/setup/install.php" \
+            echo ">>> Calling install script"
+            ${pkgs.curl}/bin/curl ${optionalString cfg.ssl.httpsOnly "-k "} "${if cfg.ssl.httpsOnly then "https" else "http"}://localhost/setup/install.php" \
             -F "s=install" \
             -F "name=${cfg.site.name}" \
             -F "email=${cfg.site.email}" \
@@ -221,37 +224,38 @@ in {
             -F "dbname=${cfg.database.name}" \
             -F "dbuser=${cfg.database.user}" \
             -F "dbpass=${myLib.passwd.cat cfg.database.passwordFile}"
-          echo ">>> Performing post-install cleanup"
-          chmod 0644 ${cfg.installation.path}/include/ost-config.php
-          rm -r ${cfg.installation.path}/setup
-        '';
-        extraDeps = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
-      }
-      {
-        name = "setup-users";
-        description = "Create initial osTicket users";
+            echo ">>> Performing post-install cleanup"
+            chmod 0644 ${cfg.installation.path}/include/ost-config.php
+            rm -r ${cfg.installation.path}/setup
+          '';
+          extraDeps = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
+        }
+        {
+          name = "setup-users";
+          description = "Create initial osTicket users";
 
-        script = let
-          updateAdminPass = ''
-            UPDATE ${cfg.database.prefix}staff SET passwd='${myLib.passwd.catAndBcrypt cfg.admin.passwordFile}' WHERE staff_id=1;
+          script = let
+            updateAdminPass = ''
+              UPDATE ${cfg.database.prefix}staff SET passwd='${myLib.passwd.catAndBcrypt cfg.admin.passwordFile}' WHERE staff_id=1;
+            '';
+            insertUser = user: ''
+              START TRANSACTION;
+              INSERT INTO ${cfg.database.prefix}user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.fullName}', NOW(), NOW());
+              SELECT LAST_INSERT_ID() INTO @user_id;
+              INSERT INTO ${cfg.database.prefix}user_email (user_id, address) VALUES (@user_id, '${user.email}');
+              SELECT LAST_INSERT_ID() INTO @email_id;
+              UPDATE ${cfg.database.prefix}user SET default_email_id=@email_id WHERE id=@user_id;
+              INSERT INTO ${cfg.database.prefix}user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.passwd.catAndBcrypt user.passwordFile}');
+              COMMIT;
+            '';
+            userToDML = map (user: (myLib.db.execDML cfg (insertUser user))) cfg.users;
+          in ''
+            ${myLib.db.execDML cfg updateAdminPass}
+            ${concatStringsSep "\n" userToDML}
           '';
-          insertUser = user: ''
-            START TRANSACTION;
-            INSERT INTO ${cfg.database.prefix}user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.fullName}', NOW(), NOW());
-            SELECT LAST_INSERT_ID() INTO @user_id;
-            INSERT INTO ${cfg.database.prefix}user_email (user_id, address) VALUES (@user_id, '${user.email}');
-            SELECT LAST_INSERT_ID() INTO @email_id;
-            UPDATE ${cfg.database.prefix}user SET default_email_id=@email_id WHERE id=@user_id;
-            INSERT INTO ${cfg.database.prefix}user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.passwd.catAndBcrypt user.passwordFile}');
-            COMMIT;
-          '';
-          userToDML = map (user: (myLib.db.execDML cfg (insertUser user))) cfg.users;
-        in ''
-          ${myLib.db.execDML cfg updateAdminPass}
-          ${concatStringsSep "\n" userToDML}
-        '';
-      }
-    ];
+        }
+      ];
+    };
 
   };
 }
