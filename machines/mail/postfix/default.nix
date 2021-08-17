@@ -78,13 +78,13 @@ let
       smtpd_helo_required = true;
       
       smtpd_recipient_restrictions = [
-        "reject_non_fqdn_recipient"
+        #"reject_non_fqdn_recipient" # TODO: FQDNs, easy way to disable this
         "reject_non_fqdn_sender"
         "reject_unknown_sender_domain"
         "reject_unknown_recipient_domain"
         "permit_mynetworks"
         "reject_unauth_destination"
-        #"check_recipient_access hash:/etc/postfix/roleaccount_exceptions"
+        #"check_recipient_access hash:/etc/postfix/roleaccount_exceptions" # TODO: alias maps
         "reject_non_fqdn_hostname"
         "reject_inavlid_hostname"
         "permit"
