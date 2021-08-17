@@ -134,11 +134,7 @@ in
       # TODO: Find out what these mean exactly
       machines.postfix.main = {
         append_dot_mydomain = false;
-        biff = false;
-        mailbox_size_limit = 0;
-        recipient_delimiter = "+";
         readme_directory = false;
-        myhostname = "nixos"; # TODO: Actual hostname
         mydestination = "localhost"; #TODO: Actual destination
         relayhost = "";
         alias_maps = "hash:/etc/aliases";
