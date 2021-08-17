@@ -1,5 +1,7 @@
 { config, pkgs, lib, ... }:
 with lib;
+with (import ./postfix-lib.nix { inherit lib; });
+
 let
   cfg = config.machines.postfix;
   masterEntryModule = with types; submodule {
@@ -59,18 +61,37 @@ let
     };
   };
 
-  boolToYN = bool: if bool then "y" else "n";
+  restrictionsSets = {
+    none = {
+      smtpd_recipient_restrictions = [];
+    };
 
-  boolToYesNo = bool: if bool then "yes" else "no";
+    no_open_relay = {
+      smtpd_recipient_restrictions = [
+        "permit_mynetworks"
+        "reject_unauth_destination"
+        "permit"
+      ];
+    };
 
-  wakeupToStr = wakeup: if (wakeup == null) then "never" else (toString wakeup);
+    rfc_conformant = {
+      smtpd_helo_required = true;
+      
+      smtpd_recipient_restrictions = [
+        "reject_non_fqdn_recipient"
+        "reject_non_fqdn_sender"
+        "reject_unknown_sender_domain"
+        "reject_unknown_recipient_domain"
+        "permit_mynetworks"
+        "reject_unauth_destination"
+        #"check_recipient_access hash:/etc/postfix/roleaccount_exceptions"
+        "reject_non_fqdn_hostname"
+        "reject_inavlid_hostname"
+        "permit"
+      ];
+    };
+  };
 
-  mainAttrToStr = value: if (builtins.typeOf value == "bool") then (boolToYesNo value) else (toString value);
-
-  attrsToMainCf = name: value: "${name} = ${mainAttrToStr value}";
-
-  # TODO: A concatStringsSep with this and spaces (or tabs) and a list for the strings.
-  attrsToMasterCf = name: value: "${if (value.name == null) then name else value.name} ${value.type} ${boolToYN value.private} ${boolToYN value.unpriv} ${boolToYN value.chroot} ${wakeupToStr value.wakeup} ${toString value.maxproc} ${value.command} ${concatStringsSep " " value.args}";
 in
   {
     imports = [
@@ -93,6 +114,12 @@ in
           description = "The contents of the master.cf file as an attribute set";
         };
 
+        restrictions = mkOption {
+          type = enum (attrNames restrictionsSets);
+          default = "no_open_relay";
+          description = "Set of restrictions to enable in increasing order of complexity";
+        };
+
       };
     };
 
@@ -104,194 +131,25 @@ in
         masterCfFile = pkgs.writeText "master.cf" (concatStringsSep "\n" (mapAttrsToList (attrsToMasterCf) cfg.master));
       in
       {
-      # TODO: Default main.cf
       # TODO: Find out what these mean exactly
       machines.postfix.main = {
+        append_dot_mydomain = false;
         biff = false;
         mailbox_size_limit = 0;
         recipient_delimiter = "+";
         readme_directory = false;
         myhostname = "nixos"; # TODO: Actual hostname
         mydestination = "localhost"; #TODO: Actual destination
-        append_dot_mydomain = false;
         relayhost = "";
         alias_maps = "hash:/etc/aliases";
         alias_database = "hash:/etc/aliases";
         mynetworks = "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128";
         inet_interfaces = "all";
-      };
+      } // restrictionsSets."${cfg.restrictions}";
 
       # TODO: I'm sure I don't need all this shit
       # Default master.cf
-      machines.postfix.master = {
-        smtpd = {
-          type = "inet";
-          private = false;
-          chroot = false;
-          command = "smtpd";
-          name = "smtp";
-        };
-
-        pickup = {
-          type = "unix";
-          private = false;
-          chroot = false;
-          wakeup = 60;
-          maxproc = 1;
-          command = "pickup";
-        };
-
-        cleanup = {
-          type = "unix";
-          private = false;
-          chroot = false;
-          maxproc = 0;
-          command = "cleanup";
-        };
-
-        qmgr = {
-          type = "unix";
-          private = false;
-          chroot = false;
-          wakeup = 300;
-          maxproc = 1;
-          command = "qmgr";
-        };
-
-        tlsmgr = {
-          type = "unix";
-          maxproc = 1;
-          chroot = false;
-          wakeup = 1000;
-          command = "tlsmgr";
-        };
-
-        rewrite = {
-          type = "unix";
-          chroot = false;
-          command = "trivial-rewrite";
-        };
-
-        bounce = {
-          type = "unix";
-          chroot = false;
-          maxproc = 0;
-          command = "bounce";
-        };
-
-        defer = {
-          type = "unix";
-          chroot = false;
-          maxproc = 0;
-          command = "bounce";
-        };
-
-        trace = {
-          type = "unix";
-          chroot = false;
-          maxproc = 0;
-          command = "bounce";
-        };
-
-        verify = {
-          type = "unix";
-          chroot = false;
-          maxproc = 1;
-          command = "verify";
-        };
-
-        flush = {
-          type = "unix";
-          private = false;
-          maxproc = 0;
-          chroot = false;
-          wakeup = 1000;
-          command = "flush";
-        };
-
-        proxymap = {
-          type = "unix";
-          chroot = false;
-          command = "proxymap";
-        };
-
-        proxywrite = {
-          type = "unix";
-          chroot = false;
-          command = "proxywrite";
-        };
-
-        smtp = {
-          type = "unix";
-          chroot = false;
-          command = "smtp";
-        };
-
-        relay = {
-          type = "unix";
-          chroot = false;
-          command = "smtp";
-        };
-
-        showq = {
-          type = "unix";
-          private = false;
-          chroot = false;
-          command = "showq";
-        };
-
-        error = {
-          type = "unix";
-          chroot = false;
-          command = "error";
-        };
-
-        retry = {
-          type = "unix";
-          chroot = false;
-          command = "error";
-        };
-
-        discard = {
-          type = "unix";
-          chroot = false;
-          command = "discard";
-        };
-
-        local = {
-          type = "unix";
-          unpriv = false;
-          chroot = false;
-          command = "local";
-        };
-
-        virtual = {
-          type = "unix";
-          unpriv = false;
-          chroot = false;
-          command = "virtual";
-        };
-
-        lmtp = {
-          type = "unix";
-          chroot = false;
-          command = "lmtp";
-        };
-
-        anvil = {
-          type = "unix";
-          chroot = false;
-          maxproc = 1;
-          command = "anvil";
-        };
-
-        scache = {
-          type = "unix";
-          chroot = false;
-          maxproc = 1;
-          command = "scache";
-        };
-      };
+      machines.postfix.master = import ./master-default.nix;
 
       environment = {
 

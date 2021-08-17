@@ -53,6 +53,7 @@
 ## Postfix
 Okay I've decided to try again to implement it myself:
 * A format for specifying any map
+* Add special role accounts as required by the RFC
 * Get it working with virtual mailboxes since that is what I care about the most.
 * Remove the todos from `mail`?
 * Remove `sleep`'s from the test, and use some `wait_for` function

@@ -21,6 +21,7 @@ pkgs.nixosTest {
 
     machines.postfix = {
       enable = true;
+      restrictions = "rfc_conformant";
     };
 
     users.users = {
