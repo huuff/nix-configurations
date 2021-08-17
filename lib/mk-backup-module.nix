@@ -53,9 +53,7 @@ in
             path = with pkgs; [ mariadb ];
 
             script = ''
-              set -x
-              rm -f ${cfg.backup.database.path}/*.sql
-              mysqldump -u ${cfg.database.user} -p${myLib.passwd.cat cfg.database.passwordFile} ${cfg.database.name} > ${cfg.backup.database.path}/$(date +%s).sql
+              mysqldump --order-by-primary -u ${cfg.database.user} -p${myLib.passwd.cat cfg.database.passwordFile} ${cfg.database.name} > ${cfg.backup.database.path}/dump.sql
             '';
 
             serviceConfig.Type = "oneshot";
