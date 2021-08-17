@@ -52,8 +52,11 @@
 
 ## Postfix
 Okay I've decided to try again to implement it myself:
-* A format for specifying any map
-* Add special role accounts as required by the RFC
+* A format for specifying any map. UPDATE: There is something done, but there is a lot of work to do:
+  * Automatically set the files in `tmpfiles.rules`
+  * `mysql` maps
+  * Actually consider linear maps such as `pcre`. Currently it's an `attrs`, but that preserves no order
+* Add special role accounts as required by the RFC. UPDATE: The aliases are in, add them to the restrictions to make them RFC conformant.
 * Add more advanced restrictions:
   * Blacklists 
   * Selective sender verification

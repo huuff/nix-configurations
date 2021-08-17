@@ -1,3 +1,4 @@
+# TODO: remove unnecessary
 {
   smtpd = {
     type = "inet";

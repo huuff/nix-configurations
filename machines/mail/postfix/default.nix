@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 with lib;
-with (import ./postfix-lib.nix { inherit lib; });
+with (import ./postfix-lib.nix { inherit lib pkgs; });
 
 let
   cfg = config.machines.postfix;
@@ -61,6 +61,34 @@ let
     };
   };
 
+  mapType = { options, config, name, ... }: with types; {
+    options = {
+      name = mkOption {
+        default = name;
+        type = str;
+        description = "Name of the map which will be on the final file";
+      };
+
+      path = mkOption {
+        type = oneOf [ str path ];
+        default = cfg.installation.path;
+        description = "Path where the map will be put";
+      };
+
+      type = mkOption {
+        type = enum [ "pcre" "hash" ];
+        default = "hash";
+        description = "Type of the map";
+      };
+
+      contents = mkOption {
+        type = attrs;
+        default = {};
+        description = "Contents of the map";
+      };
+    };
+  };
+
   restrictionsSets = {
     none = {
       smtpd_recipient_restrictions = [];
@@ -76,7 +104,7 @@ let
 
     rfc_conformant = {
       smtpd_helo_required = true;
-      
+
       smtpd_recipient_restrictions = [
         #"reject_non_fqdn_recipient" # TODO: FQDNs, easy way to disable this
         "reject_non_fqdn_sender"
@@ -120,6 +148,12 @@ in
           description = "Set of restrictions to enable in increasing order of complexity";
         };
 
+        maps = mkOption {
+          type = attrsOf (types.submodule mapType);
+          default = {};
+          description = "Maps that will be created";
+        };
+
       };
     };
 
@@ -131,24 +165,31 @@ in
         masterCfFile = pkgs.writeText "master.cf" (concatStringsSep "\n" (mapAttrsToList (attrsToMasterCf) cfg.master));
       in
       {
-      # TODO: Find out what these mean exactly
       machines.postfix.main = {
         append_dot_mydomain = false;
         readme_directory = false;
         mydestination = "localhost"; #TODO: Actual destination
         relayhost = "";
-        alias_maps = "hash:/etc/aliases";
-        alias_database = "hash:/etc/aliases";
+        alias_maps = mapToPath cfg.maps.aliases;
+        alias_database = mapToPath cfg.maps.aliases;
         mynetworks = "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128";
         inet_interfaces = "all";
       } // restrictionsSets."${cfg.restrictions}";
 
-      # TODO: I'm sure I don't need all this shit
       # Default master.cf
       machines.postfix.master = import ./master-default.nix;
 
-      environment = {
+      machines.postfix.maps = {
+        aliases = {
+          path = "/etc";
+          contents = {
+            postmaster = "root";
+            abuse = "root";
+          };
+        };
+      };
 
+      environment = {
         systemPackages = with pkgs; [ postfix ];
 
         etc = {
@@ -161,41 +202,41 @@ in
 
       systemd.tmpfiles.rules = [
         "d ${cfg.installation.path}/queue - root root - -"
-        "f /etc/aliases - root root - -"
+        "L ${cfg.maps.aliases.path}/${cfg.maps.aliases.name} - root root - ${mapToFile cfg.maps.aliases}"
       ];
 
      # TODO: What's this? 
-      services.mail.sendmailSetuidWrapper = mkIf config.services.postfix.setSendmail {
-        program = "sendmail";
-        source = "${pkgs.postfix}/bin/sendmail";
-        group = "postdrop";
-        setuid = false;
-        setgid = true;
-      };
+     services.mail.sendmailSetuidWrapper = mkIf config.services.postfix.setSendmail {
+       program = "sendmail";
+       source = "${pkgs.postfix}/bin/sendmail";
+       group = "postdrop";
+       setuid = false;
+       setgid = true;
+     };
 
-      systemd.services.postfix = {
-        description = "Postfix SMTP server";
+     systemd.services.postfix = {
+       description = "Postfix SMTP server";
 
-        path = [ pkgs.postfix ];
+       path = [ pkgs.postfix ];
 
-        wantedBy = [ "multi-user.target" ];
-        after = [ "network.target" ];
+       wantedBy = [ "multi-user.target" ];
+       after = [ "network.target" ];
 
-        serviceConfig = {
-          Type = "forking";
-          Restart = "always";
-          ExecStart = "${pkgs.postfix}/bin/postfix start";
-          ExecStop = "${pkgs.postfix}/bin/postfix stop";
-          ExecReload = "${pkgs.postfix}/bin/postfix reload";
-        };
+       serviceConfig = {
+         Type = "forking";
+         Restart = "always";
+         ExecStart = "${pkgs.postfix}/bin/postfix start";
+         ExecStop = "${pkgs.postfix}/bin/postfix stop";
+         ExecReload = "${pkgs.postfix}/bin/postfix reload";
+       };
 
-        preStart = ''
+       preStart = ''
             mkdir -p /var/spool/mail
             chown root:root /var/spool/mail
             chmod a+rwxt /var/spool/mail
             ln -sf /var/spool/mail /var/
             newaliases
-        '';
-      };
-    };
-  }
+       '';
+     };
+   };
+ }

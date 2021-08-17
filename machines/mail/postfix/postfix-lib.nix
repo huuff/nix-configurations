@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 with lib;
 
@@ -21,4 +21,8 @@ rec {
 
   # TODO: A concatStringsSep with this and spaces (or tabs) and a list for the strings.
   attrsToMasterCf = name: value: "${if (value.name == null) then name else value.name} ${value.type} ${boolToYN value.private} ${boolToYN value.unpriv} ${boolToYN value.chroot} ${wakeupToStr value.wakeup} ${toString value.maxproc} ${value.command} ${concatStringsSep " " value.args}";
+
+  mapToPath = map: "${map.type}:${map.path}/${map.name}";
+
+  mapToFile = map: pkgs.writeText map.name (concatStringsSep "\n" (mapAttrsToList (name: value: "${name}:${value}") map.contents));
 }
