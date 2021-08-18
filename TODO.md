@@ -63,5 +63,6 @@ Okay I've decided to try again to implement it myself:
   * Selective sender verification
   * Always verify senders
 * Extensive restriction testing
+* TLS
 * `clamav`
 * Some anti-spam software
