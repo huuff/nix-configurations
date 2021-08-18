@@ -1,8 +1,6 @@
 # My own library for things I want to reuse
 { config, pkgs, ... }:
 rec {
-
-
   fileFromStore = file: pkgs.writeText "${file}" (builtins.readFile file);
 
   passwd = rec {
@@ -15,4 +13,7 @@ rec {
     execDDL = ddl: ''${config.services.mysql.package}/bin/mysql -u root -e "${ddl}"'';
     execDML = cfg: dml: ''${config.services.mysql.package}/bin/mysql "${cfg.database.name}" -u "${cfg.database.user}" -p"${passwd.cat cfg.database.passwordFile}" -e "${dml}"'';
   };
+
+  copyMachine = machine: extraConf: { pkgs, config, lib, ... }:
+  lib.recursiveUpdate (machine { inherit pkgs config lib; }) extraConf;
 }

@@ -1,6 +1,7 @@
 { pkgs, ... }:
 let
   lib = pkgs.lib;
+  copyMachine = import ./copy-machine.nix { inherit lib; };
   testFilePath = "/var/testfile";
 in
   pkgs.nixosTest {
@@ -44,8 +45,7 @@ in
       };
 
   # Same as machine, but test-service fails so unit2 should fail
-  machineWithoutTestService = {pkgs, ... }:
-  lib.recursiveUpdate (machine { inherit pkgs;}) {
+  machineWithoutTestService = copyMachine machine {
     systemd.services.test-service.script = "exit 1";
   };
 };

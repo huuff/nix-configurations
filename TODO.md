@@ -6,6 +6,7 @@
 * Harden long-standing systemd services (`do-on-request`, `auto-rsync`)
 * A hardened `openssh` module like that in [this post](https://christine.website/blog/paranoid-nixos-2021-07-18)
 * Make a file with the `test` config and share it between `test.nix` and `vm.nix` to test interactively in the same test environment (Ideally, I'd get `shell_interact()` to work. Or maybe not? I like having my aliases available).
+* Maybe it's time to start passing my library from the flake, look at that import for `testing-lib` in the `virtual-test` for postfix.
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all. UPDATE: Yeah but these are integration tests and testing the individual components does not guarantee that they all work together
@@ -61,6 +62,6 @@ Okay I've decided to try again to implement it myself:
   * Blacklists 
   * Selective sender verification
   * Always verify senders
-* Test mail between two machines just for fun
+* Extensive restriction testing
 * `clamav`
 * Some anti-spam software

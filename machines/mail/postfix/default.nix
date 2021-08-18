@@ -195,6 +195,7 @@ in
       in
       {
       machines.postfix.main = {
+        compatibility_level = "3.6";
         append_dot_mydomain = false; # MUA's work
         readme_directory = false;
         mydomain = cfg.canonicalDomain;

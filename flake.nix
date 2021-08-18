@@ -22,7 +22,9 @@
       neuron = import ./machines/neuron/test.nix { inherit pkgs; };
       wallabag = import ./machines/wallabag/test.nix { inherit pkgs; };
       osticket = import ./machines/osticket/test.nix { inherit pkgs; };
-      postfix = import ./machines/mail/postfix/test.nix { inherit pkgs; };
+
+      postfixVirtual = import ./machines/mail/postfix/testing/virtual-test.nix { inherit pkgs; };
+      postfix2Machines = import ./machines/mail/postfix/testing/2-machine-test.nix { inherit pkgs; };
 
       doOnRequest = import ./lib/do-on-request-test.nix { inherit pkgs; };
       autoRsync = import ./lib/auto-rsync-test.nix { inherit pkgs; };

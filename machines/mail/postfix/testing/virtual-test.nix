@@ -14,7 +14,7 @@ pkgs.nixosTest {
 
   machine = { pkgs, ... }: {
     imports = [
-      ./default.nix
+      ../default.nix
     ];
 
     environment.systemPackages = with pkgs; [ mailutils ];
@@ -37,7 +37,7 @@ pkgs.nixosTest {
   };
 
   testScript = ''
-    ${ builtins.readFile ../../../lib/testing-lib.py }
+    ${ builtins.readFile ../../../../lib/testing-lib.py }
 
     machine.wait_for_unit("multi-user.target")
 
