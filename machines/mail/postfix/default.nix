@@ -106,15 +106,15 @@ let
       smtpd_helo_required = true;
 
       smtpd_recipient_restrictions = [
-        #"reject_non_fqdn_recipient" # TODO: FQDNs, easy way to disable this
+        "reject_non_fqdn_recipient"
         "reject_non_fqdn_sender"
         "reject_unknown_sender_domain"
         "reject_unknown_recipient_domain"
         "permit_mynetworks"
         "reject_unauth_destination"
-        #"check_recipient_access hash:/etc/postfix/roleaccount_exceptions" # TODO: alias maps
+        "check_recipient_access ${mapToMain cfg.maps.check_recipient_access}"
         "reject_non_fqdn_hostname"
-        "reject_inavlid_hostname"
+        "reject_invalid_hostname"
         "permit"
       ];
     };
@@ -213,7 +213,7 @@ in
         virtual_mailbox_base = cfg.mailPath;
         virtual_uid_maps = "static:${toString config.users.users.vmail.uid}";
         virtual_gid_maps = "static:${toString config.users.groups.vmail.gid}";
-        virtual_mailbox_maps = mapToMain cfg.maps.virtual_mailbox_maps;
+        #virtual_mailbox_maps = mapToMain cfg.maps.virtual_mailbox_maps;
 
         relayhost = "";
         # TODO: Try to remove this, we only use virtual users
@@ -222,15 +222,30 @@ in
 
         mynetworks = "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128";
         inet_interfaces = "all";
-      } // restrictionsSets."${cfg.restrictions}";
+      }
+      // mapAttrs (name: value: mapToMain value) cfg.maps
+      // restrictionsSets."${cfg.restrictions}"
+      ;
+
+      machines.postfix.users = [
+        "postmaster@${cfg.canonicalDomain}"
+        "abuse@${cfg.canonicalDomain}"
+      ];
 
       # Default master.cf
       machines.postfix.master = import ./master-default.nix;
 
       machines.postfix.maps = {
         virtual_mailbox_maps = {
-          path = "${cfg.installation.path}";
-          contents = mkMerge (map (vuser: { "${vuser}" = "${vuser}/";}) cfg.users);
+          contents = (mkMerge (map (vuser: { "${vuser}" = "${vuser}/";}) cfg.users));
+        };
+
+        # We should always accept these for RFC conformance
+        check_recipient_access = {
+          contents = {
+            "postmaster@${cfg.canonicalDomain}" = "OK";
+            "abuse@${cfg.canonicalDomain}" = "OK";
+          };
         };
       };
 
@@ -257,8 +272,10 @@ in
       systemd.tmpfiles.rules = [
         "d ${cfg.installation.path}/queue - root root - -"
         "f /etc/aliases - root root - -"
-        "L ${mapToPath cfg.maps.virtual_mailbox_maps} - ${cfg.mailUser} ${cfg.mailUser} - ${mapToFile cfg.maps.virtual_mailbox_maps}"
-      ] ++ usersToTmpfiles;
+      ]
+      ++ mapsToTmpfiles
+      ++ usersToTmpfiles  
+      ;
 
      # TODO: What's this? 
      services.mail.sendmailSetuidWrapper = mkIf config.services.postfix.setSendmail {

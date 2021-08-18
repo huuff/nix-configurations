@@ -31,13 +31,16 @@ rec {
 
   mapToFile = map: pkgs.writeText map.name (concatStringsSep "\n" (mapAttrsToList (name: value: "${name} ${value}") map.contents));
 
+  # Returns an array of the contents of all maps
+  mapsContents = mapAttrsToList (name: value: value) cfg.maps;
+
   # TODO: Set better permissions.
   # TODO: The maildir format (user/) is set twice. Once here and once in the virtual map
   usersToTmpfiles = map (user: "d ${cfg.mailPath}/${user}/ 0755 ${cfg.mailUser} ${cfg.mailUser} - -") cfg.users;
 
+  mapsToTmpfiles = map (pfMap: "L ${mapToPath pfMap} - ${cfg.mailUser} ${cfg.mailUser} - ${mapToFile pfMap}") mapsContents;
+
   # XXX: Pretty confusing mixing the postfix map with the function map. Using pfMap for "postfix map"
-  generateDatabases = 
-  let
-    mapsContents = mapAttrsToList (name: value: value) cfg.maps;
-  in concatStringsSep "\n" (map (pfMap: "postmap ${mapToMain pfMap}") mapsContents);
+  generateDatabases = concatStringsSep "\n" (map (pfMap: "postmap ${mapToMain pfMap}") mapsContents);
+
 }
