@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 with lib;
-with (import ./postfix-lib.nix { inherit lib pkgs; });
+with (import ./postfix-lib.nix { inherit lib pkgs config; });
 
 let
   cfg = config.machines.postfix;
@@ -154,6 +154,35 @@ in
           description = "Maps that will be created";
         };
 
+        canonicalDomain = mkOption {
+          type = str;
+          description = "Canonical domain of the server";
+        };
+
+        extraDomains = mkOption {
+          type = listOf str;
+          default = [];
+          description = "Extra domains for which we accept mail";
+        };
+
+        mailPath = mkOption {
+          type = oneOf [ str path ];
+          default = "/var/lib/vmail";
+          description = "Path of the virtual mailboxes";
+        };
+
+        users = mkOption {
+          type = listOf str;
+          default = [];
+          description = "Default users to create on first setup";
+        };
+
+        mailUser = mkOption {
+          type = str;
+          default = "vmail";
+          description = "User that will own the virtual mailbox";
+        };
+
       };
     };
 
@@ -166,12 +195,23 @@ in
       in
       {
       machines.postfix.main = {
-        append_dot_mydomain = false;
+        append_dot_mydomain = false; # MUA's work
         readme_directory = false;
+        mydomain = cfg.canonicalDomain;
         mydestination = "localhost"; #TODO: Actual destination
+
+        # Virtual mailbox setting
+        virtual_mailbox_domains = [cfg.canonicalDomain] ++ cfg.extraDomains;
+        virtual_mailbox_base = cfg.mailPath;
+        virtual_uid_maps = "static:${toString config.users.users.vmail.uid}";
+        virtual_gid_maps = "static:${toString config.users.groups.vmail.gid}";
+        virtual_mailbox_maps = mapToMain cfg.maps.virtual_mailbox_maps;
+
         relayhost = "";
-        alias_maps = mapToPath cfg.maps.aliases;
-        alias_database = mapToPath cfg.maps.aliases;
+        # TODO: Try to remove this, we only use virtual users
+        alias_maps = "hash:/etc/aliases";
+        alias_database = "hash:/etc/aliases";
+
         mynetworks = "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128";
         inet_interfaces = "all";
       } // restrictionsSets."${cfg.restrictions}";
@@ -180,12 +220,9 @@ in
       machines.postfix.master = import ./master-default.nix;
 
       machines.postfix.maps = {
-        aliases = {
-          path = "/etc";
-          contents = {
-            postmaster = "root";
-            abuse = "root";
-          };
+        virtual_mailbox_maps = {
+          path = "${cfg.installation.path}";
+          contents = mkMerge (map (vuser: { "${vuser}" = "${vuser}/";}) cfg.users);
         };
       };
 
@@ -198,12 +235,22 @@ in
         };
       };
 
-      users.groups.postdrop = {};
+      users = {
+        groups.postdrop = {};
+        users."${cfg.mailUser}" = {
+          isSystemUser = true;
+          uid = 1000;
+        };
+        groups."${cfg.mailUser}" = {
+          gid = 1000;
+        };
+      };
 
       systemd.tmpfiles.rules = [
         "d ${cfg.installation.path}/queue - root root - -"
-        "L ${cfg.maps.aliases.path}/${cfg.maps.aliases.name} - root root - ${mapToFile cfg.maps.aliases}"
-      ];
+        "f /etc/aliases - root root - -"
+        "L ${mapToPath cfg.maps.virtual_mailbox_maps} - ${cfg.mailUser} ${cfg.mailUser} - ${mapToFile cfg.maps.virtual_mailbox_maps}"
+      ] ++ usersToTmpfiles;
 
      # TODO: What's this? 
      services.mail.sendmailSetuidWrapper = mkIf config.services.postfix.setSendmail {
@@ -230,13 +277,14 @@ in
          ExecReload = "${pkgs.postfix}/bin/postfix reload";
        };
 
+       # TODO: This with tmpfiles
        preStart = ''
             mkdir -p /var/spool/mail
             chown root:root /var/spool/mail
             chmod a+rwxt /var/spool/mail
             ln -sf /var/spool/mail /var/
             newaliases
-       '';
+       '' + generateDatabases;
      };
    };
  }

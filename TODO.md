@@ -46,21 +46,17 @@
 * Check and generate certificates if they are expired
 * Definitely needs to follow the path convention
 
-## Mail
-* Test that I can send and receive mail to and from users (`postfix`). UPDATE: Test mail between two machines running the same configuration.
-* Test that I can access the mail from outside (`dovecot`)
-
 ## Postfix
 Okay I've decided to try again to implement it myself:
 * A format for specifying any map. UPDATE: There is something done, but there is a lot of work to do:
-  * Automatically set the files in `tmpfiles.rules`
+  * Automatically set the files in `tmpfiles.rules`.
+  * Automatically add them to `main.cf`
   * `mysql` maps
   * Actually consider linear maps such as `pcre`. Currently it's an `attrs`, but that preserves no order
-* Add special role accounts as required by the RFC. UPDATE: The aliases are in, add them to the restrictions to make them RFC conformant.
+* Add special role accounts as required by the RFC. UPDATE: Add them to users, alias to them and add them to the restrictions.
 * Add more advanced restrictions:
   * Blacklists 
   * Selective sender verification
   * Always verify senders
-* Get it working with virtual mailboxes since that is what I care about the most.
-* Remove the todos from `mail`?
-* Remove `sleep`'s from the test, and use some `wait_for` function
+* Disable local delivery
+* Test mail between two machines just for fun

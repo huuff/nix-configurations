@@ -5,25 +5,19 @@
     ../../../lib/nixos-shell-base.nix
   ];
 
-  environment.systemPackages = with pkgs; [ mailutils ];
-
-  nixos-shell.mounts = {
-    mountHome = false;
-  };
+  environment.systemPackages = with pkgs; [
+    mailutils 
+    mutt
+  ];
 
   machines.postfix = {
     enable = true;
     restrictions = "rfc_conformant";
-  };
+    canonicalDomain = "example.com";
 
-  users.users = {
-    alice = {
-      password = "password";
-      isNormalUser = true;
-    };
-    bob = {
-      password = "password";
-      isNormalUser = true;
-    };
+    users = [
+      "user1@example.com"
+      "user2@example.com"
+    ];
   };
 }

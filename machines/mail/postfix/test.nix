@@ -1,13 +1,13 @@
 { pkgs, ... }:
+# TODO: Some names as in options so I can use inherit??
 let
-  forBob = {
-    subject = "BobTest";
-    content = "Mail for bob";
-  };
-  forAlice = {
-    subject = "AliceTest";
-    content = "Mail for alice";
-  };
+  domain = "example.com";
+  user1Address = "user1@${domain}";
+  user2Address = "user2@${domain}";
+  installationPath = "/var/lib/postfix";
+  testContent = "test content";
+  testSubject = "test subject";
+  vmailPath = "/var/lib/vmail";
 in
 pkgs.nixosTest {
   name = "postfix";
@@ -22,18 +22,18 @@ pkgs.nixosTest {
     machines.postfix = {
       enable = true;
       restrictions = "rfc_conformant";
+      canonicalDomain = domain;
+
+      maps.virtual_mailbox_maps.path = installationPath;
+
+      mailPath = vmailPath;
+
+      users = [
+        user1Address
+        user2Address
+      ];
     };
 
-    users.users = {
-      alice = {
-        password = "password";
-        isNormalUser = true;
-      };
-      bob = {
-        password = "password";
-        isNormalUser = true;
-      };
-    };
   };
 
   testScript = ''
@@ -41,32 +41,21 @@ pkgs.nixosTest {
 
     machine.wait_for_unit("multi-user.target")
 
-    with subtest("units are active"):
+    with subtest("unit is active"):
       machine.succeed("systemctl is-active --quiet postfix")
 
-    with subtest("mails are delivered"):
-      # Send mail from alice to bob
-      machine.switch_tty(1)
-      machine.login(tty=1, user="alice")
-      machine.send_chars("echo '${forBob.content}' | mail -s '${forBob.subject}' bob@localhost\n")
-      # Send mail from bob to alice
-      machine.switch_tty(2)
-      machine.login(tty=2, user="bob")
-      machine.send_chars("echo '${forAlice.content}' | mail -s '${forAlice.subject}' alice@localhost\n")
-      # Read mail for alice
-      machine.switch_tty(1)
-      machine.send_chars("echo p | mail\n")
+    with subtest("virtual mailbox map works"):
+      machine.succeed("postalias -q ${user1Address} hash:${installationPath}/virtual_mailbox_maps")
+      machine.succeed("postalias -q ${user2Address} hash:${installationPath}/virtual_mailbox_maps")
+      # Sanity check
+      machine.fail("postalias -q pepo hash:${installationPath}/virtual_mailbox_maps")
+
+    with subtest("can send and receive email from local"):
+      machine.succeed('echo "${testContent}" | mail -u ${user1Address} -s "${testSubject}" ${user2Address}')
       machine.sleep(1)
-      output = machine.get_tty_text(1)
-      contains(output, "Subject: ${forAlice.subject} ")
-      contains(output, "From: bob")
-      contains(output, "${forAlice.content}")
-      # Read mail for bob
-      machine.switch_tty(2)
-      machine.send_chars("echo p | mail\n")
-      machine.sleep(1)
-      output = machine.get_tty_text(2)
-      contains(output, "Subject: ${forBob.subject}")
-      contains(output, "${forBob.content}")
+      machine.output_contains('echo p | mail -f ${vmailPath}/${user2Address}/', "To: <${user2Address}>")
+      machine.output_contains('echo p | mail -f ${vmailPath}/${user2Address}/', "Subject: ${testSubject}")
+      machine.output_contains('echo p | mail -f ${vmailPath}/${user2Address}/', "${testContent}")
+
   '';
 }
