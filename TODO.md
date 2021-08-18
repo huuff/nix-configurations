@@ -46,6 +46,7 @@
 * Option to generate one from Let's Encrypt
 * Check and generate certificates if they are expired
 * Definitely needs to follow the path convention
+* Option to set a global certificate
 
 ## Dovecot
 * Add it and use it to authenticate `postfix`
