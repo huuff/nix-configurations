@@ -134,12 +134,13 @@
     command = "discard";
   };
 
-  local = {
-    type = "unix";
-    unpriv = false;
-    chroot = false;
-    command = "local";
-  };
+  # XXX: Disabled, server is virtual-only
+  #local = {
+    #type = "unix";
+    #unpriv = false;
+    #chroot = false;
+    #command = "local";
+  #};
 
   virtual = {
     type = "unix";

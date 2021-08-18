@@ -46,6 +46,9 @@
 * Check and generate certificates if they are expired
 * Definitely needs to follow the path convention
 
+## Dovecot
+* Add it and use it to authenticate `postfix`
+
 ## Postfix
 Okay I've decided to try again to implement it myself:
 * A format for specifying any map. UPDATE: There is something done, but there is a lot of work to do:
@@ -58,5 +61,6 @@ Okay I've decided to try again to implement it myself:
   * Blacklists 
   * Selective sender verification
   * Always verify senders
-* Disable local delivery
 * Test mail between two machines just for fun
+* `clamav`
+* Some anti-spam software
