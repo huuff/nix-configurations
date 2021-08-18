@@ -1,9 +1,11 @@
 { config, pkgs, lib, ... }:
 with lib;
-with (import ./postfix-lib.nix { inherit lib pkgs config; });
 
 let
   cfg = config.machines.postfix;
+
+  postfixLib = import ./postfix-lib.nix { inherit lib pkgs config; };
+
   masterEntryModule = with types; submodule {
     options = {
       type = mkOption {
@@ -86,37 +88,12 @@ let
         default = {};
         description = "Contents of the map";
       };
-    };
-  };
 
-  restrictionsSets = {
-    none = {
-      smtpd_recipient_restrictions = [];
-    };
-
-    no_open_relay = {
-      smtpd_recipient_restrictions = [
-        "permit_mynetworks"
-        "reject_unauth_destination"
-        "permit"
-      ];
-    };
-
-    rfc_conformant = {
-      smtpd_helo_required = true;
-
-      smtpd_recipient_restrictions = [
-        "reject_non_fqdn_recipient"
-        "reject_non_fqdn_sender"
-        "reject_unknown_sender_domain"
-        "reject_unknown_recipient_domain"
-        "permit_mynetworks"
-        "reject_unauth_destination"
-        "check_recipient_access ${mapToMain cfg.maps.check_recipient_access}"
-        "reject_non_fqdn_hostname"
-        "reject_invalid_hostname"
-        "permit"
-      ];
+      addToMain = mkOption {
+        type = bool;
+        default = true;
+        description = "Automatically add this map to main.cf";
+      };
     };
   };
 
@@ -140,12 +117,6 @@ in
           type = attrsOf masterEntryModule;
           default = {};
           description = "The contents of the master.cf file as an attribute set";
-        };
-
-        restrictions = mkOption {
-          type = enum (attrNames restrictionsSets);
-          default = "no_open_relay";
-          description = "Set of restrictions to enable in increasing order of complexity";
         };
 
         maps = mkOption {
@@ -183,10 +154,25 @@ in
           description = "User that will own the virtual mailbox";
         };
 
+        restrictions = {
+          noOpenRelay = mkOption {
+            type = bool;
+            default = true;
+            description = "The bare minimum of restriction to avoid being an open relay. Disable only in testing";
+          };
+
+          rfcConformant = mkOption {
+            type = bool;
+            default = true;
+            description = "Enforce clients to follow RFC specifications";
+          };
+        };
+
       };
     };
 
     config =
+      with postfixLib;
       let
         # TODO: Postfix sends to append something at the end, so I add a newline so it doesn't get
         # mixed with my set, however, I should prevent postfix from doing that (is that what the official nixos module does?
@@ -223,8 +209,9 @@ in
         mynetworks = "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128";
         inet_interfaces = "all";
       }
-      // mapAttrs (name: value: mapToMain value) cfg.maps
-      // restrictionsSets."${cfg.restrictions}"
+      // optionalAttrs (cfg.restrictions.rfcConformant) { smtpd_helo_required = true; }
+      // mapAttrs (name: value: mapToMain value) (filterAttrs (_: pfMap: pfMap.addToMain) cfg.maps)
+      // import ./restrictions.nix { inherit cfg lib postfixLib; }
       ;
 
       machines.postfix.users = [
@@ -241,11 +228,13 @@ in
         };
 
         # We should always accept these for RFC conformance
-        check_recipient_access = {
+        permit_rfc_required_accounts = {
           contents = {
             "postmaster@${cfg.canonicalDomain}" = "OK";
             "abuse@${cfg.canonicalDomain}" = "OK";
           };
+
+          addToMain = false;
         };
       };
 

@@ -12,12 +12,7 @@
 
   machines.postfix = {
     enable = true;
-    restrictions = "rfc_conformant";
     canonicalDomain = "example.com";
-
-    main = {
-      smtp_host_lookup = "native";
-    };
 
     users = [
       "user1@example.com"
@@ -25,5 +20,4 @@
     ];
   };
 
-  networking.extraHosts = "google.com test.org";
 }

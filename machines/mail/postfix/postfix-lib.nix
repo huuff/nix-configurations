@@ -1,3 +1,4 @@
+# TODO: does it need config? can I pass cfg?
 { lib, pkgs, config, ... }:
 
 with lib;

@@ -25,6 +25,8 @@ in
           enable = true;
           canonicalDomain = domain1;
 
+          restrictions.rfcConformant = false;
+
           inherit mailPath;
 
           users = [ user1Address ];

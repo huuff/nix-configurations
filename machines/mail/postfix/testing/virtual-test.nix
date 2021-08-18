@@ -21,7 +21,6 @@ pkgs.nixosTest {
 
     machines.postfix = {
       enable = true;
-      restrictions = "rfc_conformant";
       canonicalDomain = domain;
 
       maps.virtual_mailbox_maps.path = installationPath;
