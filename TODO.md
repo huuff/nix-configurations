@@ -2,7 +2,6 @@
 * Maybe Zammad? osTicket seems dated
 * A module or library for `PHP` + `nginx`, but I find it difficult since I just copypaste nginx configurations from the internet.
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
-* I think I've used `mkEnableOption` wrong every single time. It takes a name, not a description.
 * Harden long-standing systemd services (`do-on-request`, `auto-rsync`)
 * A hardened `openssh` module like that in [this post](https://christine.website/blog/paranoid-nixos-2021-07-18)
 * Make a file with the `test` config and share it between `test.nix` and `vm.nix` to test interactively in the same test environment (Ideally, I'd get `shell_interact()` to work. Or maybe not? I like having my aliases available).

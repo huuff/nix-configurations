@@ -49,7 +49,7 @@ in
     ];
 
     options.machines.wallabag = with types; {
-      enable = mkEnableOption "Whether to enable the wallabag service";
+      enable = mkEnableOption "wallabag";
 
       package = mkOption {
         type = package;

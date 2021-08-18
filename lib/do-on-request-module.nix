@@ -5,7 +5,7 @@ let
 in
   {
     options.services.do-on-request = with types; {
-      enable = mkEnableOption "Run something when receiving a request on some port";
+      enable = mkEnableOption "do-on-request";
 
       port = mkOption {
         type = int;

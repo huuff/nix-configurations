@@ -20,7 +20,7 @@ in
     ];
 
     options.machines.neuron = with types; {
-      enable = mkEnableOption "Automatically fetch Neuron zettelkasten from git repo and serve it";
+      enable = mkEnableOption "neuron";
 
       refreshPort = mkOption {
         type = int;

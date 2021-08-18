@@ -6,7 +6,7 @@ in
   {
     options = with types; {
       services.auto-rsync = {
-        enable = mkEnableOption "Enable auto-rsync";
+        enable = mkEnableOption "auto-rsync";
 
         startPath = mkOption {
           type = oneOf [path str];

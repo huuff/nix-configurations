@@ -39,7 +39,7 @@ in {
     ];
 
     options.machines.osticket = with types; {
-      enable = mkEnableOption "osTicket ticketing system";
+      enable = mkEnableOption "osTicket";
 
       package = mkOption {
         type = package;

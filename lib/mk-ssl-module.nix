@@ -8,7 +8,7 @@ in
     options = {
       machines.${name}.ssl = with types; {
 
-        enable = mkEnableOption "Whether to auto-generate an SSL certificate";
+        enable = mkEnableOption "SSL certificate";
 
         user = mkOption {
           type = str;
