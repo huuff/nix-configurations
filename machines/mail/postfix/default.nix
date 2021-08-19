@@ -84,7 +84,7 @@ let
       };
 
       contents = mkOption {
-        type = attrs;
+        type = oneOf [ attrs (listOf attrs) ];
         default = {};
         description = "Contents of the map";
       };
@@ -179,12 +179,6 @@ in
 
     config =
       with postfixLib;
-      let
-        # TODO: Postfix sends to append something at the end, so I add a newline so it doesn't get
-        # mixed with my set, however, I should prevent postfix from doing that (is that what the official nixos module does?
-        mainCfFile = pkgs.writeText "main.cf" ((concatStringsSep "\n" (mapAttrsToList (attrsToMainCf) cfg.main)) + "\n");
-        masterCfFile = pkgs.writeText "master.cf" (concatStringsSep "\n" (mapAttrsToList (attrsToMasterCf) cfg.master));
-      in
       {
       machines.postfix.main = {
         compatibility_level = "3.6";
@@ -243,6 +237,16 @@ in
           addToMain = false;
         };
 
+        helo_checks = {
+          type = "pcre";
+          contents = [
+          { "/^${builtins.replaceStrings [ "." ] [ "\\." ] cfg.canonicalDomain}$/" = "550 Don't use my domain"; }
+          { "/^[0-9.]+$/" = "550 Your client is not RFC 2812 compliant"; }
+        ];
+
+          addToMain = false;
+        };
+
         bogus_mx = {
           type = "cidr";
           contents = {
@@ -259,11 +263,18 @@ in
       environment = {
         systemPackages = with pkgs; [ postfix ];
 
-        etc = {
-          "postfix/main.cf".source = mainCfFile;
-          "postfix/master.cf".source = masterCfFile;
+        etc =
+          let
+        # TODO: Postfix sends to append something at the end, so I add a newline so it doesn't get
+        # mixed with my set, however, I should prevent postfix from doing that (is that what the official nixos module does?
+        mainCfFile = pkgs.writeText "main.cf" ((concatStringsSep "\n" (mapAttrsToList (attrsToMainCf) cfg.main)) + "\n");
+        masterCfFile = pkgs.writeText "master.cf" (concatStringsSep "\n" (mapAttrsToList (attrsToMasterCf) cfg.master));
+          in
+          {
+            "postfix/main.cf".source = mainCfFile;
+            "postfix/master.cf".source = masterCfFile;
+          };
         };
-      };
 
       users = {
         groups.postdrop = {};

@@ -30,9 +30,17 @@ rec {
 
   mapToMain = map: "${map.type}:${mapToPath map}";
 
-  mapToFile = map: pkgs.writeText map.name (concatStringsSep "\n" (mapAttrsToList (name: value: "${name} ${value}") map.contents));
+  mapToFile = 
+  let
+    entryToStr = name: value: "${name} ${value}";
+  in
+  pfMap: 
+  if (builtins.typeOf pfMap.contents == "set") 
+  then pkgs.writeText pfMap.name (concatStringsSep "\n" (mapAttrsToList (entryToStr) pfMap.contents))
+  else pkgs.writeText pfMap.name (concatStringsSep "\n" (flatten (map (entry: mapAttrsToList (entryToStr) entry) pfMap.contents))) # Else, it's a list of attrs
+  ;
 
-  # Returns an array of the contents of all maps
+  # Returns an array of the value of all maps
   mapsContents = mapAttrsToList (name: value: value) cfg.maps;
 
   # TODO: Set better permissions.
@@ -42,6 +50,6 @@ rec {
   mapsToTmpfiles = map (pfMap: "L ${mapToPath pfMap} - ${cfg.mailUser} ${cfg.mailUser} - ${mapToFile pfMap}") mapsContents;
 
   # XXX: Pretty confusing mixing the postfix map with the function map. Using pfMap for "postfix map"
-  generateDatabases = concatStringsSep "\n" (map (pfMap: "postmap ${mapToMain pfMap}") (filter (pfMap: pfMap.type != "cidr") mapsContents));
+  generateDatabases = concatStringsSep "\n" (map (pfMap: "postmap ${mapToMain pfMap}") (filter (pfMap: pfMap.type == "hash") mapsContents));
 
 }

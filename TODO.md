@@ -55,9 +55,7 @@
 * A format for specifying any map. UPDATE: There is something done, but there is a lot of work to do:
   * Test rfc conformance (permits `abuse`, `postmaster` and `<>`)
   * `mysql` maps
-  * Actually consider linear maps such as `pcre`. Currently it's an `attrs`, but that preserves no order
 * Add more advanced restrictions:
-  * Block obvious forgeries
   * Blacklists 
   * Selective sender verification
   * Always verify senders
