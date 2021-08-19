@@ -118,6 +118,7 @@ in
         client.wait_until_tty_matches(1, "450 .* Sender address rejected: Domain not found")
         client.quit()
 
+      # I don't seem to be able to trigger this one
       #with subtest("reject unknown recipient"):
         #client.basic_conversation(toAddr = "server@domain.invalid")
         #client.wait_until_tty_matches(1, "450 .* Recipient address rejected: Domain not found")
@@ -126,6 +127,16 @@ in
       with subtest("reject non FQDN recipient"):
         client.basic_conversation(toAddr = "server")
         client.wait_until_tty_matches(1, "504 .* Recipient address rejected: need fully-qualified address")
+        client.quit()
+
+      with subtest("reject myhostname"):
+        client.basic_conversation(helo = "server.${server.domain}")
+        client.wait_until_tty_matches(1, "550 .* Helo command rejected: Don't use my hostname")
+        client.quit()
+
+      with subtest("reject non-bracketed ip hostname"):
+        client.basic_conversation(helo = "192.168.1.1")
+        client.wait_until_tty_matches(1, "550 .* Helo command rejected: Your client is not RFC 2821 compliant")
         client.quit()
     '';
   }

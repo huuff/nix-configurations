@@ -243,8 +243,8 @@ in
         helo_checks = {
           type = "pcre";
           contents = [
-          { "/^${builtins.replaceStrings [ "." ] [ "\\." ] cfg.main.myhostname}$/" = "550 Don't use my domain"; }
-          { "/^[0-9.]+$/" = "550 Your client is not RFC 2812 compliant"; }
+          { "/^${builtins.replaceStrings [ "." ] [ "\\." ] cfg.main.myhostname}$/" = "550 Don't use my hostname"; }
+          { "/^[0-9.]+$/" = "550 Your client is not RFC 2821 compliant"; }
         ];
 
           addToMain = false;
