@@ -11,7 +11,7 @@ let
   copyMachine = import ../../../../lib/copy-machine.nix { inherit lib; };
 in
   pkgs.nixosTest {
-    name = "postfix-2-machines";
+    name = "postfix-correct-delivery";
 
     nodes = rec {
       machine1 = { pkgs, ... }: {
@@ -26,24 +26,21 @@ in
           canonicalDomain = domain1;
 
           restrictions = {
-            rfcConformant = false;
+            rfcConformant = true;
             alwaysVerifySender = false;
           };
 
           inherit mailPath;
 
           users = [ user1Address ];
-
-          main = {
-            disable_dns_lookups = true;
-            smtp_host_lookup = "native";
-            lmtp_host_lookup = "native";
-            ignore_mx_lookup_error = true;
-          };
         };
 
-        networking = {
-          extraHosts = "192.168.1.2 ${domain2}";
+        services.dnsmasq = {
+          enable = true;
+          extraConfig = ''
+            address=/${domain2}./192.168.1.2
+            address=/${domain1}./192.168.1.1
+          '';
         };
       };
 
@@ -52,8 +49,6 @@ in
           canonicalDomain = domain2;
           users = [ user2Address ];
         };
-
-        networking.extraHosts = "192.168.1.1 ${domain1}" ;
       };
     };
 
@@ -67,7 +62,6 @@ in
         with subtest("machine2 receives email from machine1"):
           machine1.succeed('echo "${testContent}" | mail -s "${testSubject}" -r ${user1Address} ${user2Address}')
           machine2.sleep(1)
-          machine2.print_output("getent hosts ${domain1}")
           machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "To: <${user2Address}>")
           machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "From: System administrator <${user1Address}>")
           machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "Subject: ${testSubject}")

@@ -1,4 +1,4 @@
-# TODO
+# TASKS
 * Maybe Zammad? osTicket seems dated
 * A module or library for `PHP` + `nginx`, but I find it difficult since I just copypaste nginx configurations from the internet.
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
@@ -54,8 +54,6 @@
 * Add it and use it to authenticate `postfix`
 
 ## Postfix
-* There's a commented test in `restriction-test` with a restriction I couldn't manage to trigger, I haven't tested any sender verification either and don't find how to do it.
-* Try to get `2machinesTest` to work with RFC compliance. Also chante its name.
 * In `attrToMain` (or something like that) get a long list of values to write as a list with indented subsequent entries instead of everything in one line.
 * Test that the server is not an open relay
 * Test rfc conformance (permits `abuse`, `postmaster` and `<>`)
@@ -64,3 +62,6 @@
 * TLS
 * `clamav`
 * Some anti-spam software
+* The DNS problem: There's just a handful of things you can test without DNS and using `/etc/hosts`. Disabling lookups only works for the `smtp` client. I'm having two testing problems that I'm sure are because of this:
+  * A commented out test in `restrictions-test`
+  * No sender verification testing

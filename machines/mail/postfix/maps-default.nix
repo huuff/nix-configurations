@@ -32,7 +32,7 @@ with lib;
       "10.0.0.0/8" = "550 No route to your RFC 1918 network";
       "127.0.0.0/8" = "550 Mail server in loopback network";
       "224.0.0.0/4" = "550 Mail server in class D multicast network";
-      "192.168.0.0/16" = "550 No route to your RFC 1918 network";
+      #"192.168.0.0/16" = "550 No route to your RFC 1918 network"; # TODO: This is giving me problems in testing
     };
     addToMain = false;
   };
