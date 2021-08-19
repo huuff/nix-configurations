@@ -78,7 +78,7 @@ let
       };
 
       type = mkOption {
-        type = enum [ "pcre" "hash" ];
+        type = enum [ "pcre" "hash" "cidr" ];
         default = "hash";
         description = "Type of the map";
       };
@@ -166,6 +166,12 @@ in
             default = true;
             description = "Enforce clients to follow RFC specifications";
           };
+
+          antiSpam = mkOption {
+            type = bool;
+            default = true;
+            description = "Enforce basic anti-spam at the restriction level";
+          };
         };
 
       };
@@ -234,6 +240,18 @@ in
             "abuse@${cfg.canonicalDomain}" = "OK";
           };
 
+          addToMain = false;
+        };
+
+        bogus_mx = {
+          type = "cidr";
+          contents = {
+            "0.0.0.0/8" = "550 Mail server in broadcast network";
+            "10.0.0.0/8" = "550 No route to your RFC 1918 network";
+            "127.0.0.0/8" = "550 Mail server in loopback network";
+            "224.0.0.0/4" = "550 Mail server in class D multicast network";
+            "192.168.0.0/16" = "550 No route to your RFC 1918 network";
+          };
           addToMain = false;
         };
       };

@@ -42,6 +42,6 @@ rec {
   mapsToTmpfiles = map (pfMap: "L ${mapToPath pfMap} - ${cfg.mailUser} ${cfg.mailUser} - ${mapToFile pfMap}") mapsContents;
 
   # XXX: Pretty confusing mixing the postfix map with the function map. Using pfMap for "postfix map"
-  generateDatabases = concatStringsSep "\n" (map (pfMap: "postmap ${mapToMain pfMap}") mapsContents);
+  generateDatabases = concatStringsSep "\n" (map (pfMap: "postmap ${mapToMain pfMap}") (filter (pfMap: pfMap.type != "cidr") mapsContents));
 
 }
