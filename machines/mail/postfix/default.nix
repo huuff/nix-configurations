@@ -187,6 +187,7 @@ in
         append_dot_mydomain = false; # MUA's work
         readme_directory = false;
         mydomain = cfg.canonicalDomain;
+        myhostname = "${config.networking.hostName}.${cfg.canonicalDomain}";
 
         # TODO: use null for these
         # disable local delivery for security
@@ -242,7 +243,7 @@ in
         helo_checks = {
           type = "pcre";
           contents = [
-          { "/^${builtins.replaceStrings [ "." ] [ "\\." ] cfg.canonicalDomain}$/" = "550 Don't use my domain"; }
+          { "/^${builtins.replaceStrings [ "." ] [ "\\." ] cfg.main.myhostname}$/" = "550 Don't use my domain"; }
           { "/^[0-9.]+$/" = "550 Your client is not RFC 2812 compliant"; }
         ];
 

@@ -17,6 +17,7 @@ let
     (mkRestriction "permit_mynetworks" []) # Faster delivery for local machines
     (mkRestriction "reject_unauth_destination" [ noOpenRelay ])
     (mkRestriction "check_recipient_access ${mapToMain cfg.maps.permit_rfc_required_accounts}" [ rfcConformant ])
+    (mkRestriction "check_helo_access ${mapToMain cfg.maps.helo_checks}" [ antiForgery ])
     # The following two have swapped order from what I've read, but I haven't found any
     # test hostname that passes as FQDN but is invalid. maybe look into it?
     (mkRestriction "reject_invalid_helo_hostname" [ rfcConformant ])
