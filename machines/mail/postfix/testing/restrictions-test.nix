@@ -3,10 +3,12 @@ let
   server = rec {
     domain = "example.com";
     userAddress = "server@${domain}";
+    ip = "192.168.2.1";
   };
   client = rec {
     domain = "test.org";
     userAddress = "client@${domain}";
+    ip = "192.168.2.2";
   };
 in
   pkgs.nixosTest {
@@ -27,16 +29,23 @@ in
             alwaysVerifySender = true;
           };
 
-          main = {
-            disable_dns_lookups = true;
-            smtp_host_lookup = "native";
-          };
-
           users = [ 
             server.userAddress
             "user2@${server.domain}"
           ];
         };
+
+        services.dnsmasq = {
+          enable = true;
+          extraConfig = ''
+            address=/${server.domain}./${server.ip}
+            address=/${client.domain}./${client.ip}
+          '';
+        };
+
+        networking.interfaces.eth1.ipv4.addresses = [
+          { address = server.ip; prefixLength = 24; }
+        ];
 
         networking.extraHosts = "192.168.1.1 ${client.domain}";
         networking.useDHCP = false;
@@ -52,15 +61,19 @@ in
           canonicalDomain = client.domain;
 
           users = [ client.userAddress ];
-
-          main = {
-            disable_dns_lookups = true;
-            smtp_host_lookup = "native";
-          };
         };
 
-        networking.extraHosts = "192.168.1.2 ${server.domain}";
+        networking.interfaces.eth1.ipv4.addresses = [
+          { address = client.ip; prefixLength = 24; }
+        ];
 
+        services.dnsmasq = {
+          enable = true;
+          extraConfig = ''
+            address=/${server.domain}./${server.ip}
+            address=/${client.domain}./${client.ip}
+          '';
+        };
       };
   };
 
