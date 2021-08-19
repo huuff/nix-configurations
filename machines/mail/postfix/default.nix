@@ -205,18 +205,18 @@ in
               default = [];
               description = "Exceptions to the sender DNS blocklist";
             };
+          };
+
+          alwaysVerifySender = mkEnableOption "verify every sender";
+
+          selectiveSenderVerification = mkEnableOption "verify senders in verifyDomains";
+
+          verifyDomains = mkOption {
+            type = listOf str;
+            default = [ "hotmail.com" ];
+            description = "Domains to verify selectively";
+          };
         };
-
-        alwaysVerifySender = mkEnableOption "verify every sender";
-
-        selectiveSenderVerification = mkEnableOption "verify senders in verifyDomains";
-
-        verifyDomains = mkOption {
-          type = listOf str;
-          default = [ "hotmail.com" ];
-          description = "Domains to verify selectively";
-        };
-      };
 
       };
     };
@@ -225,148 +225,59 @@ in
       with postfixLib;
       {
 
-      assertions = [
-        {
-          assertion = cfg.restrictions.selectiveSenderVerification -> !cfg.restrictions.alwaysVerifySender;
-          message = "You can't set verifyDomains if you set alwaysVerifySender";
-        }
-      ];
-
-      networking.firewall.allowedTCPPorts = [ 25 ];
-
-      machines.postfix.main = {
-        compatibility_level = "3.6";
-        append_dot_mydomain = false; # MUA's work
-        readme_directory = false;
-        mydomain = cfg.canonicalDomain;
-        myhostname = "${config.networking.hostName}.${cfg.canonicalDomain}";
-
-        # TODO: use null for these
-        # disable local delivery for security
-        mydestination = "";
-        local_recipient_maps = "";
-        local_transport = "error:local mail delivery is disabled";
-        # TODO: isn't this $mydomain by default? Does this do anything?
-        myorigin = cfg.canonicalDomain;
-
-        # Virtual mailbox setting
-        virtual_mailbox_domains = [cfg.canonicalDomain] ++ cfg.extraDomains;
-        virtual_mailbox_base = cfg.mailPath;
-        virtual_uid_maps = "static:${toString config.users.users.vmail.uid}";
-        virtual_gid_maps = "static:${toString config.users.groups.vmail.gid}";
-        #virtual_mailbox_maps = mapToMain cfg.maps.virtual_mailbox_maps;
-
-        relayhost = "";
-        # TODO: Try to remove this, we only use virtual users
-        alias_maps = "hash:/etc/aliases";
-        alias_database = "hash:/etc/aliases";
-
-        mynetworks = "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128";
-        inet_interfaces = "all";
-        #unverified_sender_reject_code = 550;
-      }
-      // optionalAttrs (cfg.restrictions.rfcConformant) { smtpd_helo_required = true; }
-      // optionalAttrs (cfg.restrictions.noMultiRecipientBounce) { smtpd_data_restrictions = "reject_multi_recipient_bounce"; }
-      // mapAttrs (name: value: mapToMain value) (filterAttrs (_: pfMap: pfMap.addToMain) cfg.maps)
-      // import ./restrictions.nix { inherit cfg lib postfixLib; }
-      ;
-
-      machines.postfix.users = [
-        "postmaster@${cfg.canonicalDomain}"
-        "abuse@${cfg.canonicalDomain}"
-      ];
-
-      # Default master.cf
-      machines.postfix.master = import ./master-default.nix;
-
-      machines.postfix.maps = {
-        virtual_mailbox_maps = {
-          contents = (mkMerge (map (vuser: { "${vuser}" = "${vuser}/";}) cfg.users));
-        };
-
-        # We should always accept these for RFC conformance
-        permit_rfc_required_accounts = {
-          contents = {
-            "postmaster@${cfg.canonicalDomain}" = "OK";
-            "abuse@${cfg.canonicalDomain}" = "OK";
-          };
-
-          addToMain = false;
-        };
-
-        helo_checks = {
-          type = "pcre";
-          contents = [
-          { "/^${builtins.replaceStrings [ "." ] [ "\\." ] cfg.main.myhostname}$/" = "550 Don't use my hostname"; }
-          { "/^[0-9.]+$/" = "550 Your client is not RFC 2821 compliant"; }
+        assertions = [
+          {
+            assertion = cfg.restrictions.selectiveSenderVerification -> !cfg.restrictions.alwaysVerifySender;
+            message = "You can't set verifyDomains if you set alwaysVerifySender";
+          }
         ];
 
-          addToMain = false;
+        networking.firewall.allowedTCPPorts = [ 25 ];
+
+        machines.postfix = {
+          main = import ./main-default.nix { inherit config lib postfixLib; };
+          master = import ./master-default.nix;
+          maps = import ./maps-default.nix { inherit cfg lib; };
+          users = [
+            "postmaster@${cfg.canonicalDomain}"
+            "abuse@${cfg.canonicalDomain}"
+          ];
         };
 
-        bogus_mx = {
-          type = "cidr";
-          contents = {
-            "0.0.0.0/8" = "550 Mail server in broadcast network";
-            "10.0.0.0/8" = "550 No route to your RFC 1918 network";
-            "127.0.0.0/8" = "550 Mail server in loopback network";
-            "224.0.0.0/4" = "550 Mail server in class D multicast network";
-            "192.168.0.0/16" = "550 No route to your RFC 1918 network";
-          };
-          addToMain = false;
-        };
+    environment = {
+      systemPackages = with pkgs; [ postfix ];
 
-        rbl_exceptions = {
-          contents = mkMerge (map (exception: { ${exception} = "OK"; }) cfg.restrictions.dnsBlocklists.clientExceptions);
-          addToMain = false;
-        };
-
-        rhsbl_exceptions = {
-          contents = mkMerge (map (exception: { ${exception} = "OK"; }) cfg.restrictions.dnsBlocklists.senderExceptions);
-          addToMain = false;
-        };
-
-        # For selective sender verification
-        common_spam_senderdomains = {
-          contents = mkMerge (map (domain: { ${domain} = "reject_unverified_sender"; }) cfg.restrictions.verifyDomains);
-          addToMain = false;
-        };
-      };
-
-      environment = {
-        systemPackages = with pkgs; [ postfix ];
-
-        etc =
-          let
+      etc =
+        let
         # TODO: Postfix sends to append something at the end, so I add a newline so it doesn't get
         # mixed with my set, however, I should prevent postfix from doing that (is that what the official nixos module does?
         mainCfFile = pkgs.writeText "main.cf" ((concatStringsSep "\n" (mapAttrsToList (attrsToMainCf) cfg.main)) + "\n");
         masterCfFile = pkgs.writeText "master.cf" (concatStringsSep "\n" (mapAttrsToList (attrsToMasterCf) cfg.master));
-          in
-          {
-            "postfix/main.cf".source = mainCfFile;
-            "postfix/master.cf".source = masterCfFile;
+        in
+        {
+          "postfix/main.cf".source = mainCfFile;
+          "postfix/master.cf".source = masterCfFile;
+          };
+          };
+
+          users = {
+          groups.postdrop = {};
+          users."${cfg.mailUser}" = {
+            isSystemUser = true;
+            uid = 1000;
+          };
+          groups."${cfg.mailUser}" = {
+            gid = 1000;
           };
         };
 
-      users = {
-        groups.postdrop = {};
-        users."${cfg.mailUser}" = {
-          isSystemUser = true;
-          uid = 1000;
-        };
-        groups."${cfg.mailUser}" = {
-          gid = 1000;
-        };
-      };
-
-      systemd.tmpfiles.rules = [
-        "d ${cfg.installation.path}/queue - root root - -"
-        "f /etc/aliases - root root - -"
-      ]
-      ++ mapsToTmpfiles
-      ++ usersToTmpfiles  
-      ;
+        systemd.tmpfiles.rules = [
+          "d ${cfg.installation.path}/queue - root root - -"
+          "f /etc/aliases - root root - -"
+        ]
+        ++ mapsToTmpfiles
+        ++ usersToTmpfiles  
+        ;
 
      # TODO: What's this? 
      services.mail.sendmailSetuidWrapper = mkIf config.services.postfix.setSendmail {
