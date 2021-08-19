@@ -13,7 +13,7 @@ let
     (mkRestriction "reject_non_fqdn_recipient" [ rfcConformant hasFQDN ])
     (mkRestriction "reject_non_fqdn_sender" [ rfcConformant ])
     (mkRestriction "reject_unknown_sender_domain" [ rfcConformant ])
-    (mkRestriction "reject_unknown_recipient_domain" [ rfcConformant ])
+    (mkRestriction "reject_unknown_recipient_domain" [ rfcConformant ]) # Unable to test it, currently commented in the test
     (mkRestriction "permit_mynetworks" []) # Faster delivery for local machines
     (mkRestriction "reject_unauth_destination" [ noOpenRelay ])
     (mkRestriction "check_recipient_access ${mapToMain cfg.maps.permit_rfc_required_accounts}" [ rfcConformant ])

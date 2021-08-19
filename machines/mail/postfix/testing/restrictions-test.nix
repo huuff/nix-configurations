@@ -107,5 +107,25 @@ in
         client.basic_conversation(helo = "test/.local")
         client.wait_until_tty_matches(1, "501 .* Helo command rejected: Invalid name")
         client.quit()
+
+      with subtest("reject non FQDN sender"):
+        client.basic_conversation(fromAddr = "client")
+        client.wait_until_tty_matches(1, "504 .* Sender address rejected: need fully-qualified address")
+        client.quit()
+
+      with subtest("reject unknown domain"):
+        client.basic_conversation(fromAddr = "client@domain.invalid")
+        client.wait_until_tty_matches(1, "450 .* Sender address rejected: Domain not found")
+        client.quit()
+
+      #with subtest("reject unknown recipient"):
+        #client.basic_conversation(toAddr = "server@domain.invalid")
+        #client.wait_until_tty_matches(1, "450 .* Recipient address rejected: Domain not found")
+        #client.quit()
+
+      with subtest("reject non FQDN recipient"):
+        client.basic_conversation(toAddr = "server")
+        client.wait_until_tty_matches(1, "504 .* Recipient address rejected: need fully-qualified address")
+        client.quit()
     '';
   }
