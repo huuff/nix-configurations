@@ -60,7 +60,6 @@
   * Test rfc conformance (permits `abuse`, `postmaster` and `<>`)
   * `mysql` maps
 * Add more advanced restrictions:
-  * Blacklists 
   * Selective sender verification
   * Always verify senders
 * Extensive restriction testing

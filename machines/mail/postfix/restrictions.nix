@@ -23,8 +23,13 @@ let
     (mkRestriction "reject_invalid_helo_hostname" [ rfcConformant ])
     (mkRestriction "reject_non_fqdn_helo_hostname" [ rfcConformant ])
     (mkRestriction "check_sender_mx_access ${mapToMain cfg.maps.bogus_mx}" [ antiForgery ])
-    (mkRestriction "permit" []) # Allow anything that passed all previous restrictions
-  ];
+  ] 
+  ++ [(mkRestriction "check_client_access ${mapToMain cfg.maps.rbl_exceptions}" [ dnsBlocklists.enable ])]
+  ++ (map (rbl: mkRestriction "reject_rbl_client ${rbl}" [ dnsBlocklists.enable ]) dnsBlocklists.client)
+  ++ [(mkRestriction "check_sender_access ${mapToMain cfg.maps.rhsbl_exceptions}" [ dnsBlocklists.enable ])]
+  ++ (map (rhsbl: mkRestriction "reject_rhsbl_sender ${rhsbl}" [ dnsBlocklists.enable ]) dnsBlocklists.sender)
+  ++ [(mkRestriction "permit" [])] # Allow anything that passed all previous restrictions
+  ;
 in {
   smtpd_recipient_restrictions = map (r: r.name) (filter (restriction: all (s: s) restriction.switches) allRestrictions);
 }

@@ -178,7 +178,35 @@ in
             default = true;
             description = "Reject messages from the empty sender to multiple recipients";
           };
+
+          dnsBlocklists = {
+            enable = mkEnableOption "DNS blocklists";
+
+            client = mkOption {
+              type = listOf str;
+              default = [ "zen.spamhaus.org=127.0.0.[2..11]" ];
+              description = "DNS blacklists to add to reject_rbl_client"; 
+            };
+
+            clientExceptions = mkOption {
+              type = listOf str;
+              default = [];
+              description = "List of exceptions to the client DNS blocklist";
+            };
+
+            sender = mkOption {
+              type = listOf str;
+              default = [];
+              description = "DNS blacklists to add to reject_rhsbl_sender";
+            };
+
+            senderExceptions = mkOption {
+              type = listOf str;
+              default = [];
+              description = "Exceptions to the sender DNS blocklist";
+            };
         };
+      };
 
       };
     };
@@ -266,6 +294,16 @@ in
             "224.0.0.0/4" = "550 Mail server in class D multicast network";
             "192.168.0.0/16" = "550 No route to your RFC 1918 network";
           };
+          addToMain = false;
+        };
+
+        rbl_exceptions = {
+          contents = mkMerge (map (exception: { exception = "OK"; }) cfg.restrictions.dnsBlocklists.clientExceptions);
+          addToMain = false;
+        };
+
+        rhsbl_exceptions = {
+          contents = mkMerge (map (exception: { exception = "OK"; }) cfg.restrictions.dnsBlocklists.senderExceptions);
           addToMain = false;
         };
       };
