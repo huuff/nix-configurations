@@ -62,6 +62,7 @@
   * Selective sender verification
   * Always verify senders
 * Extensive restriction testing
+* Disable `VRFY`
 * TLS
 * `clamav`
 * Some anti-spam software
