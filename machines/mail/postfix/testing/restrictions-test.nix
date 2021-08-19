@@ -31,7 +31,10 @@ in
             smtp_host_lookup = "native";
           };
 
-          users = [ server.userAddress ];
+          users = [ 
+            server.userAddress
+            "user2@${server.domain}"
+          ];
         };
 
         networking.extraHosts = "192.168.1.1 ${client.domain}";
@@ -137,6 +140,18 @@ in
       with subtest("reject non-bracketed ip hostname"):
         client.basic_conversation(helo = "192.168.1.1")
         client.wait_until_tty_matches(1, "550 .* Helo command rejected: Your client is not RFC 2821 compliant")
+        client.quit()
+
+      with subtest("reject multi-recipient bounce"):
+        client.connect_smtp()
+        client.put_tty("HELO ${client.domain}")
+        client.wait_until_tty_matches(1, "250 .*")
+        client.put_tty("MAIL FROM: <>")
+        client.wait_until_tty_matches(1, "250 .*")
+        client.put_tty("RCPT TO: ${server.userAddress}")
+        client.put_tty("RCPT TO: user2@${server.domain}")
+        client.put_tty("DATA")
+        client.wait_until_tty_matches(1, "550 .* Data command rejected: Multi-recipient bounce")
         client.quit()
     '';
   }

@@ -172,6 +172,12 @@ in
             default = true;
             description = "Reject our address and bogus nameserver records";
           };
+
+          noMultiRecipientBounce = mkOption {
+            type = bool;
+            default = true;
+            description = "Reject messages from the empty sender to multiple recipients";
+          };
         };
 
       };
@@ -213,6 +219,7 @@ in
         inet_interfaces = "all";
       }
       // optionalAttrs (cfg.restrictions.rfcConformant) { smtpd_helo_required = true; }
+      // optionalAttrs (cfg.restrictions.noMultiRecipientBounce) { smtpd_data_restrictions = "reject_multi_recipient_bounce"; }
       // mapAttrs (name: value: mapToMain value) (filterAttrs (_: pfMap: pfMap.addToMain) cfg.maps)
       // import ./restrictions.nix { inherit cfg lib postfixLib; }
       ;
