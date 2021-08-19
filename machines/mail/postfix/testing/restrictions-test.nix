@@ -36,16 +36,11 @@ pkgs.nixosTest {
     machine.wait_for_unit("postfix.service")
     machine.create_user_and_login()
 
-    with subtest("helo required"):
-      machine.send_chars("telnet localhost 25\n")
-      machine.sleep(0.5)
-      machine.print_tty(1)
+    with subtest("requires HELO"):
+      machine.put_tty("telnet localhost 25")
       machine.wait_until_tty_matches(1, "220 .*?.${domain} ESMTP Postfix")
-      machine.send_chars("MAIL FROM: <sender@example.com>\n")
-      machine.sleep(1)
-      machine.print_tty(1)
+      machine.put_tty("MAIL FROM: <sender@example.com>")
       machine.wait_until_tty_matches(1, "503 .*? send HELO/EHLO first")
-      machine.send_chars("QUIT\n")
-
+      machine.put_tty("QUIT")
   '';
 }

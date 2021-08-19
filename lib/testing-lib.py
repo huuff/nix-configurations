@@ -1,3 +1,5 @@
+current_tty = 1
+
 class Colors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -19,14 +21,16 @@ def contains(actual, expected):
 """)
 
 def switch_tty(self, tty):
+    global current_tty
     self.send_key(f"alt-f{tty}")
     self.wait_until_succeeds(f"[ $(fgconsole) = {tty} ]")
+    current_tty = tty
 
 def create_user(self, user):
     self.succeed(f"useradd -m {user}")
     self.succeed(f"(echo 'password'; echo 'password') | passwd {user}")
 
-def login(self, tty, user):
+def login(self, user, tty=current_tty):
     self.wait_until_tty_matches(tty, "login: ")
     self.send_chars(f"{user}\n")
     self.wait_until_tty_matches(tty, f"login: {user}")
@@ -35,12 +39,11 @@ def login(self, tty, user):
     self.send_chars("password\n")
     self.wait_until_succeeds(f"pgrep -u {user} bash")
 
-
 # Create a user and login in the same command
-def create_user_and_login(self, tty=1, user="alice"):
+def create_user_and_login(self, tty=current_tty, user="alice"):
     self.create_user(user)
     self.switch_tty(tty)
-    self.login(tty, user)
+    self.login(user, tty)
 
 def outputs(self, command, output):
     [ _, out ] = self.execute(command)
@@ -56,9 +59,14 @@ def print_output(self, command):
     [ _, out ] = self.execute(command)
     print(out)
 
-def print_tty(self, tty):
+def print_tty(self, tty=current_tty):
     out = self.get_tty_text(tty);
     print(out);
+
+def put_tty(self, chars):
+  self.send_chars(f"{chars}\n")
+  self.wait_until_tty_matches(current_tty, chars)
+  self.print_tty(current_tty)
 
 Machine.login = login
 Machine.create_user_and_login = create_user_and_login
@@ -67,7 +75,8 @@ Machine.outputs = outputs
 Machine.output_contains = output_contains
 Machine.print_output = print_output
 Machine.switch_tty = switch_tty
-Machine.print_tty = print_tty;
+Machine.print_tty = print_tty
+Machine.put_tty = put_tty
 del(login)
 del(create_user_and_login)
 del(create_user)
@@ -76,3 +85,4 @@ del(output_contains)
 del(print_output)
 del(switch_tty)
 del(print_tty)
+del(put_tty)

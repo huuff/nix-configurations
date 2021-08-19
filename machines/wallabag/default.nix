@@ -185,6 +185,7 @@ in
           description = "Run composer install";
           script = "COMPOSER_MEMORY_LIMIT=-1 composer install || true";
           path = [ composerWithTidy phpWithTidy ];
+          extraDeps = [ "network-online.target" ];
         }
 
         {
