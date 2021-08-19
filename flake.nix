@@ -25,6 +25,7 @@
 
       postfixVirtual = import ./machines/mail/postfix/testing/virtual-test.nix { inherit pkgs; };
       postfix2Machines = import ./machines/mail/postfix/testing/2-machine-test.nix { inherit pkgs; };
+      postfixRestrictions = import ./machines/mail/postfix/testing/restrictions-test.nix { inherit pkgs; };
 
       doOnRequest = import ./lib/do-on-request-test.nix { inherit pkgs; };
       autoRsync = import ./lib/auto-rsync-test.nix { inherit pkgs; };

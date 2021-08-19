@@ -167,7 +167,7 @@ in
             description = "Enforce clients to follow RFC specifications";
           };
 
-          obviousForgery = mkOption {
+          antiForgery = mkOption {
             type = bool;
             default = true;
             description = "Reject our address and bogus nameserver records";

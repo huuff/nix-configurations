@@ -56,6 +56,10 @@ def print_output(self, command):
     [ _, out ] = self.execute(command)
     print(out)
 
+def print_tty(self, tty):
+    out = self.get_tty_text(tty);
+    print(out);
+
 Machine.login = login
 Machine.create_user_and_login = create_user_and_login
 Machine.create_user = create_user
@@ -63,6 +67,7 @@ Machine.outputs = outputs
 Machine.output_contains = output_contains
 Machine.print_output = print_output
 Machine.switch_tty = switch_tty
+Machine.print_tty = print_tty;
 del(login)
 del(create_user_and_login)
 del(create_user)
@@ -70,3 +75,4 @@ del(outputs)
 del(output_contains)
 del(print_output)
 del(switch_tty)
+del(print_tty)

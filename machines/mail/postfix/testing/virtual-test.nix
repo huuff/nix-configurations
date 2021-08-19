@@ -10,7 +10,7 @@ let
   vmailPath = "/var/lib/vmail";
 in
 pkgs.nixosTest {
-  name = "postfix";
+  name = "postfix-virtual";
 
   machine = { pkgs, ... }: {
     imports = [
