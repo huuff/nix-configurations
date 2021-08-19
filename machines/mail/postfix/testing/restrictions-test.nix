@@ -26,10 +26,16 @@ in
             antiForgery = true;
           };
 
+          main = {
+            disable_dns_lookups = true;
+            smtp_host_lookup = "native";
+          };
+
           users = [ server.userAddress ];
         };
 
-        networking.firewall.allowedTCPPorts = [ 25 ];
+        networking.extraHosts = "192.168.1.1 ${client.domain}";
+        networking.useDHCP = false;
       };
 
       client = { pkgs, ... }: {
@@ -42,7 +48,14 @@ in
           canonicalDomain = client.domain;
 
           users = [ client.userAddress ];
+
+          main = {
+            disable_dns_lookups = true;
+            smtp_host_lookup = "native";
+          };
         };
+
+        networking.extraHosts = "192.168.1.2 ${server.domain}";
 
       };
   };
@@ -51,11 +64,29 @@ in
       ${ builtins.readFile ../../../../lib/testing-lib.py }
 
       def connect_smtp(self):
-        client.put_tty("telnet server 25")
-        client.wait_until_tty_matches(1, "220 .*?.${server.domain} ESMTP Postfix")
+        self.put_tty("telnet server 25")
+        self.wait_until_tty_matches(1, "220 .*?.${server.domain} ESMTP Postfix")
+
+      def basic_conversation(self, helo="${client.domain}", fromAddr="<${client.userAddress}>", toAddr="<${server.userAddress}>"):
+        self.connect_smtp()
+        self.put_tty(f"HELO {helo}")
+        self.wait_until_tty_matches(1, "250 .*")
+        self.put_tty(f"MAIL FROM: {fromAddr}")
+        self.wait_until_tty_matches(1, "250 .*")
+        self.put_tty(f"RCPT TO: {toAddr}")
+
+      def quit(self):
+        self.put_tty("QUIT")
+        self.wait_until_tty_matches(1, "Connection closed by foreign host.")
+        self.sleep(0.3)
+        self.send_key("ctrl-l")
 
       Machine.connect_smtp = connect_smtp
+      Machine.basic_conversation = basic_conversation
+      Machine.quit = quit
       del(connect_smtp)
+      del(basic_conversation)
+      del(quit)
 
       client.wait_for_unit("postfix.service")
       server.wait_for_unit("postfix.service")
@@ -63,19 +94,18 @@ in
 
       with subtest("requires HELO"):
         client.connect_smtp()
-        client.put_tty("MAIL FROM: <sender@example.com>")
+        client.put_tty("MAIL FROM: ${client.userAddress}")
         client.wait_until_tty_matches(1, "503 .*? send HELO/EHLO first")
-        client.put_tty("QUIT")
+        client.quit()
 
-      with subtest("requires FQDN"):
-        client.connect_smtp()
-        client.put_tty("HELO client")
-        client.wait_until_tty_matches(1, "250 .*")
-        client.put_tty("MAIL FROM: <sender@example.com>")
-        client.wait_until_tty_matches(1, "250 .*")
-        client.put_tty("RCPT TO: ${server.userAddress}")
+      with subtest("requires HELO FQDN"):
+        client.basic_conversation(helo = "client")
         client.wait_until_tty_matches(1, "504 .* need fully-qualified hostname")
-        client.put_tty("QUIT")
+        client.quit()
 
+      with subtest("reject invalid hostname"):
+        client.basic_conversation(helo = "test/.local")
+        client.wait_until_tty_matches(1, "501 .* Helo command rejected: Invalid name")
+        client.quit()
     '';
   }
