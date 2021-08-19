@@ -5,7 +5,8 @@ with postfixLib;
 with cfg.restrictions;
 
 let
-  hasFQDN = (builtins.match "^[a-z]+[.][a-z]+$" cfg.canonicalDomain) != null; # Low quality regex
+  fqdnRegex = "^([a-zA-Z0-9-]{0,62}[a-zA-Z0-9]\\.)+[a-zA-Z]{2,63}$";
+  hasFQDN = (builtins.match fqdnRegex cfg.canonicalDomain) != null;
   mkRestriction = name: switches: { inherit name switches; };
 
   allRestrictions = [
