@@ -180,6 +180,8 @@ in
     config =
       with postfixLib;
       {
+      networking.firewall.allowedTCPPorts = [ 25 ];
+
       machines.postfix.main = {
         compatibility_level = "3.6";
         append_dot_mydomain = false; # MUA's work

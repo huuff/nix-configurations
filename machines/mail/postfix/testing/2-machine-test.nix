@@ -38,7 +38,6 @@ in
         };
 
         networking = {
-          firewall.allowedTCPPorts = [ 25 ];
           extraHosts = "192.168.1.2 ${domain2}";
         };
       };

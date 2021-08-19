@@ -17,7 +17,7 @@ let
     (mkRestriction "permit_mynetworks" []) # Faster delivery for local machines
     (mkRestriction "reject_unauth_destination" [ noOpenRelay ])
     (mkRestriction "check_recipient_access ${mapToMain cfg.maps.permit_rfc_required_accounts}" [ rfcConformant ])
-    (mkRestriction "reject_non_fqdn_hostname" [ rfcConformant ])
+    (mkRestriction "reject_non_fqdn_helo_hostname" [ rfcConformant ])
     (mkRestriction "reject_invalid_hostname" [ rfcConformant ])
     (mkRestriction "check_sender_mx_access ${mapToMain cfg.maps.bogus_mx}" [ antiForgery ])
     (mkRestriction "permit" []) # Allow anything that passed all previous restrictions
