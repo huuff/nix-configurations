@@ -55,6 +55,7 @@
 
 ## Postfix
 * In `attrToMain` (or something like that) get a long list of values to write as a list with indented subsequent entries instead of everything in one line.
+* Test that the server is not an open relay
 * A format for specifying any map. UPDATE: There is something done, but there is a lot of work to do:
   * Test rfc conformance (permits `abuse`, `postmaster` and `<>`)
   * `mysql` maps
