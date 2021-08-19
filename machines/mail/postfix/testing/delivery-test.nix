@@ -35,16 +35,24 @@ in
           users = [ user1Address ];
         };
 
+        networking.interfaces.eth1.ipv4.addresses = [
+          { address = "192.168.2.1"; prefixLength = 24; }
+        ];
+
         services.dnsmasq = {
           enable = true;
           extraConfig = ''
-            address=/${domain2}./192.168.1.2
-            address=/${domain1}./192.168.1.1
+            address=/${domain1}./192.168.2.1
+            address=/${domain2}./192.168.2.2
           '';
         };
       };
 
       machine2 = copyMachine machine1 { 
+        networking.interfaces.eth1.ipv4.addresses = [
+          { address = "192.168.2.2"; prefixLength = 24; }
+        ];
+
         machines.postfix = {
           canonicalDomain = domain2;
           users = [ user2Address ];
