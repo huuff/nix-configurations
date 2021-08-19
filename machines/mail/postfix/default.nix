@@ -167,10 +167,10 @@ in
             description = "Enforce clients to follow RFC specifications";
           };
 
-          antiSpam = mkOption {
+          obviousForgery = mkOption {
             type = bool;
             default = true;
-            description = "Enforce basic anti-spam at the restriction level";
+            description = "Reject our address and bogus nameserver records";
           };
         };
 
