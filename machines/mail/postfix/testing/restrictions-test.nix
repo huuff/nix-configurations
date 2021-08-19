@@ -24,6 +24,7 @@ in
             noOpenRelay = true;
             rfcConformant = true;
             antiForgery = true;
+            alwaysVerifySender = true;
           };
 
           main = {

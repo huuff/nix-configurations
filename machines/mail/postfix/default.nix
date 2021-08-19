@@ -206,6 +206,8 @@ in
               description = "Exceptions to the sender DNS blocklist";
             };
         };
+
+        alwaysVerifySender = mkEnableOption "verify every sender";
       };
 
       };
@@ -245,6 +247,7 @@ in
 
         mynetworks = "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128";
         inet_interfaces = "all";
+        #unverified_sender_reject_code = 550;
       }
       // optionalAttrs (cfg.restrictions.rfcConformant) { smtpd_helo_required = true; }
       // optionalAttrs (cfg.restrictions.noMultiRecipientBounce) { smtpd_data_restrictions = "reject_multi_recipient_bounce"; }

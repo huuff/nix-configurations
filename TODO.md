@@ -54,6 +54,7 @@
 * Add it and use it to authenticate `postfix`
 
 ## Postfix
+* There's a commented test in `restriction-test` with a restriction I couldn't manage to trigger, I haven't tested any sender verification either and don't find how to do it.
 * In `attrToMain` (or something like that) get a long list of values to write as a list with indented subsequent entries instead of everything in one line.
 * Test that the server is not an open relay
 * A format for specifying any map. UPDATE: There is something done, but there is a lot of work to do:
@@ -61,7 +62,6 @@
   * `mysql` maps
 * Add more advanced restrictions:
   * Selective sender verification
-  * Always verify senders
 * Extensive restriction testing
 * Disable `VRFY`
 * TLS

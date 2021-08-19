@@ -25,7 +25,10 @@ in
           enable = true;
           canonicalDomain = domain1;
 
-          restrictions.rfcConformant = false;
+          restrictions = {
+            rfcConformant = false;
+            alwaysVerifySender = false;
+          };
 
           inherit mailPath;
 
@@ -34,6 +37,8 @@ in
           main = {
             disable_dns_lookups = true;
             smtp_host_lookup = "native";
+            lmtp_host_lookup = "native";
+            ignore_mx_lookup_error = true;
           };
         };
 
@@ -62,6 +67,7 @@ in
         with subtest("machine2 receives email from machine1"):
           machine1.succeed('echo "${testContent}" | mail -s "${testSubject}" -r ${user1Address} ${user2Address}')
           machine2.sleep(1)
+          machine2.print_output("getent hosts ${domain1}")
           machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "To: <${user2Address}>")
           machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "From: System administrator <${user1Address}>")
           machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "Subject: ${testSubject}")
