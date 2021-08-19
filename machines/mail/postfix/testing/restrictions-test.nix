@@ -167,5 +167,10 @@ in
         client.put_tty("DATA")
         client.wait_until_tty_matches(1, "550 .* Data command rejected: Multi-recipient bounce")
         client.quit()
+
+      with subtest("reject unverified sender"):
+        client.basic_conversation(fromAddr = "nonexistent@${client.domain}")
+        client.wait_until_tty_matches(1, "450 .* Sender address rejected: unverified address.*")
+        client.print_tty()
     '';
   }

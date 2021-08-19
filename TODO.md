@@ -50,10 +50,14 @@
 * Definitely needs to follow the path convention
 * Option to set a global certificate
 
+## Mail
+* Sieve
+
 ## Dovecot
 * Add it and use it to authenticate `postfix`
 
 ## Postfix
+* There's a commented out test in `restrictions-test`. Find out what's wrong with it.
 * In `attrToMain` (or something like that) get a long list of values to write as a list with indented subsequent entries instead of everything in one line.
 * Test that the server is not an open relay
 * Test rfc conformance (permits `abuse`, `postmaster` and `<>`)
@@ -62,6 +66,3 @@
 * TLS
 * `clamav`
 * Some anti-spam software
-* The DNS problem: There's just a handful of things you can test without DNS and using `/etc/hosts`. Disabling lookups only works for the `smtp` client. I'm having two testing problems that I'm sure are because of this:
-  * A commented out test in `restrictions-test`
-  * No sender verification testing
