@@ -27,7 +27,6 @@ in
 
           restrictions = {
             rfcConformant = true;
-            alwaysVerifySender = false;
           };
 
           inherit mailPath;
@@ -56,7 +55,9 @@ in
         machines.postfix = {
           canonicalDomain = domain2;
           users = [ user2Address ];
+          restrictions.alwaysVerifySender = true;
         };
+
       };
     };
 
@@ -69,7 +70,7 @@ in
 
         with subtest("machine2 receives email from machine1"):
           machine1.succeed('echo "${testContent}" | mail -s "${testSubject}" -r ${user1Address} ${user2Address}')
-          machine2.sleep(1)
+          machine2.sleep(5)
           machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "To: <${user2Address}>")
           machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "From: System administrator <${user1Address}>")
           machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "Subject: ${testSubject}")
