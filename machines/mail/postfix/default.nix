@@ -208,6 +208,14 @@ in
         };
 
         alwaysVerifySender = mkEnableOption "verify every sender";
+
+        selectiveSenderVerification = mkEnableOption "verify senders in verifyDomains";
+
+        verifyDomains = mkOption {
+          type = listOf str;
+          default = [ "hotmail.com" ];
+          description = "Domains to verify selectively";
+        };
       };
 
       };
@@ -216,6 +224,14 @@ in
     config =
       with postfixLib;
       {
+
+      assertions = [
+        {
+          assertion = cfg.restrictions.selectiveSenderVerification -> !cfg.restrictions.alwaysVerifySender;
+          message = "You can't set verifyDomains if you set alwaysVerifySender";
+        }
+      ];
+
       networking.firewall.allowedTCPPorts = [ 25 ];
 
       machines.postfix.main = {
@@ -301,12 +317,18 @@ in
         };
 
         rbl_exceptions = {
-          contents = mkMerge (map (exception: { exception = "OK"; }) cfg.restrictions.dnsBlocklists.clientExceptions);
+          contents = mkMerge (map (exception: { ${exception} = "OK"; }) cfg.restrictions.dnsBlocklists.clientExceptions);
           addToMain = false;
         };
 
         rhsbl_exceptions = {
-          contents = mkMerge (map (exception: { exception = "OK"; }) cfg.restrictions.dnsBlocklists.senderExceptions);
+          contents = mkMerge (map (exception: { ${exception} = "OK"; }) cfg.restrictions.dnsBlocklists.senderExceptions);
+          addToMain = false;
+        };
+
+        # For selective sender verification
+        common_spam_senderdomains = {
+          contents = mkMerge (map (domain: { ${domain} = "reject_unverified_sender"; }) cfg.restrictions.verifyDomains);
           addToMain = false;
         };
       };

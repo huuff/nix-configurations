@@ -29,6 +29,7 @@ let
   ++ [(mkRestriction "check_sender_access ${mapToMain cfg.maps.rhsbl_exceptions}" [ dnsBlocklists.enable ])]
   ++ (map (rhsbl: mkRestriction "reject_rhsbl_sender ${rhsbl}" [ dnsBlocklists.enable ]) dnsBlocklists.sender)
   ++ [
+    (mkRestriction "check_sender_access ${mapToMain cfg.maps.common_spam_senderdomains}" [ selectiveSenderVerification ])
     (mkRestriction "reject_unverified_sender" [ alwaysVerifySender ])
     (mkRestriction "permit" [])
   ] # Allow anything that passed all previous restrictions
