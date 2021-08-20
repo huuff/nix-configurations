@@ -274,12 +274,14 @@ in
         systemd.tmpfiles.rules = [
           "d ${cfg.installation.path}/queue - root root - -"
           "f /etc/aliases - root root - -"
+          "d /var/spool/mail 1777 root root - -"
+          "L /var/vail - - - - /var/spool/mail"
         ]
         ++ mapsToTmpfiles
         ++ createMailboxes  
         ;
 
-     # TODO: What's this? 
+     # TODO: Make this unneeded by removing sendmail from all tests (use telnet)
      services.mail.sendmailSetuidWrapper = mkIf config.services.postfix.setSendmail {
        program = "sendmail";
        source = "${pkgs.postfix}/bin/sendmail";
@@ -306,10 +308,6 @@ in
 
        # TODO: This with tmpfiles
        preStart = ''
-            mkdir -p /var/spool/mail
-            chown root:root /var/spool/mail
-            chmod a+rwxt /var/spool/mail
-            ln -sf /var/spool/mail /var/
             newaliases
        '' + generateDatabases;
      };
