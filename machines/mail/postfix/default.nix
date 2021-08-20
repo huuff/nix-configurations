@@ -179,6 +179,16 @@ in
             description = "Reject messages from the empty sender to multiple recipients";
           };
 
+          alwaysVerifySender = mkEnableOption "verify every sender";
+
+          selectiveSenderVerification = mkEnableOption "verify senders in verifyDomains";
+
+          verifyDomains = mkOption {
+            type = listOf str;
+            default = [ "hotmail.com" ];
+            description = "Domains to verify selectively";
+          };
+
           dnsBlocklists = {
             enable = mkEnableOption "DNS blocklists";
 
@@ -206,18 +216,7 @@ in
               description = "Exceptions to the sender DNS blocklist";
             };
           };
-
-          alwaysVerifySender = mkEnableOption "verify every sender";
-
-          selectiveSenderVerification = mkEnableOption "verify senders in verifyDomains";
-
-          verifyDomains = mkOption {
-            type = listOf str;
-            default = [ "hotmail.com" ];
-            description = "Domains to verify selectively";
-          };
         };
-
       };
     };
 

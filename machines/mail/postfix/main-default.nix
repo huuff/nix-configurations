@@ -27,6 +27,9 @@ in
 
   relayhost = "";
 
+  # This will help prevent address scanning
+  disable_vrfy_command = true;
+
   mynetworks = "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128";
   inet_interfaces = "all";
 }

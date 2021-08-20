@@ -42,6 +42,7 @@
 * Add `postgres`
 * Allow also UNIX socket users.
 * `execDDL` and `execDML` would be better as `runDDL` and `runDML`, also, `execDDL` isn't even really for DDL
+* Get rid of `execDDL` and just add some option to create a DB and users. (This is in the official package but you know NIH)
 
 ## mkSSLModule
 * Option to add own certificate
@@ -62,7 +63,6 @@
 * Test that the server is not an open relay
 * Test rfc conformance (permits `abuse`, `postmaster` and `<>`)
 * `mysql` maps
-* Disable `VRFY`
 * TLS
 * `clamav`
 * Some anti-spam software
