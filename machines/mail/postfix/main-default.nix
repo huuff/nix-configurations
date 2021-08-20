@@ -8,12 +8,12 @@ let
 in
 {
   compatibility_level = "3.6";
-  append_dot_mydomain = false; # MUA's work
+  append_dot_mydomain = false; # MUA's responsibility
   readme_directory = false;
   mydomain = cfg.canonicalDomain;
   myhostname = "${config.networking.hostName}.${cfg.canonicalDomain}";
 
-  # disable local delivery for security
+  # Disable local delivery for security
   mydestination = null;
   local_recipient_maps = null;
   local_transport = "error:local mail delivery is disabled";
@@ -24,12 +24,8 @@ in
   virtual_mailbox_base = cfg.mailPath;
   virtual_uid_maps = "static:${toString config.users.users.vmail.uid}";
   virtual_gid_maps = "static:${toString config.users.groups.vmail.gid}";
-  #virtual_mailbox_maps = mapToMain cfg.maps.virtual_mailbox_maps;
 
   relayhost = "";
-  # TODO: Try to remove this, we only use virtual users
-  alias_maps = "hash:/etc/aliases";
-  alias_database = "hash:/etc/aliases";
 
   mynetworks = "127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128";
   inet_interfaces = "all";
