@@ -43,9 +43,7 @@ rec {
   # Returns an array of the value of all maps
   mapsContents = mapAttrsToList (name: value: value) cfg.maps;
 
-  # TODO: Set better permissions.
-  # TODO: The maildir format (user/) is set twice. Once here and once in the virtual map
-  usersToTmpfiles = map (user: "d ${cfg.mailPath}/${user}/ 0755 ${cfg.mailUser} ${cfg.mailUser} - -") cfg.users;
+  createMailboxes = map (user: "d ${cfg.mailPath}/${user}/ 0700 ${cfg.mailUser} ${cfg.mailUser} - -") cfg.users;
 
   mapsToTmpfiles = map (pfMap: "L ${mapToPath pfMap} - ${cfg.mailUser} ${cfg.mailUser} - ${mapToFile pfMap}") mapsContents;
 
