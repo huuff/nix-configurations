@@ -306,7 +306,6 @@ in
          ExecReload = "${pkgs.postfix}/bin/postfix reload";
        };
 
-       # TODO: This with tmpfiles
        preStart = ''
             newaliases
        '' + generateDatabases;
