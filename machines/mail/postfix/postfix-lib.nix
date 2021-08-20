@@ -19,8 +19,18 @@ rec {
 
   attrsToMainCf = name: value: "${name} = ${mainAttrToStr value}";
 
-  # TODO: A concatStringsSep with this and spaces (or tabs) and a list for the strings.
-  attrsToMasterCf = name: value: "${if (value.name == null) then name else value.name} ${value.type} ${boolToYN value.private} ${boolToYN value.unpriv} ${boolToYN value.chroot} ${wakeupToStr value.wakeup} ${toString value.maxproc} ${value.command} ${concatStringsSep " " value.args}";
+  attrsToMasterCf = name: value: let
+    columns = [
+      (if (value.name == null) then name else value.name)
+      (value.type)
+      (boolToYN value.private)
+      (boolToYN value.unpriv)
+      (boolToYN value.chroot)
+      (wakeupToStr value.wakeup)
+      (toString value.maxproc)
+      (value.command)
+    ] ++ value.args;
+  in concatStringsSep " " columns;
 
   mapToPath = map: "${map.path}/${map.name}";
 

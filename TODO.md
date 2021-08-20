@@ -4,7 +4,7 @@
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
 * Harden long-standing systemd services (`do-on-request`, `auto-rsync`)
 * A hardened `openssh` module like that in [this post](https://christine.website/blog/paranoid-nixos-2021-07-18)
-* Make a file with the `test` config and share it between `test.nix` and `vm.nix` to test interactively in the same test environment (Ideally, I'd get `shell_interact()` to work. Or maybe not? I like having my aliases available) UPDATE: I DEFINITELY need to use `shell_interact()`, anything else is just torture. Maybe I'll have to ask the discourse.
+* Make a file with the `test` config and share it between `test.nix` and `vm.nix` to test interactively in the same test environment (Ideally, I'd get `shell_interact()` to work. Or maybe not? I like having my aliases available) UPDATE: I DEFINITELY need to use `shell_interact()`, anything else is just torture. Maybe I'll have to ask the discourse. UPDATE: Idea: Use some `default.nix` for tests I want to interact with, import `nixpkgs` from the channel and pass it to the test file as a parameter
 * Maybe it's time to start passing my library from the flake, look at that import for `testing-lib` in the `virtual-test` for postfix.
 
 ## Testing library
