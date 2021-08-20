@@ -13,10 +13,9 @@ in
   mydomain = cfg.canonicalDomain;
   myhostname = "${config.networking.hostName}.${cfg.canonicalDomain}";
 
-  # TODO: use null for these
   # disable local delivery for security
-  mydestination = "";
-  local_recipient_maps = "";
+  mydestination = null;
+  local_recipient_maps = null;
   local_transport = "error:local mail delivery is disabled";
   myorigin = cfg.canonicalDomain;
 

@@ -11,7 +11,7 @@ rec {
 
   wakeupToStr = wakeup: if (wakeup == null) then "never" else (toString wakeup);
 
-  mainAttrToStr = value: match (builtins.typeOf value) {
+  mainAttrToStr = value: if (value == null) then "" else match (builtins.typeOf value) {
     bool = boolToYesNo value;
     list = concatStringsSep ", " value;
     default = toString value;
