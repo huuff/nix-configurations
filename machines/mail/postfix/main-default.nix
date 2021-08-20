@@ -19,7 +19,6 @@ in
   local_recipient_maps = "";
   local_transport = "error:local mail delivery is disabled";
   # TODO: isn't this $mydomain by default? Does this do anything?
-  myorigin = cfg.canonicalDomain;
 
   # Virtual mailbox setting
   virtual_mailbox_domains = [cfg.canonicalDomain] ++ cfg.extraDomains;
