@@ -122,7 +122,7 @@ let
     };
   };
 
-  # TODO: a better name, documentation
+  # Aux function for orderUnits
   orderUnitsRec = current: alreadyOrdered: unorderedYet: 
   if (length unorderedYet) == 0
   then
@@ -134,7 +134,7 @@ let
   in
     orderUnitsRec next (alreadyOrdered ++ [nextAfterCurrent]) rest;
 
-  # TODO: a better name, documentation
+  # Orders units (sets after and binds to for each one to be after the other), adds first and last units
   orderUnits = units: orderUnitsRec (firstUnit) [firstUnit] (units);
 
 in  
