@@ -4,7 +4,7 @@ with lib;
 let
   cfg = config.machines.postfix;
 
-  postfixLib = import ./postfix-lib.nix { inherit lib pkgs config; };
+  postfixLib = import ./postfix-lib.nix { inherit lib pkgs cfg; };
 
   masterEntryModule = with types; submodule {
     options = {

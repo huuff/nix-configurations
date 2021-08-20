@@ -1,11 +1,7 @@
-# TODO: does it need config? can I pass cfg?
-{ lib, pkgs, config, ... }:
+{ lib, pkgs, cfg, ... }:
 
 with lib;
 
-let
-  cfg = config.machines.postfix;
-in
 rec {
   match = value: attrs: if (hasAttr value attrs) then attrs."${value}" else attrs.default;
 
