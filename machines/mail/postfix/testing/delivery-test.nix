@@ -15,9 +15,7 @@ in
 
     nodes = rec {
       machine1 = { pkgs, ... }: {
-        imports = [
-          ../default.nix
-        ];
+        imports = [ ../default.nix ];
 
         environment.systemPackages = with pkgs; [ mailutils ];
 
@@ -32,6 +30,8 @@ in
           inherit mailPath;
 
           users = [ user1Address ];
+
+          master.smtpd.args = [ "-v" ];
         };
 
         networking.interfaces.eth1.ipv4.addresses = [
@@ -43,19 +43,45 @@ in
           extraConfig = ''
             address=/${domain1}./192.168.2.1
             address=/${domain2}./192.168.2.2
+            mx-host=${domain1},machine1,10
+            mx-host=${domain2},machine2,10
           '';
         };
       };
 
-      machine2 = copyMachine machine1 { 
+      machine2 = { pkgs, ... }: { 
+        imports = [ ../default.nix ];
+
+        environment.systemPackages = with pkgs; [ mailutils ];
+
         networking.interfaces.eth1.ipv4.addresses = [
           { address = "192.168.2.2"; prefixLength = 24; }
         ];
 
         machines.postfix = {
+          enable = true;
           canonicalDomain = domain2;
+
+          restrictions = {
+            rfcConformant = true;
+            alwaysVerifySender = true;
+          };
+
+          inherit mailPath;
+
           users = [ user2Address ];
-          restrictions.alwaysVerifySender = true;
+
+          master.smtpd.args = [ "-v" ];
+        };
+
+        services.dnsmasq = {
+          enable = true;
+          extraConfig = ''
+            address=/${domain1}./192.168.2.1
+            address=/${domain2}./192.168.2.2
+            mx-host=${domain1},machine1,10
+            mx-host=${domain2},machine2,10
+          '';
         };
 
       };
