@@ -50,10 +50,9 @@ def outputs(self, command, output):
     if (out != output and out != f'{output}\n'):
         raise AssertionError(f'Expected: {output} Got: {out}')
 
-# TODO: Better name for the argument, expected instead of output
-def output_contains(self, command, output):
+def output_contains(self, command, expected):
     [ _, out ] = self.execute(command)
-    contains(out, output)
+    contains(out, expected)
 
 def print_output(self, command):
     [ _, out ] = self.execute(command)

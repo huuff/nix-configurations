@@ -61,7 +61,7 @@ in
 
       with subtest("nginx is serving wallabag"):
         machine.output_contains(command='curl http://localhost/login',
-                                output='<title>Welcome to wallabag! – wallabag</title>')
+                                expected='<title>Welcome to wallabag! – wallabag</title>')
 
       with subtest("default user is deactivated"):
         machine.output_contains(listUsers(), "wallabag wallabag@wallabag.io no yes")
