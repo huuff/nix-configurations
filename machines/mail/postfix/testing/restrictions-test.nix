@@ -46,9 +46,6 @@ in
         networking.interfaces.eth1.ipv4.addresses = [
           { address = server.ip; prefixLength = 24; }
         ];
-
-        networking.extraHosts = "192.168.1.1 ${client.domain}";
-        networking.useDHCP = false;
       };
 
       client = { pkgs, ... }: {
