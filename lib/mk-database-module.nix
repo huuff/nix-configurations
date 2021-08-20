@@ -2,7 +2,7 @@ name:
 { config, lib, pkgs, ... }:
 with lib;
 let
-  cfg = config.machines.${name};
+  cfg = config.machines.${name}.database;
   myLib = import ./default.nix { inherit config pkgs; };
 in
   {
@@ -27,8 +27,15 @@ in
             description = "Name of the database user";
           };
 
+          authenticationMethod = mkOption {
+            type = enum [ "socket" "password" ];
+            default = "password";
+            description = "What to authenticate the user to the DB with";
+          };
+
           passwordFile = mkOption {
-            type = oneOf [ str path ];
+            type = nullOr (oneOf [ str path ]);
+            default = null;
             description = "Password of the database user";
           };
 
@@ -44,8 +51,8 @@ in
     config = {
       assertions = [
         {
-          assertion = cfg.database.passwordFile != null;
-          message = "database.passwordFile must be set";
+          assertion = (cfg.passwordFile != null) -> (cfg.authenticationMethod == "password");
+          message = "The authenticationMethod must be 'password' to use passwordFile";
         }
       ];
 
@@ -56,12 +63,15 @@ in
 
       systemd.services = {
         "setup-${name}-db" = {
-          description = "Create ${cfg.database.name} and give ${cfg.database.user} permissions to it";
+          description = "Create ${cfg.name} and give ${cfg.user} permissions to it";
 
           script = myLib.db.execDDL ''
-            CREATE DATABASE IF NOT EXISTS ${cfg.database.name};
-            CREATE USER IF NOT EXISTS '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${myLib.passwd.cat cfg.database.passwordFile}';
-            GRANT ALL PRIVILEGES ON ${cfg.database.name}.* TO '${cfg.database.user}'@${cfg.database.host};
+            CREATE DATABASE IF NOT EXISTS ${cfg.name};
+            CREATE USER IF NOT EXISTS '${cfg.user}'@${cfg.host} ${ if cfg.authenticationMethod == "password"
+            then "IDENTIFIED BY '${myLib.passwd.cat cfg.passwordFile}'"
+            else "IDENTIFIED VIA unix_socket"
+            };
+            GRANT ALL PRIVILEGES ON ${cfg.name}.* TO '${cfg.user}'@${cfg.host};
           ''; 
 
           wantedBy = [ "multi-user.target" ];
