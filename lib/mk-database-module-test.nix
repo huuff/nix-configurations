@@ -33,10 +33,6 @@ in
           user = dbWithSocket.user;
         };
       };
-      users.users.${dbWithSocket.user} = {
-        isNormalUser = true;
-        password = "password";
-      };
     };
 
     testScript = ''
@@ -51,7 +47,6 @@ in
         machine.succeed("mysql -u${dbWithPassword.user} -p${dbWithPassword.pass} ${dbWithPassword.name} -e 'quit'")
 
       with subtest("user can connect to satabase with socket"):
-        machine.login("${dbWithSocket.user}")
-        machine.succeed_tty("mysql ${dbWithSocket.name} -e 'quit'")
+        machine.succeed("sudo -u ${dbWithSocket.user} mysql ${dbWithSocket.name} -e 'quit'")
     '';
   }

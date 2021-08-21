@@ -73,6 +73,10 @@ in
         package = mkDefault pkgs.mariadb;
       };
 
+      users.users.${cfg.user} = mkIf (!hasAttr "installation" config.machines.${name}) {
+        isSystemUser = true;
+      };
+
       systemd.services = {
         "setup-${name}-db" = {
           description = "Create ${cfg.name} and give ${cfg.user} permissions to it";
