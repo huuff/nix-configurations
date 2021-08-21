@@ -191,7 +191,7 @@ in {
       };
     };
 
-    machines.osticket.initialization = [
+    machines.osticket.initialization.units = [
       {
         name = "deploy-osticket";
         description = "Copy osTicket files and set permissions";

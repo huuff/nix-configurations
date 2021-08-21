@@ -65,7 +65,7 @@ in
 
       systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
-      machines.neuron.initialization = [
+      machines.neuron.initialization.units = [
         { 
           name = "initialize-zettelkasten";
           description = "Create Zettelkasten directory and clone repository";

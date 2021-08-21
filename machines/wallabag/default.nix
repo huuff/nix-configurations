@@ -155,7 +155,7 @@ in
 
       networking.firewall.allowedTCPPorts = [ 80 ];
 
-      machines.wallabag.initialization = [
+      machines.wallabag.initialization.units = [
         {
           name = "copy-wallabag";
           description = "Copy wallabag to final directory and setting permissions for installation";
