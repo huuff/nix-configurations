@@ -1,3 +1,5 @@
+import re
+
 current_tty = 1
 
 class Colors:
@@ -63,9 +65,21 @@ def print_tty(self, tty=current_tty):
     print(out);
 
 def put_tty(self, chars):
-  self.send_chars(f"{chars}\n")
-  self.wait_until_tty_matches(current_tty, chars)
-  self.print_tty(current_tty)
+    self.send_chars(f"{chars}\n")
+    self.wait_until_tty_matches(current_tty, re.escape(chars))
+    self.print_tty(current_tty)
+
+def clear_tty(self):
+    self.send_key("ctrl-l")
+
+def succeed_tty(self, command, tty=current_tty):
+    self.put_tty(command)
+    self.clear_tty()
+    self.put_tty("echo $?")
+    tty_content = self.get_tty_text(tty).rstrip()
+    # Remove all trailing whitespace from the lines
+    tty_content = "\n".join(list(map(lambda line: line.rstrip(), tty_content.splitlines())))
+    contains(tty_content, "\n0\n")
 
 Machine.login = login
 Machine.create_user_and_login = create_user_and_login
@@ -76,6 +90,8 @@ Machine.print_output = print_output
 Machine.switch_tty = switch_tty
 Machine.print_tty = print_tty
 Machine.put_tty = put_tty
+Machine.succeed_tty = succeed_tty
+Machine.clear_tty = clear_tty
 del(login)
 del(create_user_and_login)
 del(create_user)
@@ -85,3 +101,5 @@ del(print_output)
 del(switch_tty)
 del(print_tty)
 del(put_tty)
+del(succeed_tty)
+del(clear_tty)
