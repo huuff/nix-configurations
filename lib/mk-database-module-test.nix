@@ -24,13 +24,11 @@ in
       machines = {
         ${dbWithPassword.name}.database = {
           user = dbWithPassword.user;
-          name = dbWithPassword.name;
           passwordFile = pkgs.writeText "dbpass" dbWithPassword.pass; 
         };
 
         ${dbWithSocket.name}.database = {
           user = dbWithSocket.user;
-          name = dbWithSocket.name;
         };
       };
       users.users.${dbWithSocket.user} = {
@@ -48,10 +46,10 @@ in
         machine.succeed("systemctl is-active --quiet setup-${dbWithPassword.name}-db")
 
       with subtest("user can connect to database with password"):
-        machine.succeed("mysql -u${dbWithPassword.user} -p${dbWithPassword.pass} ${dbWithPassword.name} -e 'SHOW TABLES;'")
+        machine.succeed("mysql -u${dbWithPassword.user} -p${dbWithPassword.pass} ${dbWithPassword.name} -e 'quit'")
 
       with subtest("user can connect to satabase with socket"):
         machine.login("${dbWithSocket.user}")
-        machine.succeed_tty("mysql -u${dbWithSocket.user} ${dbWithSocket.name} -e 'quit'")
+        machine.succeed_tty("mysql ${dbWithSocket.name} -e 'quit'")
     '';
   }
