@@ -94,6 +94,7 @@ in
         database_driver = "pdo_mysql";
         database_port = "~";
         database_name = cfg.database.name;
+        database_user = cfg.database.user;
         database_path = null;
         database_table_prefix = cfg.database.prefix;
         database_charset = "utf8mb4";
@@ -142,11 +143,9 @@ in
         if (cfg.database.authenticationMethod == "password") then { 
           database_password = myLib.passwd.cat cfg.database.passwordFile;
           database_host = "127.0.0.1";
-          database_user = cfg.database.user;
         }
         else if (cfg.database.authenticationMethod == "socket") then {
           database_socket = "/run/mysqld/mysqld.sock";
-          database_user = cfg.database.user;
           database_host = null;
         }
         else throw "Unknown database authentication method"
@@ -191,7 +190,7 @@ in
         {
           name = "install-dependencies";
           description = "Run composer install";
-          script = "COMPOSER_MEMORY_LIMIT=-1 composer install || true";
+          script = "COMPOSER_MEMORY_LIMIT=-1 composer install";
           path = [ composerWithTidy phpWithTidy ];
           extraDeps = [ "network-online.target" ];
         }
