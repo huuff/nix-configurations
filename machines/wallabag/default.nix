@@ -92,14 +92,10 @@ in
 
       machines.wallabag.parameters = {
         database_driver = "pdo_mysql";
-        database_host = "127.0.0.1";
         database_port = "~";
         database_name = cfg.database.name;
-        database_user = cfg.database.user;
-        database_password = myLib.passwd.cat cfg.database.passwordFile;
         database_path = null;
         database_table_prefix = cfg.database.prefix;
-        database_socket = null;
         database_charset = "utf8mb4";
 
         domain_name = if cfg.ssl.enable then "https://localhost" else "http://localhost";
@@ -142,7 +138,19 @@ in
         rabbitmq_user = "guest";
         rabbitmq_password = "guest";
         rabbitmq_prefetch_count = 10;
-      };
+      } // (
+        if (cfg.database.authenticationMethod == "password") then { 
+          database_password = myLib.passwd.cat cfg.database.passwordFile;
+          database_host = "127.0.0.1";
+          database_user = cfg.database.user;
+        }
+        else if (cfg.database.authenticationMethod == "socket") then {
+          database_socket = "/run/mysqld/mysqld.sock";
+          database_user = cfg.database.user;
+          database_host = null;
+        }
+        else throw "Unknown database authentication method"
+        );
 
 
 

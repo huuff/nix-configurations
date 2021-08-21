@@ -95,6 +95,13 @@ in {
     };
 
     config = mkIf cfg.enable {
+      assertions = [
+        {
+          assertion = cfg.database.authenticationMethod == "password";
+          message = "osTicket needs an authenticationMethod of 'password'";
+        }
+      ];
+
       networking.firewall = {
         allowedTCPPorts = [ 80 ];
       };

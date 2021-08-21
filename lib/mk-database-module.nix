@@ -29,7 +29,7 @@ in
 
           authenticationMethod = mkOption {
             type = enum [ "socket" "password" ];
-            default = "password";
+            default = "socket";
             description = "What to authenticate the user to the DB with";
           };
 
@@ -53,6 +53,10 @@ in
         {
           assertion = (cfg.passwordFile != null) -> (cfg.authenticationMethod == "password");
           message = "The authenticationMethod must be 'password' to use passwordFile";
+        }
+        {
+          assertion = (cfg.authenticationMethod == "password") -> (cfg.passwordFile != null);
+          message = "If authenticationMethod is 'password', then passwordFile must be set";
         }
       ];
 

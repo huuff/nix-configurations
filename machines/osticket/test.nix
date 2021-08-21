@@ -29,7 +29,11 @@ in
       machines.osticket = {
         enable = true;
 
-        database.passwordFile = pkgs.writeText "dbpass" "dbpass";
+        database = {
+          passwordFile = pkgs.writeText "dbpass" "dbpass";
+          authenticationMethod = "password";
+        };
+
         site.email = "site@test.com";
         installation.path = path;
 

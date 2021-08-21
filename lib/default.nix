@@ -11,7 +11,12 @@ rec {
 
   db = {
     execDDL = ddl: ''${config.services.mysql.package}/bin/mysql -u root -e "${ddl}"'';
-    execDML = cfg: dml: ''${config.services.mysql.package}/bin/mysql "${cfg.database.name}" -u "${cfg.database.user}" -p"${passwd.cat cfg.database.passwordFile}" -e "${dml}"'';
+    execDML = cfg: dml: let
+      authentication = if (cfg.database.authenticationMethod == "password")
+      then ''-p"${passwd.cat cfg.database.passwordFile}"''
+      else "";
+    in
+    ''${config.services.mysql.package}/bin/mysql "${cfg.database.name}" -u "${cfg.database.user}" ${authentication} -e "${dml}"'';
   };
 
   copyMachine = machine: extraConf: { pkgs, config, lib, ... }:

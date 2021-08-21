@@ -26,7 +26,10 @@ in with myLib; {
     ssl.enable = true;
     ssl.httpsOnly = true;
 
-    database.passwordFile = fileFromStore ./dbpass;
+    database = {
+      authenticationMethod = "password";
+      passwordFile = fileFromStore ./dbpass;
+    };
 
     site.email = "site@example.com";
 

@@ -12,6 +12,7 @@ let
   };
   databasePassword = "dbpass";
   path = "/var/lib/wallabag";
+  user = "wallabag";
 in
   pkgs.nixosTest {
     name = "wallabag";
@@ -25,9 +26,7 @@ in
         enable = true;
         ssl.enable = false;
 
-        database.passwordFile = pkgs.writeText "dbpass" databasePassword;
-
-        installation.path = path;
+        installation = { inherit path user; };
 
         users = [
           {
@@ -49,7 +48,7 @@ in
       ${ builtins.readFile ../../lib/testing-lib.py }
 
       def listUsers():
-        return "cd ${path} && php bin/console wallabag:user:list | tr -s ' '"
+        return "cd ${path} && sudo -u ${user} php bin/console wallabag:user:list | tr -s ' '"
 
       machine.wait_for_unit("multi-user.target")
 

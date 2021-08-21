@@ -24,10 +24,12 @@ in
       machines = {
         ${dbWithPassword.name}.database = {
           user = dbWithPassword.user;
+          authenticationMethod = "password";
           passwordFile = pkgs.writeText "dbpass" dbWithPassword.pass; 
         };
 
         ${dbWithSocket.name}.database = {
+          authenticationMethod = "socket";
           user = dbWithSocket.user;
         };
       };
