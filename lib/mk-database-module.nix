@@ -23,7 +23,7 @@ in
 
           user = mkOption {
             type = str;
-            default = name;
+            default = if (hasAttr "installation" config.machines.${name}) then config.machines.${name}.installation.user else name;
             description = "Name of the database user";
           };
 
@@ -57,6 +57,14 @@ in
         {
           assertion = (cfg.authenticationMethod == "password") -> (cfg.passwordFile != null);
           message = "If authenticationMethod is 'password', then passwordFile must be set";
+        }
+        {
+          assertion = (cfg.authenticationMethod == "socket") -> (hasAttr cfg.user config.users.users);
+          message = "For DB socket authentication, the system user ${cfg.user} must exist!";
+        }
+        {
+          assertion = (hasAttr "installation" config.machines.${name}) -> (cfg.user == config.machines.${name}.installation.user);
+          message = "If a machine has the 'installation' module, then installation.user must be the same as database.user!";
         }
       ];
 
