@@ -202,7 +202,7 @@ in
           let
             insertUser = user: ''
               php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile} --no-interaction ${optionalString user.superAdmin "--super-admin"}
-              ${optionalString (user.pocketKeyFile != null) (myLib.db.execDML cfg ''
+              ${optionalString (user.pocketKeyFile != null) (myLib.db.runSql cfg ''
                 SELECT id FROM ${cfg.database.prefix}user WHERE username='${user.username}' INTO @user_id;
                 UPDATE ${cfg.database.prefix}config SET pocket_consumer_key='${myLib.passwd.cat user.pocketKeyFile}' WHERE user_id=@user_id;
               '')}
@@ -219,7 +219,7 @@ in
         (mkIf (cfg.importTool != "none") {
           name = "enable-${cfg.importTool}";
           description = "Enable ${cfg.importTool} for importing in the database";
-          script = myLib.db.execDML cfg "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_${cfg.importTool}';";
+          script = myLib.db.runSql cfg "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_${cfg.importTool}';";
         })
 
       ];

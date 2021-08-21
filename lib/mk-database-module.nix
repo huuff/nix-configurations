@@ -81,7 +81,7 @@ in
         "setup-${name}-db" = {
           description = "Create ${cfg.name} and give ${cfg.user} permissions to it";
 
-          script = myLib.db.execDDL ''
+          script = myLib.db.runSqlAsRoot ''
             CREATE DATABASE IF NOT EXISTS ${cfg.name};
             CREATE USER IF NOT EXISTS '${cfg.user}'@${cfg.host} ${ if cfg.authenticationMethod == "password"
             then "IDENTIFIED BY '${myLib.passwd.cat cfg.passwordFile}'"
