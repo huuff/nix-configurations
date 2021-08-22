@@ -1,4 +1,3 @@
-# TODO: DRY each unit
 machineName:
 { pkgs, lib, config, ... }:
 with lib;
@@ -46,24 +45,40 @@ let
     };
   };
 
-  initModuleToUnit = initModule: nameValuePair initModule.name rec {
+  mkUnit = moduleName: config: { 
+    name = moduleName;
+
+    value = recursiveUpdate {
+      serviceConfig = {
+        Type = "oneshot";
+        User = cfg.user;
+        RemainAfterExit = true;
+        WorkingDirectory = mkIf (cfg.workingDirectory != null) cfg.workingDirectory;
+        ExecStartPost = createLock moduleName;
+      };
+
+      unitConfig = {
+        After = [];
+        BindsTo = [];
+        Requires = [];
+        ConditionPathExists = "!${lockPath}/${moduleName}";
+      };
+
+    } config;
+  };
+
+  initModuleToUnit = initModule: mkUnit initModule.name {
     script = initModule.script;
     description = initModule.description;
     path = initModule.path;
 
     serviceConfig = {
       User = initModule.user;
-      Type = "oneshot";
-      RemainAfterExit = true;
-      WorkingDirectory = mkIf (hasAttr "installation" config.machines.${machineName}) config.machines.${machineName}.installation.path;
-      ExecStartPost = createLock initModule.name;
     };
 
     unitConfig = {
       After = initModule.extraDeps;
       BindsTo = initModule.extraDeps;
-      Requires = [];
-      ConditionPathExists = "!${lockPath}/${initModule.name}";
     };
   };
 
@@ -76,68 +91,34 @@ let
 
   # This creates a unit that is required by all others, running only if the "lock" does not exist
   # Therefore, if the "lock" exists (which means the initialization is complete) then nothing will run
-  firstUnit = rec {
-    name = "start-${machineName}-initialization";
+  firstUnit = mkUnit "start-${machineName}-initialization" {
+    description = "Start the provisioning of ${machineName}";
 
-    value = {
-      description = "Start the provisioning of ${machineName}";
-
-      script = "echo 'Start provisioning ${machineName}'";
-
-      serviceConfig = {
-        User = cfg.user;
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStartPost = createLock name;
-      };
-
-      unitConfig = {
-        ConditionPathExists = "!${lockPath}/${name}"; 
-      };
-
-    };
+    script = "echo 'Start provisioning ${machineName}'";
   };
 
   # This creates a new unit that satisfies the following:
   # * Is after and requires all units in init.
   # * Is wanted by multi-user target, so it will be auto-started and propagate to all others.
   # * It creates a file that will signify the end of the initialization (the "lock")
-  lastUnit = rec {
-    name = "finish-${machineName}-initialization";
+  lastUnit = mkUnit "finish-${machineName}-initialization" {
+    description = "Finish the provisioning of ${machineName}";
+    script = "echo 'Finished provisioning ${machineName}'";
 
-    value = {
-      description = "Finish the provisioning of ${machineName}";
-      script = "echo 'Finished provisioning ${machineName}'";
-
-      wantedBy = [ "multi-user.target" ];
-
-      serviceConfig = {
-        User = cfg.user;
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStartPost = createLock name;
-      };
-
-      # Just so after function works
-      unitConfig = {
-        After = [];
-        Requires = [];
-        ConditionPathExists = "!${lockPath}/${name}"; 
-      };
-    };
+    wantedBy = [ "multi-user.target" ];
   };
 
   # Aux function for orderUnits
   orderUnitsRec = current: alreadyOrdered: unorderedYet: 
   if (length unorderedYet) == 0
   then
-    alreadyOrdered ++ [ (after current lastUnit) ]
+  alreadyOrdered ++ [ (after current lastUnit) ]
   else let 
     next = head unorderedYet;
     nextAfterCurrent = after current next;
     rest = tail unorderedYet;
   in
-    orderUnitsRec next (alreadyOrdered ++ [nextAfterCurrent]) rest;
+  orderUnitsRec next (alreadyOrdered ++ [nextAfterCurrent]) rest;
 
   # Orders units (sets after and binds to for each one to be after the other), adds first and last units
   orderUnits = units: orderUnitsRec (firstUnit) [firstUnit] (units);
@@ -145,20 +126,26 @@ let
 in  
   {
     options = {
-      machines.${machineName}.initialization = {
+      machines.${machineName}.initialization = with types; {
         user = mkOption {
-          type = types.str;
+          type = str;
           default = if (hasAttr "installation" config.machines.${machineName}) then config.machines.${machineName}.installation.user else "root";
           description = "Default user for the initialization units";
         };
 
+        workingDirectory = mkOption {
+          type = nullOr str;
+          default = if (hasAttr "installation" config.machines.${machineName}) then config.machines.${machineName}.installation.path else null;
+          description = "Working directory where the units will be executed";
+        };
+
         units = mkOption {
-          type = types.listOf initModule;
+          type = listOf initModule;
           default = [];
           description = "Each of the scripts to run for provisioning, in the required order";
         };
       };
-  };
+    };
 
     config = {
 
