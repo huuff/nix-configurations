@@ -62,6 +62,7 @@ let
     unitConfig = {
       After = initModule.extraDeps;
       BindsTo = initModule.extraDeps;
+      Requires = [];
       ConditionPathExists = "!${lockPath}/${initModule.name}";
     };
   };
@@ -69,7 +70,7 @@ let
   after = first: second: recursiveUpdate second {
     value.unitConfig = {
       After = [ "${first.name}.service" ] ++ second.value.unitConfig.After;
-      BindsTo = [ "${first.name}.service" ] ++ second.value.unitConfig.BindsTo;
+      Requires = [ "${first.name}.service" ] ++ second.value.unitConfig.Requires;
     };
   };
 
@@ -120,7 +121,7 @@ let
       # Just so after function works
       unitConfig = {
         After = [];
-        BindsTo = [];
+        Requires = [];
         ConditionPathExists = "!${lockPath}/${name}"; 
       };
     };

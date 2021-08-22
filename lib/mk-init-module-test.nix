@@ -2,34 +2,35 @@
 let
   lib = pkgs.lib;
   copyMachine = import ./copy-machine.nix { inherit lib; };
-  testFilePath = "/var/testfile";
+  unitOrderFilePath = "/var/unit-order";
+  testFilePath = "/var/test-file";
 in
   pkgs.nixosTest {
     name = "mk-init-module";
 
     nodes = rec {
-      machine = { pkgs, ... }: {
+      machine1 = { pkgs, ... }: {
         imports = [ (import ./mk-init-module.nix "test") ];
 
-        system.activationScripts.createTestFile.text = "touch ${testFilePath}";
+        system.activationScripts.createTestFile.text = "touch ${unitOrderFilePath}";
 
         machines.test.initialization.units = [
           {
             name = "unit1";
             description = "First unit";
             path = [ pkgs.hello ];
-            script = "hello -v && echo -n 'unit1 ' >> ${testFilePath}";
+            script = "hello -v && echo -n 'unit1 ' >> ${unitOrderFilePath}";
           }
           {
             name = "unit2";
             description = "Second unit";
             extraDeps = [ "test-service.service" ];
-            script = "echo -n 'unit2 ' >> ${testFilePath}";
+            script = "echo -n 'unit2 ' >> ${unitOrderFilePath}";
           }
           {
             name = "unit3";
             description = "Third unit";
-            script = "echo -n 'unit3' >> ${testFilePath}";
+            script = "echo -n 'unit3' >> ${unitOrderFilePath}";
           }
         ];
 
@@ -45,36 +46,60 @@ in
       };
 
   # Same as machine, but test-service fails so unit2 should fail
-  machineWithoutTestService = copyMachine machine {
+  machine2 = copyMachine machine1 {
     systemd.services.test-service.script = "exit 1";
+  };
+
+  machine3 = copyMachine machine1 {
+    systemd.services.unit2.script = "[ -e ${testFilePath} ]"; 
   };
 };
 
 testScript = ''
     ${ builtins.readFile ./testing-lib.py }
 
-    machine.wait_for_unit("multi-user.target")
+    machine1.wait_for_unit("multi-user.target")
+    machine2.wait_for_unit("multi-user.target")
+    machine3.wait_for_unit("multi-user.target")
 
     with subtest("units are active"):
-      machine.succeed("systemctl is-active --quiet unit1")
-      machine.succeed("systemctl is-active --quiet unit2")
-      machine.succeed("systemctl is-active --quiet unit3")
-      machine.succeed("systemctl is-active --quiet test-service")
+      machine1.succeed("systemctl is-active --quiet unit1")
+      machine1.succeed("systemctl is-active --quiet unit2")
+      machine1.succeed("systemctl is-active --quiet unit3")
+      machine1.succeed("systemctl is-active --quiet test-service")
 
     # This tests that the echos have been done in the correct ordered
     # and thus, that the units are correctly ordered
     with subtest("units are correctly ordered"):
-      machine.outputs("cat ${testFilePath}", "unit1 unit2 unit3")
+      machine1.outputs("cat ${unitOrderFilePath}", "unit1 unit2 unit3")
 
     with subtest("unit fails if extraDeps fail"):
-     machineWithoutTestService.wait_for_unit("multi-user.target")
-     machineWithoutTestService.fail("systemctl is-active --quiet unit2") 
+     machine2.wait_for_unit("multi-user.target")
+     machine2.fail("systemctl is-active --quiet unit2") 
 
     with subtest("units are not started on restart"):
-      machine.shutdown()
-      machine.start()
-      machine.fail("systemctl is-active --quiet unit1")
-      machine.fail("systemctl is-active --quiet unit2")
-      machine.fail("systemctl is-active --quiet unit3")
+      machine1.shutdown()
+      machine1.start()
+      machine1.fail("systemctl is-active --quiet unit1")
+      machine1.fail("systemctl is-active --quiet unit2")
+      machine1.fail("systemctl is-active --quiet unit3")
+
+    # In this test, the machine will fail at unit2 the first time because ${testFilePath}
+    # doesn't exist. Then we create it and reset the machine and ensure that only
+    # unit2 and unit3 (the remaining in the initialization process) are active
+    with subtest("initialization resumes from failed unit"):
+      machine3.succeed("systemctl is-active --quiet unit1")
+      machine3.fail("systemctl is-active --quiet unit2")
+      machine3.fail("systemctl is-active --quiet unit3")
+
+      machine3.succeed("touch ${testFilePath}")
+      machine3.shutdown()
+      machine3.start()
+      machine3.wait_for_unit("multi-user.target")
+
+      machine3.fail("systemctl is-active --quiet unit1")
+      machine3.succeed("systemctl is-active --quiet unit2")
+      machine3.succeed("systemctl is-active --quiet unit3")
+      
 '';
 }
