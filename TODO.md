@@ -32,6 +32,7 @@
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important
+* `composer install` fails with some weird error about parsing XML. Try to fix it or just ignore the error with `|| true`
 * Add email options
 
 ## mkInitModule
@@ -44,7 +45,6 @@
 * Option to add own certificate
 * Option to generate one from Let's Encrypt
 * Check and generate certificates if they are expired
-* Definitely needs to follow the path convention
 * Option to set a global certificate
 
 ## Mail
