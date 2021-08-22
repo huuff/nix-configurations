@@ -35,7 +35,6 @@
 * Add email options
 
 ## mkInitModule
-* Add an intermediate "lock" for each unit, so these can show at what point of the initialization we are, and thus, restart from an intermediate point instead of from the beginning.
 * Make it somewhat more terse. My init scripts still look a bit hideous
 
 ## mkDatabaseModule
