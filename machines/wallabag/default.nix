@@ -224,8 +224,6 @@ in
 
       ];
 
-      machines.wallabag.database.enable = true;
-
       services.nginx = {
         enable = true;
         user = mkDefault cfg.installation.user;

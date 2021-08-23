@@ -4,7 +4,7 @@ name:
 with lib;
 
 let
-  cfg = config.machines.${name};
+  cfg = config.machines.${name}.backup;
 
   myLib = import ./default.nix { inherit config pkgs; };
 
@@ -28,7 +28,7 @@ let
     options = { 
       path = mkOption {
         type = oneOf [ str path ];
-        default = "/var/backup/${name}";
+        default = "/var/lib/backup/${name}";
         description = "Path where the backup will be stored, if remote, do not use the 'ssh://' format, but fill in the remote option";
       };
 
@@ -45,7 +45,7 @@ in
       machines.${name}.backup = {
         user = mkOption {
           type = str;
-          default = if hasAttr "installatio" config.machines.${name} then config.machines.${name}.installation else null;
+          default = if hasAttr "installation" config.machines.${name} then config.machines.${name}.installation.user else null;
           description = "User that will run the backup script";
         };
 
@@ -64,18 +64,34 @@ in
     config = {
       assertions = [
         {
-          assertion = cfg.backup.database.enable -> cfg.database.enable;
+          assertion = cfg.database.enable -> cfg.database.enable;
           message = "Can't enable database backup without enabling database!";
         }
       ];
 
+      machines.${name}.initialization.units = mkBefore [
+        (mkIf cfg.database.enable {
+          name = "initialize-${name}-repository";
+          description = "Initialize the ${name} borg repository if not already a repository";
+          path = [ pkgs.borgbackup ];
+          script = ''
+            set +e
+            borg info ${cfg.database.repository.path}
+            if [ $? -eq 2 ]; then
+              borg init -e none ${cfg.database.repository.path}
+            fi
+          '';
+          #workingDirectory = cfg.database.repository.path;
+        })
+      ];
+
       systemd = {
         tmpfiles.rules = mkIf cfg.database.enable [
-          "d ${cfg.backup.database.path} 0644 ${cfg.installation.user} ${cfg.installation.user} - -"
+          "d ${cfg.database.repository.path} 755 ${cfg.user} ${cfg.user} - -"
         ];
 
         timers = {
-          "backup-${name}-database" = mkIf cfg.backup.database.enable {
+          "backup-${name}-database" = mkIf cfg.database.enable {
             wantedBy = [ "timers.target" ];
 
             partOf = [ "backup-${name}-database.service" ];
@@ -85,16 +101,26 @@ in
         };
 
         services = {
-          "backup-${name}-database" = mkIf cfg.backup.database.enable {
+          "backup-${name}-database" = mkIf cfg.database.enable {
             description = "Make a backup of the ${name} database";
 
-            path = [ config.services.mysql.package ];
+            environment.BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK = "yes";
 
-            script = ''
-              mysqldump --order-by-primary -u ${cfg.database.user} -p${myLib.passwd.cat cfg.database.passwordFile} ${cfg.database.name} > ${cfg.backup.database.path}/dump.sql
+            path = [ config.services.mysql.package  pkgs.borgbackup ];
+
+            script = let
+              dbCfg = config.machines.${name}.database;
+              authentication = if (dbCfg.authenticationMethod == "password") then "-p ${myLib.passwd.cat dbCfg.passwordFile}" else "";
+            in
+            ''
+              mysqldump --order-by-primary -u${dbCfg.user} ${authentication} ${dbCfg.name} | borg create ${cfg.database.repository.path}::{now} -
+              echo test
             '';
 
-            serviceConfig.Type = "oneshot";
+            serviceConfig = {
+              Type = "oneshot";
+              User = cfg.user;
+            };
           };
         };
       };

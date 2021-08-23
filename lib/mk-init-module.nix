@@ -29,7 +29,7 @@ let
       extraDeps = mkOption {
         type = listOf str;
         default = [];
-        description = "Services that are also dependencies of the unit";
+        description = "Services that are also dependencies of the unit. Added as `After` and `BindsTo`";
       };
 
       user = mkOption {
@@ -41,6 +41,12 @@ let
       script = mkOption {
         type = str;
         description = "Script that will be run";
+      };
+
+      workingDirectory = mkOption {
+        type = nullOr (oneOf [ str path ]);
+        default = cfg.workingDirectory;
+        description = "Path where the unit will be run";
       };
     };
   };
@@ -74,6 +80,7 @@ let
 
     serviceConfig = {
       User = initModule.user;
+      WorkingDirectory = mkIf (initModule.workingDirectory != null) initModule.workingDirectory;
     };
 
     unitConfig = {

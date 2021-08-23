@@ -1,7 +1,9 @@
 { pkgs, ... }:
 let
   dbPass = "dbpass";
-  backupPath = "/var/backup/test/db";
+  backupPath = "/var/lib/backup";
+  user = "test";
+  testTable = "TEST_TABLE";
 in
 pkgs.nixosTest {
   name = "backup";
@@ -15,20 +17,21 @@ pkgs.nixosTest {
       (import ./mk-database-module.nix "test")
       (import ./mk-backup-module.nix "test")
       (import ./mk-installation-module.nix "test")
+      (import ./mk-init-module.nix "test")
     ];
 
-    environment.systemPackages = with pkgs; [ mysql ];
+
+    environment.systemPackages = with pkgs; [ mysql borgbackup ];
 
     machines.test = {
-      database = {
-        enable = true;
-        passwordFile = pkgs.writeText dbPass dbPass;
-      };
+      installation.user = user;
 
       backup = {
         database = {
           enable = true;
-          path = backupPath;
+          repository = {
+            path = backupPath;
+          };
         };
       };
     };
@@ -39,15 +42,14 @@ pkgs.nixosTest {
 
         machine.wait_for_unit("multi-user.target")
 
-        machine.print_output('mysql -u test -p${dbPass} test -e "CREATE TABLE TEST_TABLE (TEST_COLUMN INT);"')
-        machine.print_output('mysql -u test -p${dbPass} test -e "INSERT INTO TEST_TABLE VALUES (1), (2), (3);"')
-
-        machine.sleep(1)
-        machine.print_output('mysql -u test -p${dbPass} test -e "SELECT * FROM TEST_TABLE;"')
+        machine.print_output('sudo -u${user} mysql test -e "CREATE TABLE ${testTable} (TEST_COLUMN INT);"')
+        machine.print_output('sudo -u${user} mysql test -e "INSERT INTO ${testTable} VALUES (1), (2), (3);"')
 
         with subtest("backup is created"):
           machine.systemctl("start backup-test-database")
-          machine.sleep(2)
-          machine.print_output("cat ${backupPath}/*.sql")
+          [ _, archive ] = machine.execute("BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes borg list --last 1 --format '{archive}' ${backupPath}")
+          print(f"The archive is: {archive}")
+          machine.output_contains(command=f"borg extract --stdout ${backupPath}::{archive}", 
+                                  expected="CREATE TABLE `${testTable}`")
       '';
 }

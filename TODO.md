@@ -20,7 +20,10 @@
 * Add a way to setup a global certificate, this will help with deploying multiple machines.
 
 ## mkBackupModule
-* Use `borg` to backup a mysql database.
+* Restore the backup if it exists as a last step in initialization
+* Encryption options
+* Some way to conditionally load `mkInitModule`? (Not loading it if already loaded)
+* Test remote repos
 
 ## osTicket
 * Add backup options
@@ -43,6 +46,7 @@
 
 ## mkDatabaseModule
 * Add `postgres`
+* A enable option with mkIf? Think about it at least.
 
 ## mkSSLModule
 * Option to add own certificate
