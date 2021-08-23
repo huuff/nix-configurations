@@ -114,7 +114,6 @@ in
             in
             ''
               mysqldump --order-by-primary -u${dbCfg.user} ${authentication} ${dbCfg.name} | borg create ${cfg.database.repository.path}::{now} -
-              echo test
             '';
 
             serviceConfig = {
