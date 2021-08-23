@@ -27,6 +27,8 @@ pkgs.nixosTest {
       installation.user = user;
 
       backup = {
+        restore = true;
+
         database = {
           enable = true;
           repository = {
@@ -51,5 +53,6 @@ pkgs.nixosTest {
           print(f"The archive is: {archive}")
           machine.output_contains(command=f"borg extract --stdout ${backupPath}::{archive}", 
                                   expected="CREATE TABLE `${testTable}`")
+
       '';
 }

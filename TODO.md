@@ -29,6 +29,9 @@
 * Set up credentials (in `credentials.xml`)
 * Set up security
 
+# My library
+* Consider putting database authentication here
+
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important

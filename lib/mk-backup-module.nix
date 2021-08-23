@@ -5,6 +5,9 @@ with lib;
 
 let
   cfg = config.machines.${name}.backup;
+  dbCfg = if (hasAttr "database" config.machines.${name}) then config.machines.${name}.database else null;
+
+  allowUnencryptedRepo = "export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes";
 
   myLib = import ./default.nix { inherit config pkgs; };
 
@@ -23,6 +26,8 @@ let
       };
     };
   };
+
+  repoNotEmpty = repoPath: "[ $(borg list ${repoPath} | wc -l) -ne 0 ]";
 
   repository = with types; submodule {
     options = { 
@@ -88,23 +93,27 @@ in
               set +e
               borg info ${cfg.database.repository.path}
               if [ $? -eq 2 ]; then
-              borg init -e none ${cfg.database.repository.path}
+                borg init -e none ${cfg.database.repository.path}
               fi
             '';
           })
         ])
-
+        # TODO: This is AFTER finish, should be just before
         (mkAfter [
           (mkIf cfg.restore {
             name = "restore-${name}-backup";
             description = "Restore the latest ${name} backup";
             path = [ pkgs.borgbackup ];
             script = ''
-              ${myLib.runSqlAsRoot "DROP DATABASE ${cfg.database.name};"}
-              latest_archive=$(borg list --last 1 --format '{archive}' ${cfg.database.repository.path})
-              ${myLib.runSqlAsRoot "$(borg extract --stdout ${cfg.database.repository.path}::$latest_archive)"}
+              ${allowUnencryptedRepo}
+              if ${repoNotEmpty cfg.database.repository.path}; then
+                ${myLib.db.runSqlAsRoot "DROP DATABASE ${dbCfg.name};"}
+                latest_archive=$(borg list --last 1 --format '{archive}' ${cfg.database.repository.path})
+                ${myLib.db.runSqlAsRoot "$(borg extract --stdout ${cfg.database.repository.path}::$latest_archive)"}
+              fi
             '';
             user = "root";
+            extraDeps = [ "mysql.service" ];
           })
         ])
       ];
@@ -133,7 +142,6 @@ in
             path = [ config.services.mysql.package  pkgs.borgbackup ];
 
             script = let
-              dbCfg = config.machines.${name}.database;
               authentication = if (dbCfg.authenticationMethod == "password") then "-p ${myLib.passwd.cat dbCfg.passwordFile}" else "";
             in
             ''
