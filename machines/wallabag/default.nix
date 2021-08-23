@@ -49,7 +49,7 @@ in
     ];
 
     options.machines.wallabag = with types; {
-      enable = mkEnableOption "Whether to enable the wallabag service";
+      enable = mkEnableOption "wallabag";
 
       package = mkOption {
         type = package;
@@ -92,14 +92,11 @@ in
 
       machines.wallabag.parameters = {
         database_driver = "pdo_mysql";
-        database_host = "127.0.0.1";
         database_port = "~";
         database_name = cfg.database.name;
         database_user = cfg.database.user;
-        database_password = myLib.passwd.cat cfg.database.passwordFile;
         database_path = null;
         database_table_prefix = cfg.database.prefix;
-        database_socket = null;
         database_charset = "utf8mb4";
 
         domain_name = if cfg.ssl.enable then "https://localhost" else "http://localhost";
@@ -142,13 +139,23 @@ in
         rabbitmq_user = "guest";
         rabbitmq_password = "guest";
         rabbitmq_prefetch_count = 10;
-      };
+      } // (
+        if (cfg.database.authenticationMethod == "password") then { 
+          database_password = myLib.passwd.cat cfg.database.passwordFile;
+          database_host = "127.0.0.1";
+        }
+        else if (cfg.database.authenticationMethod == "socket") then {
+          database_socket = "/run/mysqld/mysqld.sock";
+          database_host = null;
+        }
+        else throw "Unknown database authentication method"
+        );
 
 
 
       networking.firewall.allowedTCPPorts = [ 80 ];
 
-      machines.wallabag.initialization = [
+      machines.wallabag.initialization.units = [
         {
           name = "copy-wallabag";
           description = "Copy wallabag to final directory and setting permissions for installation";
@@ -183,8 +190,9 @@ in
         {
           name = "install-dependencies";
           description = "Run composer install";
-          script = "COMPOSER_MEMORY_LIMIT=-1 composer install || true";
+          script = "COMPOSER_MEMORY_LIMIT=-1 composer install";
           path = [ composerWithTidy phpWithTidy ];
+          extraDeps = [ "network-online.target" ];
         }
 
         {
@@ -194,7 +202,7 @@ in
           let
             insertUser = user: ''
               php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile} --no-interaction ${optionalString user.superAdmin "--super-admin"}
-              ${optionalString (user.pocketKeyFile != null) (myLib.db.execDML cfg ''
+              ${optionalString (user.pocketKeyFile != null) (myLib.db.runSql cfg ''
                 SELECT id FROM ${cfg.database.prefix}user WHERE username='${user.username}' INTO @user_id;
                 UPDATE ${cfg.database.prefix}config SET pocket_consumer_key='${myLib.passwd.cat user.pocketKeyFile}' WHERE user_id=@user_id;
               '')}
@@ -211,7 +219,7 @@ in
         (mkIf (cfg.importTool != "none") {
           name = "enable-${cfg.importTool}";
           description = "Enable ${cfg.importTool} for importing in the database";
-          script = myLib.db.execDML cfg "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_${cfg.importTool}';";
+          script = myLib.db.runSql cfg "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_${cfg.importTool}';";
         })
 
       ];

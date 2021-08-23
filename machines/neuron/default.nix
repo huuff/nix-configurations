@@ -20,7 +20,7 @@ in
     ];
 
     options.machines.neuron = with types; {
-      enable = mkEnableOption "Automatically fetch Neuron zettelkasten from git repo and serve it";
+      enable = mkEnableOption "neuron";
 
       refreshPort = mkOption {
         type = int;
@@ -65,7 +65,7 @@ in
 
       systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
-      machines.neuron.initialization = [
+      machines.neuron.initialization.units = [
         { 
           name = "initialize-zettelkasten";
           description = "Create Zettelkasten directory and clone repository";

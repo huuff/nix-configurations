@@ -1,6 +1,8 @@
 { config, pkgs, lib, ... }:
 let
   myLib = import ../../../lib { inherit config pkgs; };
+  phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
+  composerWithTidy = (pkgs.php74Packages.composer.override { php = phpWithTidy; });
 in with myLib; {
   imports = [
     ../default.nix
@@ -11,8 +13,10 @@ in with myLib; {
   virtualisation.diskSize = 5 * 1024;
 
   environment.systemPackages = with pkgs; [
-    php74
-    php74Packages.composer
+    phpWithTidy
+    composerWithTidy
+    gnumake
+    doas
   ];
   
   services.redis.logfile = "stdout";
@@ -23,7 +27,6 @@ in with myLib; {
     ssl.enable = true;
     parameters.domain_name = "https://localhost:8988";
 
-    database.passwordFile = fileFromStore ./dbpass;
     importTool = "rabbitmq";
 
     users = [

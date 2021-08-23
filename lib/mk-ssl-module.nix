@@ -3,23 +3,20 @@ name:
 with lib;
 let
   cfg = config.machines.${name}.ssl;
+  sslPath = "/etc/ssl";
+  certPath = "${sslPath}/certs/${name}.pem";
+  keyPath = "${sslPath}/private/${name}.pem";
 in
   {
     options = {
       machines.${name}.ssl = with types; {
 
-        enable = mkEnableOption "Whether to auto-generate an SSL certificate";
+        enable = mkEnableOption "SSL certificate";
 
         user = mkOption {
           type = str;
           default = if (builtins.hasAttr "installation" config.machines.${name}) then config.machines.${name}.installation.user else "root";
           description = "User that will own the certificate";
-        };
-
-        path = mkOption {
-          type = oneOf [ path str ];
-          default = "/etc/ssl/${name}";
-          description = "Path of the generated certificate";
         };
 
         httpsOnly = mkOption {
@@ -37,32 +34,40 @@ in
       services.nginx.virtualHosts.${name} = mkIf config.services.nginx.enable {
         addSSL = !cfg.httpsOnly;
         forceSSL = cfg.httpsOnly;
-        sslCertificate = "${cfg.path}/cert.pem";
-        sslCertificateKey = "${cfg.path}/key.pem";
+        sslCertificate = certPath;
+        sslCertificateKey = keyPath;
       };
       
-      systemd.tmpfiles.rules = [ "d ${cfg.path} 0700 ${cfg.user} ${cfg.user} - - "];
+      systemd.tmpfiles.rules = 
+      [
+        "d ${sslPath}/certs 755 root root - - "
+        "d ${sslPath}/private 755 root root - - "
+      ];
 
       systemd.services."create-${name}-cert" = {
         description = "Create a certificate for ${name}";
 
-        script = ''
-          ${pkgs.libressl}/bin/openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes -subj '/CN=localhost'
-          chmod 644 cert.pem
-          chmod 640 key.pem
+        script = 
+        let
+        in
+        ''
+          ${pkgs.libressl}/bin/openssl req -x509 -newkey rsa:4096 -keyout ${keyPath} -out ${certPath} -days 365 -nodes -subj '/CN=localhost'
+          chown ${cfg.user}:${cfg.user} ${certPath}
+          chown ${cfg.user}:${cfg.user} ${keyPath}
+          chmod 644 ${certPath}
+          chmod 640 ${keyPath}
         '';
 
         wantedBy = [ "multi-user.target" ] ++ optional config.services.nginx.enable "nginx.service";
         
         unitConfig = {
           Before = [ "multi-user.target"] ++ optional config.services.nginx.enable "nginx.service" ;
-          ConditionPathExists = "!${cfg.path}/cert.pem";
+          ConditionPathExists = "!${certPath}";
         };
 
         serviceConfig = {
-          User = cfg.user;
+          User = "root";
           Type = "oneshot";
-          WorkingDirectory = cfg.path;
           RemainAfterExit = true;
         };
       };

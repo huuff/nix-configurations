@@ -4,5 +4,8 @@
     php74 
     vim
     telnet
+    ag
+    fd
+    fzf
   ];
 }

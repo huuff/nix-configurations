@@ -2,7 +2,7 @@ name:
 { config, lib, pkgs, ... }:
 with lib;
 let
-  cfg = config.machines.${name};
+  cfg = config.machines.${name}.database;
   myLib = import ./default.nix { inherit config pkgs; };
 in
   {
@@ -25,12 +25,19 @@ in
 
           user = mkOption {
             type = str;
-            default = name;
+            default = if (hasAttr "installation" config.machines.${name}) then config.machines.${name}.installation.user else name;
             description = "Name of the database user";
           };
 
+          authenticationMethod = mkOption {
+            type = enum [ "socket" "password" ];
+            default = "socket";
+            description = "What to authenticate the user to the DB with";
+          };
+
           passwordFile = mkOption {
-            type = oneOf [ str path ];
+            type = nullOr (oneOf [ str path ]);
+            default = null;
             description = "Password of the database user";
           };
 
@@ -46,8 +53,20 @@ in
     config = mkIf cfg.database.enable {
       assertions = [
         {
-          assertion = cfg.database.passwordFile != null;
-          message = "database.passwordFile must be set";
+          assertion = (cfg.passwordFile != null) -> (cfg.authenticationMethod == "password");
+          message = "The authenticationMethod must be 'password' to use passwordFile";
+        }
+        {
+          assertion = (cfg.authenticationMethod == "password") -> (cfg.passwordFile != null);
+          message = "If authenticationMethod is 'password', then passwordFile must be set";
+        }
+        {
+          assertion = (cfg.authenticationMethod == "socket") -> (hasAttr cfg.user config.users.users);
+          message = "For DB socket authentication, the system user ${cfg.user} must exist!";
+        }
+        {
+          assertion = (hasAttr "installation" config.machines.${name}) -> (cfg.user == config.machines.${name}.installation.user);
+          message = "If a machine has the 'installation' module, then installation.user must be the same as database.user!";
         }
       ];
 
@@ -56,14 +75,21 @@ in
         package = mkDefault pkgs.mariadb;
       };
 
+      users.users.${cfg.user} = mkIf (!hasAttr "installation" config.machines.${name}) {
+        isSystemUser = true;
+      };
+
       systemd.services = {
         "setup-${name}-db" = {
-          description = "Create ${cfg.database.name} and give ${cfg.database.user} permissions to it";
+          description = "Create ${cfg.name} and give ${cfg.user} permissions to it";
 
-          script = myLib.db.execDDL ''
-            CREATE DATABASE IF NOT EXISTS ${cfg.database.name};
-            CREATE USER IF NOT EXISTS '${cfg.database.user}'@${cfg.database.host} IDENTIFIED BY '${myLib.passwd.cat cfg.database.passwordFile}';
-            GRANT ALL PRIVILEGES ON ${cfg.database.name}.* TO '${cfg.database.user}'@${cfg.database.host};
+          script = myLib.db.runSqlAsRoot ''
+            CREATE DATABASE IF NOT EXISTS ${cfg.name};
+            CREATE USER IF NOT EXISTS '${cfg.user}'@${cfg.host} ${ if cfg.authenticationMethod == "password"
+            then "IDENTIFIED BY '${myLib.passwd.cat cfg.passwordFile}'"
+            else "IDENTIFIED VIA unix_socket"
+            };
+            GRANT ALL PRIVILEGES ON ${cfg.name}.* TO '${cfg.user}'@${cfg.host};
           ''; 
 
           wantedBy = [ "multi-user.target" ];

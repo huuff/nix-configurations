@@ -1,10 +1,12 @@
-name:
-{ lib, config, ... }:
+machineName:
+{ pkgs, lib, config, ... }:
 with lib;
 let
-  cfg = config.machines.${name};
+  cfg = config.machines.${machineName}.initialization;
 
-  lockPath = "/etc/inits/${name}"; # Created when the initialization is finished
+  lockPath = "/etc/inits/${machineName}"; # Path where locks will be put
+
+  createLock = lockName: "${pkgs.coreutils}/bin/touch ${lockPath}/${lockName}";
 
   initModule = with types; submodule {
     options = {
@@ -32,7 +34,7 @@ let
 
       user = mkOption {
         type = str;
-        default = if (builtins.hasAttr "installation" cfg) then cfg.installation.user else "root";
+        default = cfg.user;
         description = "User that will run the unit";
       };
 
@@ -43,16 +45,35 @@ let
     };
   };
 
-  initModuleToUnit = initModule: nameValuePair initModule.name {
+  mkUnit = moduleName: config: { 
+    name = moduleName;
+
+    value = recursiveUpdate {
+      serviceConfig = {
+        Type = "oneshot";
+        User = cfg.user;
+        RemainAfterExit = true;
+        WorkingDirectory = mkIf (cfg.workingDirectory != null) cfg.workingDirectory;
+        ExecStartPost = createLock moduleName;
+      };
+
+      unitConfig = {
+        After = [];
+        BindsTo = [];
+        Requires = [];
+        ConditionPathExists = "!${lockPath}/${moduleName}";
+      };
+
+    } config;
+  };
+
+  initModuleToUnit = initModule: mkUnit initModule.name {
     script = initModule.script;
     description = initModule.description;
     path = initModule.path;
 
     serviceConfig = {
       User = initModule.user;
-      Type = "oneshot";
-      RemainAfterExit = true;
-      WorkingDirectory = mkIf (hasAttr "installation" cfg) cfg.installation.path;
     };
 
     unitConfig = {
@@ -64,93 +85,77 @@ let
   after = first: second: recursiveUpdate second {
     value.unitConfig = {
       After = [ "${first.name}.service" ] ++ second.value.unitConfig.After;
-      BindsTo = [ "${first.name}.service" ] ++ second.value.unitConfig.BindsTo;
+      Requires = [ "${first.name}.service" ] ++ second.value.unitConfig.Requires;
     };
   };
 
   # This creates a unit that is required by all others, running only if the "lock" does not exist
   # Therefore, if the "lock" exists (which means the initialization is complete) then nothing will run
-  firstUnit = {
-    name = "start-${name}-initialization";
+  firstUnit = mkUnit "start-${machineName}-initialization" {
+    description = "Start the provisioning of ${machineName}";
 
-    value = {
-      description = "Start the provisioning of ${name}";
-
-      script = "echo 'Start provisioning ${name}'";
-
-      serviceConfig = {
-        User = "root";
-        Type = "oneshot";
-        RemainAfterExit = true;
-      };
-
-      unitConfig = {
-        ConditionPathExists = "!${lockPath}"; 
-      };
-
-    };
+    script = "echo 'Start provisioning ${machineName}'";
   };
 
   # This creates a new unit that satisfies the following:
   # * Is after and requires all units in init.
   # * Is wanted by multi-user target, so it will be auto-started and propagate to all others.
   # * It creates a file that will signify the end of the initialization (the "lock")
-  lastUnit = {
-    name = "finish-${name}-initialization";
+  lastUnit = mkUnit "finish-${machineName}-initialization" {
+    description = "Finish the provisioning of ${machineName}";
+    script = "echo 'Finished provisioning ${machineName}'";
 
-    value = {
-      description = "Finish the provisioning of ${name}";
-      script = ''
-        mkdir -p /etc/inits
-        touch ${lockPath}
-        chmod 600 ${lockPath}
-      '';
-
-      wantedBy = [ "multi-user.target" ];
-
-      serviceConfig = {
-        User = "root";
-        Type = "oneshot";
-        RemainAfterExit = true;
-      };
-
-      # Just so after function works
-      unitConfig = {
-        After = [];
-        BindsTo = [];
-      };
-    };
+    wantedBy = [ "multi-user.target" ];
   };
 
-  # TODO: a better name, documentation
+  # Aux function for orderUnits
   orderUnitsRec = current: alreadyOrdered: unorderedYet: 
   if (length unorderedYet) == 0
   then
-    alreadyOrdered ++ [ (after current lastUnit) ]
+  alreadyOrdered ++ [ (after current lastUnit) ]
   else let 
     next = head unorderedYet;
     nextAfterCurrent = after current next;
     rest = tail unorderedYet;
   in
-    orderUnitsRec next (alreadyOrdered ++ [nextAfterCurrent]) rest;
+  orderUnitsRec next (alreadyOrdered ++ [nextAfterCurrent]) rest;
 
-  # TODO: a better name, documentation
+  # Orders units (sets after and binds to for each one to be after the other), adds first and last units
   orderUnits = units: orderUnitsRec (firstUnit) [firstUnit] (units);
 
 in  
   {
     options = {
-      machines.${name}.initialization = mkOption {
-        type = types.listOf initModule;
-        default = [];
-        description = "Each of the scripts to run for provisioning, in the required order";
+      machines.${machineName}.initialization = with types; {
+        user = mkOption {
+          type = str;
+          default = if (hasAttr "installation" config.machines.${machineName}) then config.machines.${machineName}.installation.user else "root";
+          description = "Default user for the initialization units";
+        };
+
+        workingDirectory = mkOption {
+          type = nullOr str;
+          default = if (hasAttr "installation" config.machines.${machineName}) then config.machines.${machineName}.installation.path else null;
+          description = "Working directory where the units will be executed";
+        };
+
+        units = mkOption {
+          type = listOf initModule;
+          default = [];
+          description = "Each of the scripts to run for provisioning, in the required order";
+        };
       };
     };
 
     config = {
+
+      systemd.tmpfiles.rules = [
+        "d ${lockPath} - ${cfg.user} ${cfg.user} - -"
+      ];
+
       systemd.services = 
       let
-        unorderedUnits = map initModuleToUnit cfg.initialization;
+        unorderedUnits = map initModuleToUnit cfg.units;
         orderedUnits = orderUnits unorderedUnits;
       in (listToAttrs orderedUnits);
     };

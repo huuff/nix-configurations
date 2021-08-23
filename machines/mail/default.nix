@@ -6,7 +6,7 @@ in
 {
   options = with types; {
     machines.mail = {
-      enable = mkEnableOption "Whether to enable a full email server"; 
+      enable = mkEnableOption "Full mail server"; 
 
 
     };

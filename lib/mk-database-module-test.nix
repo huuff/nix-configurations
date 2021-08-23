@@ -1,29 +1,52 @@
 { pkgs, ... }:
 let
-  user = "user";
-  pass = "pass";
-  name = "test";
-in
-pkgs.nixosTest {
-  name = "mk-database-module";
-
-  machine = { pkgs, ... }: {
-    imports = [ (import ./mk-database-module.nix "test") ];
-
-    machines.test.database = {
-      enable = true;
-      inherit user name;
-      passwordFile = pkgs.writeText "dbpass" pass; 
-    };
+  dbWithPassword = {
+    user = "user1";
+    pass = "pass";
+    name = "passwd";
   };
+  dbWithSocket = {
+    user = "user2";
+    name = "socket";
+  };
+in
+  pkgs.nixosTest {
+    name = "mk-database-module";
 
-  testScript = ''
-    machine.wait_for_unit("multi-user.target")
+    machine = { pkgs, lib, ... }: {
+      imports = [ 
+        (import ./mk-database-module.nix dbWithPassword.name)
+        (import ./mk-database-module.nix dbWithSocket.name)
+      ];
 
-    with subtest("unit is active"):
-      machine.succeed("systemctl is-active --quiet setup-test-db")
+      services.mysql.package = lib.mkForce pkgs.mariadb;
 
-    with subtest("user can connect to database"):
-      machine.succeed("mysql -u${user} -p${pass} ${name} -e 'SHOW TABLES;'")
-  '';
-}
+      machines = {
+        ${dbWithPassword.name}.database = {
+          user = dbWithPassword.user;
+          authenticationMethod = "password";
+          passwordFile = pkgs.writeText "dbpass" dbWithPassword.pass; 
+        };
+
+        ${dbWithSocket.name}.database = {
+          authenticationMethod = "socket";
+          user = dbWithSocket.user;
+        };
+      };
+    };
+
+    testScript = ''
+      ${ builtins.readFile ./testing-lib.py }
+
+      machine.wait_for_unit("multi-user.target")
+
+      with subtest("unit is active"):
+        machine.succeed("systemctl is-active --quiet setup-${dbWithPassword.name}-db")
+
+      with subtest("user can connect to database with password"):
+        machine.succeed("mysql -u${dbWithPassword.user} -p${dbWithPassword.pass} ${dbWithPassword.name} -e 'quit'")
+
+      with subtest("user can connect to satabase with socket"):
+        machine.succeed("sudo -u ${dbWithSocket.user} mysql ${dbWithSocket.name} -e 'quit'")
+    '';
+  }
