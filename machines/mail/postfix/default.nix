@@ -248,7 +248,7 @@ in
 
       etc =
         let
-        # TODO: Postfix sends to append something at the end, so I add a newline so it doesn't get
+        # TODO: Postfix seems to append something at the end, so I add a newline so it doesn't get
         # mixed with my set, however, I should prevent postfix from doing that (is that what the official nixos module does?
         mainCfFile = pkgs.writeText "main.cf" ((concatStringsSep "\n" (mapAttrsToList (attrsToMainCf) cfg.main)) + "\n");
         masterCfFile = pkgs.writeText "master.cf" (concatStringsSep "\n" (mapAttrsToList (attrsToMasterCf) cfg.master));

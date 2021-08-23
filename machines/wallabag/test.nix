@@ -53,10 +53,7 @@ in
       machine.wait_for_unit("multi-user.target")
 
       with subtest("units are active"):
-        machine.succeed("systemctl is-active --quiet copy-wallabag")
-        machine.succeed("systemctl is-active --quiet create-parameters")
-        machine.succeed("systemctl is-active --quiet install-wallabag")
-        machine.succeed("systemctl is-active --quiet setup-users")
+        machine.succeed("systemctl is-active --quiet finish-wallabag-initialization")
 
       with subtest("nginx is serving wallabag"):
         machine.output_contains(command='curl http://localhost/login',

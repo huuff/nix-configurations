@@ -24,7 +24,7 @@ pkgs.nixosTest {
       with subtest("units are active"):
         machine.succeed("systemctl is-active --quiet neuron")
         machine.succeed("systemctl is-active --quiet do-on-request")
-        machine.succeed("systemctl is-active --quiet nginx")
+        machine.succeed("systemctl is-active --quiet finish-neuron-initialization")
 
       with subtest("directory is created"):
         machine.succeed("[ -d ${directory} ]")

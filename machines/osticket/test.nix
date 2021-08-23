@@ -69,9 +69,7 @@ in
       machine.wait_for_unit("multi-user.target")
 
       with subtest("units are active"):
-        machine.succeed("systemctl is-active --quiet deploy-osticket")
-        machine.succeed("systemctl is-active --quiet install-osticket")
-        machine.succeed("systemctl is-active --quiet setup-users")
+        machine.succeed("systemctl is-active --quiet finish-osticket-initialization")
 
       machine.create_user_and_login()
 
