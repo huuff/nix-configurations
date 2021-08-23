@@ -19,12 +19,6 @@
 * `nginx` has one user set for each machine and they conflict.
 * Add a way to setup a global certificate, this will help with deploying multiple machines.
 
-## mkBackupModule
-* Restore the backup if it exists as a last step in initialization
-* Encryption options
-* Some way to conditionally load `mkInitModule`? (Not loading it if already loaded)
-* Test remote repos
-
 ## osTicket
 * Add backup options
 * Add email options
@@ -56,11 +50,10 @@
 
 ## mkBackupModule
 * Test the timer
-* Use initialization module to setup the database
-* A way to restore the backup. Test it.
-* Backup using `borg` to the same machine. Test it.
-* Backup using `borg` to another machine. Test it.
-* Backup using `borg` to S3. The final frontier.
+* Restore the backup if it exists as a last step in initialization
+* Encryption options
+* Some way to conditionally load `mkInitModule`? (Not loading it if already loaded)
+* Test remote repos
 
 ## Mail
 * Sieve
