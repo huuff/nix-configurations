@@ -58,6 +58,15 @@ in
             description = "Options for the borg repository where the backup will be stored";
           };
         };
+
+        restore = mkOption {
+          type = bool;
+          default = false;
+          description = ''
+            Automatically restore the latest backup after initialization.
+            This is a destructive operation since all previous files/databaes will be replaced by the contents of the backup.
+            '';
+        };
       };
     };
 
@@ -69,20 +78,35 @@ in
         }
       ];
 
-      machines.${name}.initialization.units = mkBefore [
-        (mkIf cfg.database.enable {
-          name = "initialize-${name}-repository";
-          description = "Initialize the ${name} borg repository if not already a repository";
-          path = [ pkgs.borgbackup ];
-          script = ''
-            set +e
-            borg info ${cfg.database.repository.path}
-            if [ $? -eq 2 ]; then
+      machines.${name}.initialization.units = mkMerge [ 
+        (mkBefore [
+          (mkIf cfg.database.enable {
+            name = "initialize-${name}-repository";
+            description = "Initialize the ${name} borg repository if not already a repository";
+            path = [ pkgs.borgbackup ];
+            script = ''
+              set +e
+              borg info ${cfg.database.repository.path}
+              if [ $? -eq 2 ]; then
               borg init -e none ${cfg.database.repository.path}
-            fi
-          '';
-          #workingDirectory = cfg.database.repository.path;
-        })
+              fi
+            '';
+          })
+        ])
+
+        (mkAfter [
+          (mkIf cfg.restore {
+            name = "restore-${name}-backup";
+            description = "Restore the latest ${name} backup";
+            path = [ pkgs.borgbackup ];
+            script = ''
+              ${myLib.runSqlAsRoot "DROP DATABASE ${cfg.database.name};"}
+              latest_archive=$(borg list --last 1 --format '{archive}' ${cfg.database.repository.path})
+              ${myLib.runSqlAsRoot "$(borg extract --stdout ${cfg.database.repository.path}::$latest_archive)"}
+            '';
+            user = "root";
+          })
+        ])
       ];
 
       systemd = {
