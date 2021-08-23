@@ -19,6 +19,9 @@
 * `nginx` has one user set for each machine and they conflict.
 * Add a way to setup a global certificate, this will help with deploying multiple machines.
 
+## mkBackupModule
+* Use `borg` to backup a mysql database.
+
 ## osTicket
 * Add backup options
 * Add email options
