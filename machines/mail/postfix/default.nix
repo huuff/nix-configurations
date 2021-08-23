@@ -22,13 +22,13 @@ let
       unpriv = mkOption {
         type = bool;
         default = true;
-        description = "TODO: I think I know what this is about but look it up";
+        description = "Whether the service runs with root privileges";
       };
 
       chroot = mkOption {
         type = bool;
         default = false;
-        description = "TODO";
+        description = "Whether the service runs chrooted to the queue directory";
       };
 
       wakeup = mkOption {
@@ -40,18 +40,18 @@ let
       maxproc = mkOption {
         type = int;
         default = 100;
-        description = "TODO";
+        description = "Maximum number of processes this service may run simultaneously";
       };
 
       command = mkOption {
         type = str;
-        description = "TODO";
+        description = "Command the service will run";
       };
 
       args = mkOption {
         type = listOf str;
         default = [];
-        description = "TODO";
+        description = "Arguments passed to the command";
       };
 
       # HACK: I would like to have a better solution, and the one by the official module is pretty good. Or maybe this isn't that bad? They have an extra option just for the name anyway.
