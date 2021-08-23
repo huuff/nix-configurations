@@ -52,9 +52,6 @@ in
 
       machine.wait_for_unit("multi-user.target")
 
-      # TODO: delete this
-      machine.execute("echo test")
-
       with subtest("units are active"):
         machine.succeed("systemctl is-active --quiet finish-wallabag-initialization")
 
