@@ -55,6 +55,7 @@
 ## mkBackupModule
 * Test the timer
 * Some way to conditionally load `mkInitModule`? (Not loading it if already loaded)
+* Something about exporting the key
 * Test remote repos
 
 ## Mail
