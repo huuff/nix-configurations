@@ -53,7 +53,6 @@
 
 ## mkBackupModule
 * Test the timer
-* Restore the backup if it exists as a last step in initialization
 * Encryption options
 * Some way to conditionally load `mkInitModule`? (Not loading it if already loaded)
 * Test remote repos
