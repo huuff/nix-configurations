@@ -2,7 +2,7 @@
 let
   dbPass = "dbpass";
   backupPath = "/var/lib/backup";
-  user = "test";
+  testName = "backup_test";
   testTable = "TEST_TABLE";
 in
 pkgs.nixosTest {
@@ -14,17 +14,17 @@ pkgs.nixosTest {
   in
   {
     imports = [
-      (import ./mk-database-module.nix "test")
-      (import ./mk-backup-module.nix "test")
-      (import ./mk-installation-module.nix "test")
-      (import ./mk-init-module.nix "test")
+      (import ./mk-database-module.nix testName)
+      (import ./mk-backup-module.nix testName)
+      (import ./mk-installation-module.nix testName)
+      (import ./mk-init-module.nix testName)
     ];
 
 
     environment.systemPackages = with pkgs; [ mysql borgbackup ];
 
-    machines.test = {
-      installation.user = user;
+    machines.${testName} = {
+      installation.user = testName;
 
       backup = {
         restore = true;
@@ -44,15 +44,30 @@ pkgs.nixosTest {
 
         machine.wait_for_unit("multi-user.target")
 
-        machine.print_output('sudo -u${user} mysql test -e "CREATE TABLE ${testTable} (TEST_COLUMN INT);"')
-        machine.print_output('sudo -u${user} mysql test -e "INSERT INTO ${testTable} VALUES (1), (2), (3);"')
+        machine.print_output('mysql ${testName} -e "CREATE TABLE ${testTable} (TEST_COLUMN INT);"')
+        machine.print_output('mysql ${testName} -e "INSERT INTO ${testTable} VALUES (1), (2), (3);"')
 
         with subtest("backup is created"):
-          machine.systemctl("start backup-test-database")
+          machine.systemctl("start backup-${testName}-database")
           [ _, archive ] = machine.execute("BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes borg list --last 1 --format '{archive}' ${backupPath}")
           print(f"The archive is: {archive}")
           machine.output_contains(command=f"borg extract --stdout ${backupPath}::{archive}", 
                                   expected="CREATE TABLE `${testTable}`")
+
+        with subtest("database is restored"):
+          # First, delete everything in the DB
+          machine.succeed('mysql ${testName} -e "DROP DATABASE ${testName};"')
+          # Sanity check that the database is removed
+          machine.fail("[ -d /var/lib/mysql/${testName} ]")
+          # Remove init files to trigger reinitialization
+          machine.succeed("rm -rf /etc/inits/${testName}/*")
+          # Trigger reinitialization
+          machine.systemctl("restart restore-${testName}-backup")
+          machine.wait_for_unit("restore-${testName}-backup")
+          machine.output_contains(
+            command="mysql -sN ${testName} -e 'SELECT * FROM ${testTable};'",
+            expected="1\n2\n3")
+          
 
       '';
 }

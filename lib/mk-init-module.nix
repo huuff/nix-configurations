@@ -67,6 +67,7 @@ let
         After = [];
         BindsTo = [];
         Requires = [];
+        PartOf = [];
         ConditionPathExists = "!${lockPath}/${moduleName}";
       };
 
@@ -93,6 +94,7 @@ let
     value.unitConfig = {
       After = [ "${first.name}.service" ] ++ second.value.unitConfig.After;
       Requires = [ "${first.name}.service" ] ++ second.value.unitConfig.Requires;
+      PartOf = [ "${first.name}.service" ] ++ second.value.unitConfig.PartOf;
     };
   };
 

@@ -107,7 +107,7 @@ in
             script = ''
               ${allowUnencryptedRepo}
               if ${repoNotEmpty cfg.database.repository.path}; then
-                ${myLib.db.runSqlAsRoot "DROP DATABASE ${dbCfg.name};"}
+                # ${myLib.db.runSqlAsRoot "DROP DATABASE IF EXISTS ${dbCfg.name};"}
                 latest_archive=$(borg list --last 1 --format '{archive}' ${cfg.database.repository.path})
                 ${myLib.db.runSqlAsRoot "$(borg extract --stdout ${cfg.database.repository.path}::$latest_archive)"}
               fi
@@ -145,7 +145,7 @@ in
               authentication = if (dbCfg.authenticationMethod == "password") then "-p ${myLib.passwd.cat dbCfg.passwordFile}" else "";
             in
             ''
-              mysqldump --order-by-primary -u${dbCfg.user} ${authentication} ${dbCfg.name} | borg create ${cfg.database.repository.path}::{now} -
+              mysqldump --order-by-primary -u${dbCfg.user} ${authentication} --databases ${dbCfg.name} --add-drop-database | borg create ${cfg.database.repository.path}::{now} -
             '';
 
             serviceConfig = {
