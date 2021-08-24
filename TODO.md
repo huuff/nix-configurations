@@ -11,6 +11,7 @@
 * Some wrapper around `wait_until_tty_matches` with a timeout, setting current tty and printing.
 * `contains` could be `match` and accept a regex
 * `current_tty` could be an instance variable in `Machine`. Currently, two different machines on two different ttys could cause interference with this.
+* Why use `fileFromStore` in my tests? I could get the same and more concisely with just `pkgs.writeText`
 
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all. UPDATE: Yeah but these are integration tests and testing the individual components does not guarantee that they all work together
@@ -31,6 +32,7 @@
 
 # My library
 * Consider putting database authentication here
+* Some function to create a `passwordFile` option.
 
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
@@ -52,7 +54,6 @@
 
 ## mkBackupModule
 * Test the timer
-* Encryption options
 * Some way to conditionally load `mkInitModule`? (Not loading it if already loaded)
 * Test remote repos
 

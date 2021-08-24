@@ -6,8 +6,10 @@ with lib;
 let
   cfg = config.machines.${name}.backup;
   dbCfg = if (hasAttr "database" config.machines.${name}) then config.machines.${name}.database else null;
+  dbRepo = cfg.database.repository;
 
-  allowUnencryptedRepo = "export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes";
+  allowUnencryptedRepo = repo: if (repo.encryption.mode == "none") then "export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes" else "";
+  exportPassphrase = repo: if (repo.encryption.mode != "none") then "export BORG_PASSPHRASE=${myLib.passwd.cat repo.encryption.passphraseFile}" else "";
 
   myLib = import ./default.nix { inherit config pkgs; };
 
@@ -41,6 +43,20 @@ let
         type = nullOr remote;
         default = null;
         description = "SSH options for a remote repository";
+      };
+
+      encryption = {
+        mode = mkOption {
+          type = enum [ "none" "authenticated" "repokey" "keyfile" ];
+          default = "none";
+          description = "Encryption mode to use";
+        };
+
+        passphraseFile = mkOption {
+          type = nullOr (oneOf [ str path ]);
+          default = null;
+          description = "Encryption key passphrase";
+        };
       };
     };
   };
@@ -90,14 +106,17 @@ in
             description = "Initialize the ${name} borg repository if not already a repository";
             path = [ pkgs.borgbackup ];
             script = ''
+              ${allowUnencryptedRepo dbRepo}
+              ${exportPassphrase dbRepo}
               set +e
-              borg info ${cfg.database.repository.path}
+              borg info ${dbRepo.path}
               if [ $? -eq 2 ]; then
-                borg init -e none ${cfg.database.repository.path}
+                borg init -e${dbRepo.encryption.mode} ${dbRepo.path}
               fi
             '';
           })
         ])
+
         # TODO: This is AFTER finish, should be just before
         (mkAfter [
           (mkIf cfg.restore {
@@ -105,9 +124,9 @@ in
             description = "Restore the latest ${name} backup";
             path = [ pkgs.borgbackup ];
             script = ''
-              ${allowUnencryptedRepo}
+              ${allowUnencryptedRepo dbRepo}
+              ${exportPassphrase dbRepo}
               if ${repoNotEmpty cfg.database.repository.path}; then
-                # ${myLib.db.runSqlAsRoot "DROP DATABASE IF EXISTS ${dbCfg.name};"}
                 latest_archive=$(borg list --last 1 --format '{archive}' ${cfg.database.repository.path})
                 ${myLib.db.runSqlAsRoot "$(borg extract --stdout ${cfg.database.repository.path}::$latest_archive)"}
               fi
@@ -145,6 +164,8 @@ in
               authentication = if (dbCfg.authenticationMethod == "password") then "-p ${myLib.passwd.cat dbCfg.passwordFile}" else "";
             in
             ''
+              ${allowUnencryptedRepo dbRepo}
+              ${exportPassphrase dbRepo}
               mysqldump --order-by-primary -u${dbCfg.user} ${authentication} --databases ${dbCfg.name} --add-drop-database | borg create ${cfg.database.repository.path}::{now} -
             '';
 

@@ -4,14 +4,12 @@ let
   backupPath = "/var/lib/backup";
   testName = "backup_test";
   testTable = "TEST_TABLE";
+  passphrase = "passphrase";
 in
 pkgs.nixosTest {
   name = "backup";
 
   machine = { pkgs, config, ... }: 
-  let
-    myLib = import ./default.nix { inherit pkgs config; };
-  in
   {
     imports = [
       (import ./mk-database-module.nix testName)
@@ -33,6 +31,10 @@ pkgs.nixosTest {
           enable = true;
           repository = {
             path = backupPath;
+            encryption = {
+              mode = "repokey";
+              passphraseFile = pkgs.writeText passphrase passphrase;
+            };
           };
         };
       };
@@ -49,9 +51,9 @@ pkgs.nixosTest {
 
         with subtest("backup is created"):
           machine.systemctl("start backup-${testName}-database")
-          [ _, archive ] = machine.execute("BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes borg list --last 1 --format '{archive}' ${backupPath}")
+          [ _, archive ] = machine.execute("BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes BORG_PASSPHRASE=${passphrase} borg list --last 1 --format '{archive}' ${backupPath}")
           print(f"The archive is: {archive}")
-          machine.output_contains(command=f"borg extract --stdout ${backupPath}::{archive}", 
+          machine.output_contains(command=f"BORG_PASSPHRASE=${passphrase} borg extract --stdout ${backupPath}::{archive}", 
                                   expected="CREATE TABLE `${testTable}`")
 
         with subtest("database is restored"):
@@ -67,7 +69,5 @@ pkgs.nixosTest {
           machine.output_contains(
             command="mysql -sN ${testName} -e 'SELECT * FROM ${testTable};'",
             expected="1\n2\n3")
-          
-
       '';
 }
