@@ -190,13 +190,14 @@ in
         {
           name = "install-dependencies";
           description = "Run composer install";
-          script = "COMPOSER_MEMORY_LIMIT=-1 composer install";
+          # TODO: Fix this shitty XML error from composer
+          script = "COMPOSER_MEMORY_LIMIT=-1 composer install || true";
           path = [ composerWithTidy phpWithTidy ];
           extraDeps = [ "network-online.target" ];
         }
 
         {
-          name = "setup-users";
+          name = "setup-wallabag-users";
           description = "Create default users";
           script = 
           let
@@ -227,7 +228,7 @@ in
       services.nginx = {
         enable = true;
         user = mkDefault cfg.installation.user;
-        group = mkDefault cfg.installation.user;
+        group = mkDefault cfg.installation.group;
 
         virtualHosts.wallabag = {
           root = "${cfg.installation.path}/web";

@@ -1,4 +1,6 @@
 { config, pkgs, lib, ... }:
+# TODO: Use mkInstallation module for vmail path and user
+
 with lib;
 
 let

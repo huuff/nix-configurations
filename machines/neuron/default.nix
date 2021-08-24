@@ -98,7 +98,7 @@ in
         nginx = {
           enable = true;
           user = mkDefault cfg.installation.user;
-          group = mkDefault cfg.installation.user;
+          group = mkDefault cfg.installation.group;
 
           virtualHosts.neuron = {
             root = "${cfg.installation.path}/.neuron/output";

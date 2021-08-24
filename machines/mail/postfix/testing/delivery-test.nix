@@ -31,7 +31,7 @@ in
 
           users = [ user1Address ];
 
-          master.smtpd.args = [ "-v" ];
+          #master.smtpd.args = [ "-v" ];
         };
 
         networking.interfaces.eth1.ipv4.addresses = [
@@ -71,7 +71,7 @@ in
 
           users = [ user2Address ];
 
-          master.smtpd.args = [ "-v" ];
+          #master.smtpd.args = [ "-v" ];
         };
 
         services.dnsmasq = {
@@ -90,16 +90,19 @@ in
     testScript = ''
         ${ builtins.readFile ../../../../lib/testing-lib.py }
 
+        def print_user2_mail():
+          return "echo p | mail -f ${mailPath}/${user2Address}/"
+
         machine1.wait_for_unit("postfix.service")
         machine2.wait_for_unit("postfix.service")
 
 
         with subtest("machine2 receives email from machine1"):
           machine1.succeed('echo "${testContent}" | mail -s "${testSubject}" -r ${user1Address} ${user2Address}')
-          machine2.sleep(5)
-          machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "To: <${user2Address}>")
-          machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "From: System administrator <${user1Address}>")
-          machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "Subject: ${testSubject}")
-          machine2.output_contains("echo p | mail -f ${mailPath}/${user2Address}/", "${testContent}")
+          machine2.wait_until_succeeds(print_user2_mail())
+          machine2.output_contains(print_user2_mail(), "To: <${user2Address}>")
+          machine2.output_contains(print_user2_mail(), "From: System administrator <${user1Address}>")
+          machine2.output_contains(print_user2_mail(), "Subject: ${testSubject}")
+          machine2.output_contains(print_user2_mail(), "${testContent}")
       '';
   }

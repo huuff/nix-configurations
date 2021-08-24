@@ -1,6 +1,7 @@
 { pkgs, ... }:
 let
   user = "user";
+  group = "group";
   path = "/var/user/path";
 in
 pkgs.nixosTest {
@@ -9,7 +10,7 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ ( import ./mk-installation-module.nix "test" ) ];
 
-    machines.test.installation = { inherit user path; };
+    machines.test.installation = { inherit user path group; };
   };
 
   testScript = ''
@@ -19,9 +20,9 @@ pkgs.nixosTest {
       machine.succeed("grep -q ${user} /etc/passwd")
 
     with subtest("group exists"):
-      machine.succeed("grep -q ${user} /etc/group")
+      machine.succeed("grep -q ${group} /etc/group")
 
     with subtest("user is in group"):
-      machine.succeed("groups ${user} | grep -q ${user}")
+      machine.succeed("groups ${user} | grep -q ${group}")
   '';
 }

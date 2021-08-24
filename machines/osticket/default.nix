@@ -112,7 +112,7 @@ in {
     services.nginx = {
       enable = true;
       user = mkDefault cfg.installation.user;
-      group = mkDefault cfg.installation.user;
+      group = mkDefault cfg.installation.group;
 
       virtualHosts.osticket = {
         root = cfg.installation.path;
@@ -235,7 +235,7 @@ in {
         extraDeps = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
       }
       {
-        name = "setup-users";
+        name = "setup-osticket-users";
         description = "Create initial osTicket users";
 
         script = let

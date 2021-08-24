@@ -19,6 +19,8 @@
     };
 
     checks.${system} = {
+      #multiDeploy = import ./modules/multi-deploy/test.nix { inherit pkgs; };
+
       neuron = import ./machines/neuron/test.nix { inherit pkgs; };
       wallabag = import ./machines/wallabag/test.nix { inherit pkgs; };
       osticket = import ./machines/osticket/test.nix { inherit pkgs; };

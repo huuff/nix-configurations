@@ -22,8 +22,8 @@ in
   # Virtual mailbox setting
   virtual_mailbox_domains = [cfg.canonicalDomain] ++ cfg.extraDomains;
   virtual_mailbox_base = cfg.mailPath;
-  virtual_uid_maps = "static:${toString config.users.users.vmail.uid}";
-  virtual_gid_maps = "static:${toString config.users.groups.vmail.gid}";
+  virtual_uid_maps = "static:${toString config.users.users.${cfg.mailUser}.uid}";
+  virtual_gid_maps = "static:${toString config.users.groups.${cfg.mailUser}.gid}";
 
   relayhost = "";
 

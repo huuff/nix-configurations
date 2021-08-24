@@ -135,6 +135,8 @@ let
 in  
   {
     options = {
+      # TODO: Look at this repetition with installation. Add some sort of `getFromInstallation` to
+      # my lib or something
       machines.${machineName}.initialization = with types; {
         user = mkOption {
           type = str;

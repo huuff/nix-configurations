@@ -19,21 +19,30 @@ in
           default = "/var/lib/${name}";
           description = "Path of the installation";
         };
+
+        group = mkOption {
+          type = str;
+          default = cfg.user;
+          description = "Default group of the user";
+        };
       };
     };
 
     config = {
-      systemd.tmpfiles.rules = [ "d ${cfg.path} - ${cfg.user} ${cfg.user} - -" ];
+      systemd.tmpfiles.rules = [ "d ${cfg.path} - ${cfg.user} ${cfg.group} - -" ];
 
       users = {
         users.${cfg.user} = {
           isSystemUser = mkDefault true;
           home = cfg.path;
           group = cfg.user;
-          extraGroups = [ "keys" ]; # needed for nixops, to access /run/keys
+          extraGroups = [ "keys" cfg.group ]; # needed for nixops, to access /run/keys
         };
 
-        groups.${cfg.user} = {}; # create the group
+        groups = mkMerge [
+          { ${cfg.group} = {}; } # create the group
+          (mkIf (cfg.group != cfg.user) { ${cfg.user} = {}; }) # create a group with user's name
+        ];
       };
     };
   }
