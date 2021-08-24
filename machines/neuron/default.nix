@@ -14,7 +14,7 @@ in
     [
       ./cachix.nix
       ../../lib/do-on-request-module.nix
-      (import ../../lib/mk-ssl-module.nix "neuron")
+      (import ../../modules/ssl/mk-ssl-module.nix "neuron")
       (import ../../lib/mk-installation-module.nix "neuron")
       (import ../../lib/mk-init-module.nix "neuron")
     ];

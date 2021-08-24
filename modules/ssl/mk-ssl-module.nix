@@ -4,10 +4,8 @@ with lib;
 let
   cfg = config.machines.${name}.ssl;
   sslPath = "/etc/ssl";
-  defaultCertPath = "${sslPath}/certs/${name}.pem";
-  defaultKeyPath = "${sslPath}/private/${name}.pem";
-  getCertPath = if (cfg.certificate != null) then cfg.certificate else defaultCertPath;
-  getKeyPath = if (cfg.key != null) then cfg.key else defaultKeyPath;
+  certPath = "${sslPath}/certs/${name}.pem";
+  keyPath = "${sslPath}/private/${name}.pem";
 in
   {
     options = {
@@ -60,8 +58,8 @@ in
       services.nginx.virtualHosts.${name} = mkIf (config.services.nginx.enable && cfg.enable) {
         addSSL = !cfg.httpsOnly;
         forceSSL = cfg.httpsOnly;
-        sslCertificate = getCertPath;
-        sslCertificateKey = getKeyPath;
+        sslCertificate = certPath;
+        sslCertificateKey = keyPath;
       };
       
       systemd.tmpfiles.rules = 
@@ -70,22 +68,31 @@ in
         "d ${sslPath}/private 755 root root - - "
       ];
 
-      systemd.services."create-${name}-cert" = mkIf cfg.autoGenerate {
+      systemd.services."setup-${name}-cert" = mkIf cfg.enable {
         description = "Create a certificate for ${name}";
 
-        script = ''
-          ${pkgs.libressl}/bin/openssl req -x509 -newkey rsa:4096 -keyout ${getKeyPath} -out ${getCertPath} -days 365 -nodes -subj '/CN=localhost'
-          chown ${cfg.user}:${cfg.user} ${getCertPath}
-          chown ${cfg.user}:${cfg.user} ${getKeyPath}
-          chmod 644 ${getCertPath}
-          chmod 640 ${getKeyPath}
-        '';
+        # For provided cert, maybe softlink instead of copying? but I don't want to need
+        # to have the cert around as provided by some deploy tool
+        script = (if cfg.autoGenerate
+        then ''
+          ${pkgs.libressl}/bin/openssl req -x509 -newkey rsa:4096 -keyout ${keyPath} -out ${certPath} -days 365 -nodes -subj '/CN=localhost'
+        ''
+        else ''
+          cp ${cfg.certificate} ${certPath}
+          cp ${cfg.key} ${keyPath}
+        '') + ''
+          chown ${cfg.user}:${cfg.user} ${certPath}
+          chown ${cfg.user}:${cfg.user} ${keyPath}
+          chmod 644 ${certPath}
+          chmod 640 ${keyPath}
+          ''
+        ;
 
         wantedBy = [ "multi-user.target" ] ++ optional config.services.nginx.enable "nginx.service";
         
         unitConfig = {
           Before = [ "multi-user.target"] ++ optional config.services.nginx.enable "nginx.service" ;
-          ConditionPathExists = "!${getCertPath}";
+          ConditionPathExists = "!${certPath}";
         };
 
         serviceConfig = {

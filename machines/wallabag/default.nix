@@ -43,7 +43,7 @@ in
 
     imports = [
       (import ../../lib/mk-database-module.nix "wallabag")
-      (import ../../lib/mk-ssl-module.nix "wallabag")
+      (import ../../modules/ssl/mk-ssl-module.nix "wallabag")
       (import ../../lib/mk-installation-module.nix "wallabag")
       (import ../../lib/mk-init-module.nix "wallabag")
     ];

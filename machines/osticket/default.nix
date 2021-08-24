@@ -33,7 +33,7 @@ let
 in {
   imports = [
     (import ../../lib/mk-database-module.nix "osticket")
-    (import ../../lib/mk-ssl-module.nix "osticket")
+    (import ../../modules/ssl/mk-ssl-module.nix "osticket")
     (import ../../lib/mk-installation-module.nix "osticket")
     (import ../../lib/mk-init-module.nix "osticket")
     ];

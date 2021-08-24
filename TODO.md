@@ -46,7 +46,6 @@
 * A enable option with mkIf? Think about it at least.
 
 ## mkSSLModule
-* Option to add own certificate
 * Option to generate one from Let's Encrypt
 * Check and generate certificates if they are expired
 * Option to set a global certificate
