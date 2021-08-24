@@ -13,6 +13,12 @@ in
 
         enable = mkEnableOption "SSL certificate";
 
+        autoGenerate = mkOption {
+          type = bool;
+          default = true;
+          description = "Whether to auto-generate an SSL certificate for ${name}";
+        };
+
         user = mkOption {
           type = str;
           default = if (builtins.hasAttr "installation" config.machines.${name}) then config.machines.${name}.installation.user else "root";
@@ -31,7 +37,7 @@ in
 
       networking.firewall.allowedTCPPorts = [ 443 ];
 
-      services.nginx.virtualHosts.${name} = mkIf config.services.nginx.enable {
+      services.nginx.virtualHosts.${name} = mkIf (config.services.nginx.enable && cfg.enable) {
         addSSL = !cfg.httpsOnly;
         forceSSL = cfg.httpsOnly;
         sslCertificate = certPath;
@@ -44,13 +50,10 @@ in
         "d ${sslPath}/private 755 root root - - "
       ];
 
-      systemd.services."create-${name}-cert" = {
+      systemd.services."create-${name}-cert" = mkIf cfg.autoGenerate {
         description = "Create a certificate for ${name}";
 
-        script = 
-        let
-        in
-        ''
+        script = ''
           ${pkgs.libressl}/bin/openssl req -x509 -newkey rsa:4096 -keyout ${keyPath} -out ${certPath} -days 365 -nodes -subj '/CN=localhost'
           chown ${cfg.user}:${cfg.user} ${certPath}
           chown ${cfg.user}:${cfg.user} ${keyPath}
