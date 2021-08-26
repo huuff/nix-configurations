@@ -102,10 +102,6 @@ in {
         }
       ];
 
-      networking.firewall = {
-        allowedTCPPorts = [ 80 ];
-      };
-
     # is this useful for anything?
     systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.installation.path ];
 
@@ -116,6 +112,13 @@ in {
 
       virtualHosts.osticket = {
         root = cfg.installation.path;
+
+        listen = [{
+          addr = "0.0.0.0";
+          port = cfg.installation.ports.http;
+          ssl = cfg.ssl.enable;
+        }];
+
         extraConfig = ''
           set $path_info "";
 

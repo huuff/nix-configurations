@@ -59,10 +59,7 @@ in
     };
 
     config = mkIf cfg.enable {
-      networking.firewall = {
-        allowedTCPPorts = [ 80 ];
-      };
-
+      # TODO: Does this do anything?
       systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
       machines.neuron.initialization.units = [
@@ -102,6 +99,13 @@ in
 
           virtualHosts.neuron = {
             root = "${cfg.installation.path}/.neuron/output";
+
+            listen = [{
+              addr = "0.0.0.0";
+              port = cfg.installation.ports.http;
+              ssl = cfg.ssl.enable;
+            }];
+
             locations."/".extraConfig = ''
               index index.html index.htm;
 

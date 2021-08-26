@@ -6,6 +6,7 @@
 * A hardened `openssh` module like that in [this post](https://christine.website/blog/paranoid-nixos-2021-07-18)
 * Make a file with the `test` config and share it between `test.nix` and `vm.nix` to test interactively in the same test environment (Ideally, I'd get `shell_interact()` to work. Or maybe not? I like having my aliases available) UPDATE: I DEFINITELY need to use `shell_interact()`, anything else is just torture. Maybe I'll have to ask the discourse. UPDATE: Idea: Use some `default.nix` for tests I want to interact with, import `nixpkgs` from the channel and pass it to the test file as a parameter. UPDATE: It doesn't work either. Seems like nobody cares much about `shell_interact()`?
 * Maybe it's time to start passing my library from the flake, look at that import for `testing-lib` in the `virtual-test` for postfix.
+* Use `?` (Which is kind of like an `or`) instead of `hasAttr` everywhere.
 
 ## Testing library
 * Some wrapper around `wait_until_tty_matches` with a timeout, setting current tty and printing.
@@ -38,6 +39,9 @@
 * Backup options, there's nothing yet but it's pretty important
 * `composer install` fails with some weird error about parsing XML. Try to fix it or just ignore the error with `|| true`. UPDATE: Currently ignoring it but not satisfied.
 * Add email options
+
+## mkInstallationModule
+* Do something to add programmatically ports to nginx, take care of providing installations with both `http` and `https` (Or maybe this would be the task of an `nginx` module?)
 
 ## mkInitModule
 * Make it somewhat more terse. My init scripts still look a bit hideous

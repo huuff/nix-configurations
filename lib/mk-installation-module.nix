@@ -25,10 +25,22 @@ in
           default = cfg.user;
           description = "Default group of the user";
         };
+
+        ports = mkOption {
+          type = attrsOf int;
+          default = {
+            # TODO: A bit dangerous? this could mean that any client that uses this module
+            # will have 80 open if it does not override the option. Check if overrides delete any contents
+            http = if (hasAttr "ssl" config.machines.${name} && config.machines.${name}.ssl.enable) then 443 else 80; 
+          };
+          description = "Name of protocol to port that will be open/served by the application";
+        };
       };
     };
 
     config = {
+      networking.firewall.allowedTCPPorts = mapAttrsToList (name: value: value) cfg.ports;
+
       systemd.tmpfiles.rules = [ "d ${cfg.path} - ${cfg.user} ${cfg.group} - -" ];
 
       users = {

@@ -151,10 +151,6 @@ in
         else throw "Unknown database authentication method"
         );
 
-
-
-      networking.firewall.allowedTCPPorts = [ 80 ];
-
       machines.wallabag.initialization.units = [
         {
           name = "copy-wallabag";
@@ -232,6 +228,14 @@ in
 
         virtualHosts.wallabag = {
           root = "${cfg.installation.path}/web";
+
+          listen = [{
+            addr = "0.0.0.0";
+            port = cfg.installation.ports.http;
+            ssl = cfg.ssl.enable;
+          }];
+
+          # TODO: are priorities needed?
           locations = {
             "/" = {
               priority = 100;
