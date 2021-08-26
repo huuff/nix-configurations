@@ -8,6 +8,9 @@
 * Maybe it's time to start passing my library from the flake, look at that import for `testing-lib` in the `virtual-test` for postfix.
 * Use `?` (Which is kind of like an `or`) instead of `hasAttr` everywhere.
 
+# nixosShellBase
+* Configuration to forward ports.
+
 ## Testing library
 * Some wrapper around `wait_until_tty_matches` with a timeout, setting current tty and printing.
 * `contains` could be `match` and accept a regex

@@ -18,6 +18,8 @@ with lib;
     osticket = {
       enable = true;
 
+      installation.ports.http = 8080;
+
       database = {
         authenticationMethod = "password";
         passwordFile = pkgs.writeText "dbpass" "dbpass";
@@ -41,6 +43,8 @@ with lib;
     wallabag = {
       enable = true;
 
+      installation.ports.http = 8081;
+
       installation.group = "nginx";
     };
 
@@ -54,4 +58,10 @@ with lib;
   };
 
   services.nginx.user = mkForce "nginx";
+
+
+  virtualisation.qemu.networkingOptions = [
+    "-net nic,netdev=user.0,model=virtio"
+    "-netdev user,id=user.0,hostfwd=tcp::8080-:8080,hostfwd=tcp::8081-:8081"
+  ];
 }
