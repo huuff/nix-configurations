@@ -11,7 +11,7 @@ let
   allowUnencryptedRepo = repo: if (repo.encryption.mode == "none") then "export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes" else "";
   exportPassphrase = repo: if (repo.encryption.mode != "none") then "export BORG_PASSPHRASE=${myLib.passwd.cat repo.encryption.passphraseFile}" else "";
 
-  myLib = import ./default.nix { inherit config pkgs; };
+  myLib = import ./default.nix { inherit config pkgs lib; };
 
   remote = with types; submodule {
     options = {

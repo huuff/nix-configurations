@@ -1,5 +1,8 @@
 # My own library for things I want to reuse
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
+
+with lib;
+
 rec {
   fileFromStore = file: pkgs.writeText "${file}" (builtins.readFile file);
 
@@ -23,6 +26,20 @@ rec {
     runSqlAsRoot = ddl: ''${config.services.mysql.package}/bin/mysql -u root -e "${ddl}"'';
   };
 
-  copyMachine = machine: extraConf: { pkgs, config, lib, ... }:
-  lib.recursiveUpdate (machine { inherit pkgs config lib; }) extraConf;
+  # TODO: Make it mkListen since listen isn't even a block...
+  mkListenBlock = cfg:
+  [
+    (mkIf (hasAttr "ssl" cfg -> !cfg.ssl.httpsOnly) {
+      addr = "0.0.0.0";
+      port = cfg.installation.ports.http;
+      ssl = false;
+    })
+
+    (mkIf (hasAttr "ssl" cfg && cfg.ssl.enable) {
+      addr = "0.0.0.0";
+      port = cfg.installation.ports.https;
+      ssl = true;
+    })
+  ];
+
 }

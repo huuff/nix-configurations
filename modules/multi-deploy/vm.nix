@@ -48,7 +48,7 @@ with lib;
       installation.group = "nginx";
     };
 
-    # TODO: find out what happens with getFlake
+    # TODO: Upstream nixos-shell has an older version of nixpkgs without getFlake?
     #neuron = {
       #enable = true;
       #repository = "https://github.com/srid/alien-psychology.git";

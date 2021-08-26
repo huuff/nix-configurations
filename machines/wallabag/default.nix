@@ -4,7 +4,7 @@ with lib;
 
 let
   cfg = config.machines.wallabag;
-  myLib = import ../../lib/default.nix { inherit config pkgs; };
+  myLib = import ../../lib/default.nix { inherit config pkgs lib; };
 
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
   composerWithTidy = (pkgs.php74Packages.composer.override { php = phpWithTidy; });
@@ -229,11 +229,7 @@ in
         virtualHosts.wallabag = {
           root = "${cfg.installation.path}/web";
 
-          listen = [{
-            addr = "0.0.0.0";
-            port = cfg.installation.ports.http;
-            ssl = cfg.ssl.enable;
-          }];
+          listen = myLib.mkListenBlock cfg;
 
           # TODO: are priorities needed?
           locations = {

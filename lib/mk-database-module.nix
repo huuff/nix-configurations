@@ -3,7 +3,7 @@ name:
 with lib;
 let
   cfg = config.machines.${name}.database;
-  myLib = import ./default.nix { inherit config pkgs; };
+  myLib = import ./default.nix { inherit config pkgs lib; };
 in
   {
     options = with types; {

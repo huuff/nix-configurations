@@ -5,6 +5,8 @@ with lib;
 let
   cfg = config.machines.neuron;
   neuronPkg = (builtins.getFlake "github:srid/neuron?rev=998fce27ccc91231ef9757e2bebeb39327850092").packages.x86_64-linux.neuron;
+  myLib = import ../../lib { inherit config pkgs lib; };
+
   gitWithoutDeployKey = "${pkgs.git}/bin/git";
   gitWithDeployKey = ''${pkgs.git}/bin/git -c 'core.sshCommand=${pkgs.openssh}/bin/ssh -i ${cfg.deployKey} -o StrictHostKeyChecking=no -p ${toString cfg.sshPort}' '';
   gitCommand = if cfg.deployKey == null then gitWithoutDeployKey else gitWithDeployKey;
@@ -100,11 +102,7 @@ in
           virtualHosts.neuron = {
             root = "${cfg.installation.path}/.neuron/output";
 
-            listen = [{
-              addr = "0.0.0.0";
-              port = cfg.installation.ports.http;
-              ssl = cfg.ssl.enable;
-            }];
+            listen = myLib.mkListenBlock cfg;
 
             locations."/".extraConfig = ''
               index index.html index.htm;

@@ -1,7 +1,7 @@
 { config, pkgs, lib, ... }:
 
 let
-  myLib = import ../../../lib { inherit config pkgs; }; 
+  myLib = import ../../../lib { inherit config pkgs lib; }; 
 in with myLib; {
   imports = [
     ../default.nix
@@ -24,7 +24,7 @@ in with myLib; {
     };
 
     ssl.enable = true;
-    ssl.httpsOnly = true;
+    ssl.httpsOnly = false;
 
     database = {
       authenticationMethod = "password";

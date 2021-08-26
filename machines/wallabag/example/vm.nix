@@ -1,6 +1,6 @@
 { config, pkgs, lib, ... }:
 let
-  myLib = import ../../../lib { inherit config pkgs; };
+  myLib = import ../../../lib { inherit config pkgs lib; };
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
   composerWithTidy = (pkgs.php74Packages.composer.override { php = phpWithTidy; });
 in with myLib; {

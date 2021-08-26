@@ -1,5 +1,4 @@
 # TASKS
-* Maybe Zammad? osTicket seems dated
 * A module or library for `PHP` + `nginx`, but I find it difficult since I just copypaste nginx configurations from the internet.
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
 * Harden long-standing systemd services (`do-on-request`, `auto-rsync`)
@@ -7,6 +6,7 @@
 * Make a file with the `test` config and share it between `test.nix` and `vm.nix` to test interactively in the same test environment (Ideally, I'd get `shell_interact()` to work. Or maybe not? I like having my aliases available) UPDATE: I DEFINITELY need to use `shell_interact()`, anything else is just torture. Maybe I'll have to ask the discourse. UPDATE: Idea: Use some `default.nix` for tests I want to interact with, import `nixpkgs` from the channel and pass it to the test file as a parameter. UPDATE: It doesn't work either. Seems like nobody cares much about `shell_interact()`?
 * Maybe it's time to start passing my library from the flake, look at that import for `testing-lib` in the `virtual-test` for postfix.
 * Use `?` (Which is kind of like an `or`) instead of `hasAttr` everywhere.
+* Does `mkEnableOption` protect against using other options? I don't think so but test it. Especially for `mkSSLModule`, I want to know if I can set `httpsOnly` without `enable` (And if I can, prevent it with an assertion)
 
 # nixosShellBase
 * Configuration to forward ports.
@@ -20,8 +20,10 @@
 ## Neuron
 * Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all. UPDATE: Yeah but these are integration tests and testing the individual components does not guarantee that they all work together
 
-## Multi-machine deploy
+## multiDeploy
 * Add a way to setup a global certificate, this will help with deploying multiple machines.
+* Check that all `mysql` packages are the same.
+* Check that no two machines use the same ports.
 
 ## osTicket
 * Add backup options
@@ -43,15 +45,11 @@
 * `composer install` fails with some weird error about parsing XML. Try to fix it or just ignore the error with `|| true`. UPDATE: Currently ignoring it but not satisfied.
 * Add email options
 
-## mkInstallationModule
-* Do something to add programmatically ports to nginx, take care of providing installations with both `http` and `https` (Or maybe this would be the task of an `nginx` module?)
-
 ## mkInitModule
 * Make it somewhat more terse. My init scripts still look a bit hideous
 
 ## mkDatabaseModule
 * Add `postgres`
-* A enable option with mkIf? Think about it at least.
 
 ## mkSSLModule
 * Option to generate one from Let's Encrypt

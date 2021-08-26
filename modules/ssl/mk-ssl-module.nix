@@ -37,9 +37,10 @@ in
           description = "User that will own the certificate";
         };
 
+        # Maybe should be sslOnly? This is going to be used for other ports other than http
         httpsOnly = mkOption {
           type = bool;
-          default = cfg.enable;
+          default = false;
           description = "Whether to redirect all http traffic to https";
         };
       };

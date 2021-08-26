@@ -4,7 +4,7 @@ with lib;
 
 let
   cfg = config.machines.osticket;
-  myLib = import ../../lib/default.nix { inherit config pkgs; };
+  myLib = import ../../lib/default.nix { inherit config pkgs lib; };
 
   userModule = with types; submodule {
     options = {
@@ -113,11 +113,7 @@ in {
       virtualHosts.osticket = {
         root = cfg.installation.path;
 
-        listen = [{
-          addr = "0.0.0.0";
-          port = cfg.installation.ports.http;
-          ssl = cfg.ssl.enable;
-        }];
+        listen = myLib.mkListenBlock cfg;
 
         extraConfig = ''
           set $path_info "";
@@ -210,13 +206,17 @@ in {
       {
         name = "install-osticket";
         description = "Run osTicket installation script and cleanup";
-        script = ''
+        script = let
+          protocol = if cfg.ssl.httpsOnly then "https" else "http";
+          port = toString (if cfg.ssl.httpsOnly then cfg.installation.ports.https else cfg.installation.ports.http);
+        in
+        ''
           echo ">>> Setting config file"
           mv ${cfg.installation.path}/include/ost-sampleconfig.php ${cfg.installation.path}/include/ost-config.php
           chmod 0666 ${cfg.installation.path}/include/ost-config.php
 
           echo ">>> Calling install script"
-          ${pkgs.curl}/bin/curl ${optionalString cfg.ssl.httpsOnly "-k "} "${if cfg.ssl.httpsOnly then "https" else "http"}://localhost:${toString cfg.installation.ports.http}/setup/install.php" \
+          ${pkgs.curl}/bin/curl ${optionalString cfg.ssl.httpsOnly "-k"} "${protocol}://localhost:${port}/setup/install.php" \
             -F "s=install" \
             -F "name=${cfg.site.name}" \
             -F "email=${cfg.site.email}" \
