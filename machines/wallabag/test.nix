@@ -56,8 +56,7 @@ in
         machine.succeed("systemctl is-active --quiet finish-wallabag-initialization")
 
       with subtest("nginx is serving wallabag"):
-        machine.output_contains(command='curl http://localhost/login',
-                                expected='<title>Welcome to wallabag! – wallabag</title>')
+        machine.output_contains('curl http://localhost/login', '<title>Welcome to wallabag! – wallabag</title>')
 
       with subtest("default user is deactivated"):
         machine.output_contains(listUsers(), "wallabag wallabag@wallabag.io no yes")

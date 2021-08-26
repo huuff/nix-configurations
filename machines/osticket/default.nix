@@ -1,4 +1,5 @@
 { config, pkgs, lib, ... }:
+# TODO: Maybe use fake machines for these! The real ones are too expensive
 
 with lib;
 
@@ -47,6 +48,7 @@ in {
         description = "The package that provides osTicket";
       };
 
+      # TODO: Defaults for these as they are tiring to set
       admin = {
         username = mkOption {
           type = str;
