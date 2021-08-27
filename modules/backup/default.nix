@@ -84,6 +84,7 @@ in
         directories = {
           enable = mkEnableOption "directory backup";
 
+          # TODO: Ensure paths are absolute
           paths = mkOption {
             type = listOf (oneOf [ str path ]);
             default = [];
@@ -158,25 +159,35 @@ in
           (mkIf (cfg.restore && cfg.directories.enable) {
             name = "restore-${name}-directories-backup";
             description = "Restore the latest ${name} directories backup";
-            path = with pkgs; [ borgbackup openssh ];
-            script = let repo = cfg.directories.repository; in ''
+            path = with pkgs; [ borgbackup openssh rsync ];
+            script = let 
+              repo = cfg.directories.repository;
+              paths = concatStringsSep " " (map (path: ''"${toString path}"'') cfg.directories.paths);
+            in ''
+              set -x
               ${borgLib.setEnv repo}
               if ${borgLib.repoNotEmpty repo}; then
                 latest_archive=${borgLib.latestArchive repo}
-              else
-                exit 0
+                
+                tmp_dir=$(mktemp -d)
+                trap "rm -rf $tmp_dir" EXIT
+
+                cd $tmp_dir
+                borg extract ${borgLib.buildPath repo}::"$latest_archive"
+                rm -rf ${paths}
+                rsync -a . /
               fi
 
-              for path_to_backup in ${concatStringsSep " " (map (path: ''"${toString path}"'') cfg.directories.paths)}
-              do
-                cd "$path_to_backup" && rm -rf * && borg extract ${borgLib.buildPath repo}::$latest_archive $(basename "$path_to_backup")
-              done
+              # for path_to_backup in ${concatStringsSep " " (map (path: ''"${toString path}"'') cfg.directories.paths)}
+              # do
+              #   cd "$path_to_backup" && rm -rf * && borg extract ${borgLib.buildPath repo}::$latest_archive $(basename "$path_to_backup")
+              # done
             '';
             user = "root";
           })
         ])
 
-        # TODO: This is AFTER finish, should be just before. mkOrder?
+        # TODO: This is AFTER finish, should be just before. mkOrder? Or is it? Check it
         (mkAfter [
           (mkIf (cfg.restore && cfg.database.enable) {
             name = "restore-${name}-database-backup";
@@ -196,7 +207,7 @@ in
       ];
 
       systemd = {
-        # TODO: Create only if remote, check if perms are right
+        # TODO: check if perms are right
         tmpfiles.rules = [
           (mkIf (cfg.database.enable && cfg.database.repository.path != null) "d ${cfg.database.repository.path} 755 ${cfg.user} ${cfg.user} - -")
           (mkIf (cfg.directories.enable && cfg.directories.repository.path != null) "d ${cfg.directories.repository.path} 755 ${cfg.user} ${cfg.user} - -")

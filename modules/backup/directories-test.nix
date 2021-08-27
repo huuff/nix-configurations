@@ -141,5 +141,17 @@ pkgs.nixosTest {
           [ _, last_archive ] = server.execute(f"{borg_boilerplate()} borg list --last 1 --format '{{archive}}' ${remotePath}")
           server.output_contains(f"{borg_boilerplate()} borg extract --stdout ${remotePath}::{last_archive}", "${dir1Contents}")
           server.output_contains(f"{borg_boilerplate()} borg extract --stdout ${remotePath}::{last_archive}", "${dir2Contents}")
+
+        with subtest("backup is restored"):
+          # First, delete the files
+          client.succeed("rm -rf {${dir1},${dir2}}/*")
+          # Sanity check that they were deleted
+          client.succeed('[ -z "$(ls -A ${dir1})" ] && [ -z "$(ls -A ${dir2})" ]')
+          # Remove init to trigger reinitialization and restart the restore unit
+          client.succeed("rm -rf /etc/inits/${testName}/*")
+          client.systemctl("restart restore-${testName}-directories-backup")
+          # Check if the contents are back
+          client.output_contains("cat ${dir1}/file1", "${dir1Contents}")
+          client.output_contains("cat ${dir2}/file2", "${dir2Contents}")
       '';
 }
