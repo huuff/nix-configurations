@@ -7,7 +7,7 @@ with lib;
 
 let
   cfg = config.machines.${name}.backup;
-  dbCfg = if (hasAttr "database" config.machines.${name}) then config.machines.${name}.database else null;
+  dbCfg = config.machines.${name}.database;
 
   myLib = import ../../lib/default.nix { inherit config pkgs lib; };
   borgLib = import ./borg-lib.nix { inherit lib myLib; };
@@ -77,7 +77,7 @@ in
       machines.${name}.backup = {
         user = mkOption {
           type = str;
-          default = if hasAttr "installation" config.machines.${name} then config.machines.${name}.installation.user else null;
+          default = config.machines.${name}.installation.user or null;
           description = "User that will run the backup script";
         };
 

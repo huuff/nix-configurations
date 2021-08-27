@@ -29,13 +29,13 @@ rec {
   # TODO: Make it mkListen since listen isn't even a block...
   mkListenBlock = cfg:
   [
-    (mkIf (hasAttr "ssl" cfg -> !cfg.ssl.httpsOnly) {
+    (mkIf ((cfg ? ssl) -> !cfg.ssl.httpsOnly) {
       addr = "0.0.0.0";
       port = cfg.installation.ports.http;
       ssl = false;
     })
 
-    (mkIf (hasAttr "ssl" cfg && cfg.ssl.enable) {
+    (mkIf ((cfg ? ssl) && cfg.ssl.enable) {
       addr = "0.0.0.0";
       port = cfg.installation.ports.https;
       ssl = true;

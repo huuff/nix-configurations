@@ -23,7 +23,7 @@ in
 
           user = mkOption {
             type = str;
-            default = if (hasAttr "installation" config.machines.${name}) then config.machines.${name}.installation.user else name;
+            default = config.machines.${name}.installation.user or name;
             description = "Name of the database user";
           };
 
@@ -63,7 +63,7 @@ in
           message = "For DB socket authentication, the system user ${cfg.user} must exist!";
         }
         {
-          assertion = (hasAttr "installation" config.machines.${name}) -> (cfg.user == config.machines.${name}.installation.user);
+          assertion = (config.machines.${name} ? installation) -> (cfg.user == config.machines.${name}.installation.user);
           message = "If a machine has the 'installation' module, then installation.user must be the same as database.user!";
         }
       ];
@@ -73,7 +73,7 @@ in
         package = mkDefault pkgs.mariadb;
       };
 
-      users.users.${cfg.user} = mkIf (!hasAttr "installation" config.machines.${name}) {
+      users.users.${cfg.user} = mkIf (config.machines.${name} ? installation) {
         isSystemUser = true;
       };
 

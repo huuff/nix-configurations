@@ -140,13 +140,13 @@ in
       machines.${machineName}.initialization = with types; {
         user = mkOption {
           type = str;
-          default = if (hasAttr "installation" config.machines.${machineName}) then config.machines.${machineName}.installation.user else "root";
+          default = config.machines.${machineName}.installation.user or "root";
           description = "Default user for the initialization units";
         };
 
         workingDirectory = mkOption {
           type = nullOr str;
-          default = if (hasAttr "installation" config.machines.${machineName}) then config.machines.${machineName}.installation.path else null;
+          default = config.machines.${machineName}.installation.path or null;
           description = "Working directory where the units will be executed";
         };
 

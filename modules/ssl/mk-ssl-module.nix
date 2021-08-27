@@ -33,7 +33,7 @@ in
 
         user = mkOption {
           type = str;
-          default = if (builtins.hasAttr "installation" config.machines.${name}) then config.machines.${name}.installation.user else "root";
+          default = config.machines.${name}.installation.user or "root";
           description = "User that will own the certificate";
         };
 

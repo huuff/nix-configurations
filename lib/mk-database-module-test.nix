@@ -21,6 +21,8 @@ in
 
       services.mysql.package = lib.mkForce pkgs.mariadb;
 
+      users.users.${dbWithSocket.user}.isNormalUser = true;
+
       machines = {
         ${dbWithPassword.name}.database = {
           user = dbWithPassword.user;

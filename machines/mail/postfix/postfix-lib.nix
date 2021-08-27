@@ -3,7 +3,8 @@
 with lib;
 
 rec {
-  match = value: attrs: if (hasAttr value attrs) then attrs."${value}" else attrs.default;
+  # Pretty useful in any case, put it in my lib?
+  match = value: attrs: attrs."${value}" or attrs.default;
 
   boolToYN = bool: if bool then "y" else "n";
 
