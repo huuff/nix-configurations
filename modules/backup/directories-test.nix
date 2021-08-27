@@ -119,7 +119,6 @@ pkgs.nixosTest {
     };
   };
 
-  # TODO: test that we can restore the contents
   testScript = ''
         ${ builtins.readFile ../../lib/testing-lib.py }
 
