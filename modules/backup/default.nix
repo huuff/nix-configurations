@@ -8,15 +8,9 @@ with lib;
 let
   cfg = config.machines.${name}.backup;
   dbCfg = if (hasAttr "database" config.machines.${name}) then config.machines.${name}.database else null;
-  dbRepo = cfg.database.repository;
-
-  allowUnencryptedRepo = repo: optionalString (repo.encryption.mode == "none") "export BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes";
-  exportPassphrase = repo: optionalString (repo.encryption.mode != "none") "export BORG_PASSPHRASE=${myLib.passwd.cat repo.encryption.passphraseFile}";
-  setBorgRSH = repo: optionalString (repo.remote != null) "ssh -i ${repo.remote.key}";
 
   myLib = import ../../lib/default.nix { inherit config pkgs lib; };
-
-  buildPath = repo: if (repo.path != null) then repo.path else "ssh://${repo.remote.user}@${repo.remote.hostname}:${repo.remote.path}";
+  borgLib = import ./borg-lib.nix { inherit lib myLib; };
 
   remote = with types; submodule {
     options = {
@@ -46,7 +40,6 @@ let
     };
   };
 
-  repoNotEmpty = repo: "[ $(borg list ${buildPath repo} | wc -l) -ne 0 ]";
 
   repository = with types; submodule {
     options = { 
@@ -143,16 +136,14 @@ in
           (mkIf (cfg.database.enable || cfg.directories.enable) {
             name = "initialize-${name}-repositories";
             description = "Initialize the ${name} borg repository if not already a repository";
-            path = [ pkgs.borgbackup ];
+            path = with pkgs; [ borgbackup openssh ];
             script = let
               initRepoIfNotInitialized = repo: ''
-                ${allowUnencryptedRepo repo}
-                ${exportPassphrase repo}
-                ${setBorgRSH repo}
+                ${borgLib.setEnv repo}
                 set +e
-                borg info ${buildPath repo}
+                borg info ${borgLib.buildPath repo}
                 if [ $? -eq 2 ]; then
-                  borg init -e${repo.encryption.mode} ${buildPath repo}
+                  borg init -e${repo.encryption.mode} ${borgLib.buildPath repo}
                 fi
 
                 '';
@@ -167,20 +158,18 @@ in
           (mkIf (cfg.restore && cfg.directories.enable) {
             name = "restore-${name}-directories-backup";
             description = "Restore the latest ${name} directories backup";
-            path = [ pkgs.borgbackup ];
-            script = ''
-              ${allowUnencryptedRepo dbRepo}
-              ${exportPassphrase dbRepo}
-              ${setBorgRSH dbRepo}
-              if ${repoNotEmpty cfg.directories.repository}; then
-                latest_archive=$(borg list --last 1 --format '{archive}' ${buildPath cfg.database.repository})
+            path = with pkgs; [ borgbackup openssh ];
+            script = let repo = cfg.directories.repository; in ''
+              ${borgLib.setEnv repo}
+              if ${borgLib.repoNotEmpty repo}; then
+                latest_archive=${borgLib.latestArchive repo}
               else
                 exit 0
               fi
 
               for path_to_backup in ${concatStringsSep " " (map (path: ''"${toString path}"'') cfg.directories.paths)}
               do
-                cd "$path_to_backup" && rm -rf * && borg extract ${buildPath cfg.directories.repository}::$latest_archive $(basename "$path_to_backup")
+                cd "$path_to_backup" && rm -rf * && borg extract ${borgLib.buildPath repo}::$latest_archive $(basename "$path_to_backup")
               done
             '';
             user = "root";
@@ -192,14 +181,13 @@ in
           (mkIf (cfg.restore && cfg.database.enable) {
             name = "restore-${name}-database-backup";
             description = "Restore the latest ${name} database backup";
-            path = [ pkgs.borgbackup ];
-            script = ''
-              ${allowUnencryptedRepo dbRepo}
-              ${exportPassphrase dbRepo}
-              ${setBorgRSH dbRepo}
-              if ${repoNotEmpty cfg.database.repository}; then
-                latest_archive=$(borg list --last 1 --format '{archive}' ${buildPath cfg.database.repository})
-                ${myLib.db.runSqlAsRoot "$(borg extract --stdout ${buildPath cfg.database.repository}::$latest_archive)"}
+            path = with pkgs; [ borgbackup openssh ];
+            script = let repo = cfg.database.repository; in
+            ''
+              ${borgLib.setEnv repo}
+              if ${borgLib.repoNotEmpty repo}; then
+                latest_archive=$(borg list --last 1 --format '{archive}' ${borgLib.buildPath repo})
+                ${myLib.db.runSqlAsRoot "$(borg extract --stdout ${borgLib.buildPath repo}::$latest_archive)"}
               fi
             '';
             user = "root";
@@ -209,9 +197,9 @@ in
 
       systemd = {
         # TODO: Create only if remote, check if perms are right
-        tmpfiles.rules = mkIf cfg.database.enable [
-          (optionalString (cfg.database.enable && cfg.database.repository.path != null) "d ${cfg.database.repository.path} 755 ${cfg.user} ${cfg.user} - -")
-          (optionalString (cfg.directories.enable && cfg.directories.repository.path != null) "d ${cfg.directories.repository.path} 755 ${cfg.user} ${cfg.user} - -")
+        tmpfiles.rules = [
+          (mkIf (cfg.database.enable && cfg.database.repository.path != null) "d ${cfg.database.repository.path} 755 ${cfg.user} ${cfg.user} - -")
+          (mkIf (cfg.directories.enable && cfg.directories.repository.path != null) "d ${cfg.directories.repository.path} 755 ${cfg.user} ${cfg.user} - -")
         ];
 
         timers = {
@@ -236,16 +224,16 @@ in
           "backup-${name}-database" = mkIf cfg.database.enable {
             description = "Make a backup of the ${name} database";
 
-            path = [ config.services.mysql.package  pkgs.borgbackup ];
+            path = with pkgs; [ config.services.mysql.package borgbackup openssh ];
 
             script = let
+              # TODO: This in mylib
               authentication = if (dbCfg.authenticationMethod == "password") then "-p ${myLib.passwd.cat dbCfg.passwordFile}" else "";
+              repo = cfg.database.repository;
             in
             ''
-              ${allowUnencryptedRepo dbRepo}
-              ${exportPassphrase dbRepo}
-              ${setBorgRSH dbRepo}
-              mysqldump --order-by-primary -u${dbCfg.user} ${authentication} --databases ${dbCfg.name} --add-drop-database | borg create ${buildPath cfg.database.repository}::{now} -
+              ${borgLib.setEnv repo}
+              mysqldump --order-by-primary -u${dbCfg.user} ${authentication} --databases ${dbCfg.name} --add-drop-database | borg create ${borgLib.buildPath repo}::{now} -
             '';
 
             serviceConfig = {
@@ -257,13 +245,11 @@ in
           "backup-${name}-directories" = mkIf cfg.directories.enable {
             description = "Make a backup of the ${name} directories";
 
-            path = [ pkgs.borgbackup ];
+            path = with pkgs; [ borgbackup openssh ];
 
-            script = ''
-              ${allowUnencryptedRepo dbRepo}
-              ${exportPassphrase dbRepo}
-              ${setBorgRSH dbRepo}
-              borg create ${buildPath cfg.directories.repository}::{now} ${concatStringsSep " " (map (path: ''"${path}"'') cfg.directories.paths)}
+            script = let repo = cfg.directories.repository; in ''
+              ${borgLib.setEnv repo}
+              borg create ${borgLib.buildPath repo}::{now} ${concatStringsSep " " (map (path: ''"${path}"'') cfg.directories.paths)}
             '';
 
             serviceConfig = {

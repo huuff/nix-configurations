@@ -49,7 +49,6 @@ pkgs.nixosTest {
         def borg_boilerplate():
           return "BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes BORG_PASSPHRASE=${passphrase}"
 
-        # DATABASE BACKUP TESTS
         machine.wait_for_unit("multi-user.target")
 
         machine.succeed('mysql ${testName} -e "CREATE TABLE ${testTable} (TEST_COLUMN INT);"')
