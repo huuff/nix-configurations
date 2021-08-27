@@ -32,11 +32,13 @@
       doOnRequest = import ./lib/do-on-request-test.nix { inherit pkgs; };
       autoRsync = import ./lib/auto-rsync-test.nix { inherit pkgs; };
 
+      # TODO: make SSL module files `default.nix` and `test.nix`
       mkSSLModule = import ./modules/ssl/mk-ssl-module-test.nix { inherit pkgs; };
       mkInstallationModule = import ./lib/mk-installation-module-test.nix { inherit pkgs; };
       mkDatabaseModule = import ./lib/mk-database-module-test.nix { inherit pkgs; };
       mkInitModule = import ./lib/mk-init-module-test.nix { inherit pkgs; };
-      mkBackupModule = import ./lib/mk-backup-module-test.nix { inherit pkgs; };
+      mkBackupModuleDatabase = import ./modules/backup/database-test.nix { inherit pkgs; };
+      mkBackupModuleDirectories = import ./modules/backup/directories-test.nix { inherit pkgs; };
     };
   };
 
