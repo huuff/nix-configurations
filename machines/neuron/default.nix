@@ -61,7 +61,6 @@ in
     };
 
     config = mkIf cfg.enable {
-      # TODO: Does this do anything?
       systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
       machines.neuron.initialization.units = [
