@@ -1,5 +1,4 @@
 { config, pkgs, lib, ... }:
-# TODO: Maybe use fake machines for these! The real ones are too expensive
 
 with lib;
 
@@ -34,7 +33,7 @@ let
 in {
   imports = [
     (import ../../lib/mk-database-module.nix "osticket")
-    (import ../../modules/ssl/mk-ssl-module.nix "osticket")
+    (import ../../modules/ssl "osticket")
     (import ../../lib/mk-installation-module.nix "osticket")
     (import ../../lib/mk-init-module.nix "osticket")
     ];
