@@ -1,6 +1,5 @@
 { pkgs, ... }:
 let
-  # Database TODO: Put it in an attr set and improve it generally
   dbPass = "dbpass";
   backupPath = "/var/lib/backup";
   testName = "backup_test";
