@@ -187,7 +187,6 @@ in
           })
         ])
 
-        # TODO: This is AFTER finish, should be just before. mkOrder? Or is it? Check it
         (mkAfter [
           (mkIf (cfg.restore && cfg.database.enable) {
             name = "restore-${name}-database-backup";
