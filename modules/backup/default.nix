@@ -43,8 +43,7 @@ let
 
   repository = with types; submodule {
     options = { 
-      # TODO: Something like `localPath`?
-      path = mkOption {
+      localPath = mkOption {
         type = nullOr (oneOf [ str path ]);
         default = "/var/lib/backup/${name}";
         description = "Path where the backup will be stored, if remote, do not use the 'ssh://' format, but fill in the remote option";
@@ -127,7 +126,7 @@ in
           message = "Can't enable database backup without enabling database!";
         }
         {
-          assertion = ((cfg.database.repository.path != null) -> cfg.database.repository.remote == null) && ((cfg.directories.repository.path != null) -> cfg.directories.repository.remote == null);
+          assertion = ((cfg.database.repository.localPath != null) -> cfg.database.repository.remote == null) && ((cfg.directories.repository.localPath != null) -> cfg.directories.repository.remote == null);
           message = "You can't set a path and a remote at the same time for a repository!";
         }
       ];
@@ -208,8 +207,8 @@ in
       systemd = {
         # TODO: check if perms are right
         tmpfiles.rules = [
-          (mkIf (cfg.database.enable && cfg.database.repository.path != null) "d ${cfg.database.repository.path} 755 ${cfg.user} ${cfg.user} - -")
-          (mkIf (cfg.directories.enable && cfg.directories.repository.path != null) "d ${cfg.directories.repository.path} 755 ${cfg.user} ${cfg.user} - -")
+          (mkIf (cfg.database.enable && cfg.database.repository.localPath != null) "d ${cfg.database.repository.localPath} 755 ${cfg.user} ${cfg.user} - -")
+          (mkIf (cfg.directories.enable && cfg.directories.repository.localPath != null) "d ${cfg.directories.repository.localPath} 755 ${cfg.user} ${cfg.user} - -")
         ];
 
         timers = {

@@ -45,7 +45,7 @@ pkgs.nixosTest {
               encryption.mode = "none";
               # TODO: Give some form of providing a default but just in the case that
               # no remote is specified
-              path = null;
+              localPath = null;
 
               remote = {
                 user = "root";

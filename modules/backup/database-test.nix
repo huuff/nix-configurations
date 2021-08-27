@@ -30,7 +30,7 @@ pkgs.nixosTest {
           database = {
             enable = true;
             repository = {
-              path = backupPath;
+              localPath = backupPath;
               encryption = {
                 mode = "repokey";
                 passphraseFile = pkgs.writeText passphrase passphrase;

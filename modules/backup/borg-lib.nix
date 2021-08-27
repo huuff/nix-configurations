@@ -4,7 +4,8 @@ with lib;
 
 rec {
   # Creates a path string from a repo suitable for borg consumption
-  buildPath = repo: if (repo.path != null) then repo.path else "ssh://${repo.remote.user}@${repo.remote.hostname}/${repo.remote.path}";
+  # TODO: Can I use OR here?
+  buildPath = repo: if (repo.localPath != null) then repo.localPath else "ssh://${repo.remote.user}@${repo.remote.hostname}/${repo.remote.path}";
 
   latestArchive = repo: "$(borg list --last 1 --format '{archive}' ${buildPath repo})";
 
