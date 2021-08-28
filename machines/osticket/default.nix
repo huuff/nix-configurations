@@ -113,7 +113,6 @@ in {
         }
       ];
 
-    # TODO: is this useful for anything?
     systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.installation.path ];
 
     machines.osticket = {
