@@ -1,6 +1,7 @@
 { pkgs, ... }:
 let
   directory = "/home/neuron";
+  refreshPort = 8999;
 in
 pkgs.nixosTest {
   name = "neuron";
@@ -11,8 +12,10 @@ pkgs.nixosTest {
     machines.neuron = {
       enable = true;
       repository = "https://github.com/srid/alien-psychology.git";
-      refreshPort = 8999;
-      installation.path = directory;
+      installation = {
+        path = directory;
+        ports.refresh = refreshPort;
+      };
     };
   };
 

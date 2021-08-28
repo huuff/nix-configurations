@@ -24,13 +24,6 @@ in
     options.machines.neuron = with types; {
       enable = mkEnableOption "neuron";
 
-      # TODO: use `mkInstallation` ports for this
-      refreshPort = mkOption {
-        type = int;
-        default = 55000;
-        description = "Sending a request to this port will trigger a git pull to refresh the zettelkasten from a repo.";
-      };
-
       repository = mkOption {
         type = str;
         description = "Repository that holds the zettelkasten";
@@ -81,7 +74,9 @@ in
           }
         ];
 
-        installation.ports = myLib.mkDefaultHttpPorts cfg;
+        installation.ports = myLib.mkDefaultHttpPorts cfg // {
+          refresh = mkDefault 55000;
+        };
 
       };
 
@@ -109,6 +104,7 @@ in
 
             listen = myLib.mkListen cfg;
 
+            # TODO: auth_basic in a nix way
             locations."/".extraConfig = ''
               index index.html index.htm;
 
@@ -125,7 +121,7 @@ in
         do-on-request = {
           enable = true;
           user = cfg.installation.user;
-          port = cfg.refreshPort;
+          port = cfg.installation.ports.refresh;
           directory = "${cfg.installation.path}";
           script = "${gitCommand} pull";
         };
