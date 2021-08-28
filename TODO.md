@@ -38,6 +38,7 @@
 
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
+* Are perms right?
 * Add email options
 
 ## mkInitModule
