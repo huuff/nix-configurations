@@ -103,8 +103,7 @@ in
           database_table_prefix = cfg.database.prefix;
           database_charset = "utf8mb4";
 
-          # TODO: Also set the port for https
-          domain_name = (if cfg.ssl.enable then "https://" else "http://") + "localhost:${toString cfg.installation.ports.http}";
+          domain_name = (if cfg.ssl.enable then "https://" else "http://") + "localhost:${if cfg.ssl.enable then (toString cfg.installation.ports.https) else (toString cfg.installation.ports.http)}";
           server_name = "Your wallabag instance";
 
           mailer_transport = "smtp";
