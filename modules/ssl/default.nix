@@ -37,6 +37,12 @@ in
           description = "User that will own the certificate";
         };
 
+        group = mkOption {
+          type = str;
+          default = config.machines.${name}.installation.group or "root";
+          description = "Group that will own the certificate";
+        };
+
         # Maybe should be sslOnly? This is going to be used for other ports other than http
         httpsOnly = mkOption {
           type = bool;
@@ -83,8 +89,8 @@ in
           cp ${cfg.certificate} ${certPath}
           cp ${cfg.key} ${keyPath}
         '') + ''
-          chown ${cfg.user}:${cfg.user} ${certPath}
-          chown ${cfg.user}:${cfg.user} ${keyPath}
+          chown ${cfg.user}:${cfg.group} ${certPath}
+          chown ${cfg.user}:${cfg.group} ${keyPath}
           chmod 644 ${certPath}
           chmod 640 ${keyPath}
           ''
