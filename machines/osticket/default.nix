@@ -256,9 +256,10 @@ in {
             INSERT INTO ${cfg.database.prefix}user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.passwd.catAndBcrypt user.passwordFile}');
             COMMIT;
           '';
-          userToDML = map (user: (myLib.db.runSql cfg (insertUser user))) cfg.users;
+          userToDML = map (user: (myLib.db.runSql cfg.database (insertUser user))) cfg.users;
         in ''
-          ${myLib.db.runSql cfg updateAdminPass}
+          set -x
+          ${myLib.db.runSql cfg.database updateAdminPass}
           ${concatStringsSep "\n" userToDML}
         '';
       }

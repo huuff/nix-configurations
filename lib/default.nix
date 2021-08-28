@@ -12,18 +12,16 @@ rec {
     catAndBcrypt = file: bcrypt (cat file);
   };
 
-  db = {
+  db = rec {
     # XXX: Should I put the password in the command, even though it's in a subshell?
-    runSql = cfg: sql: let
-      authentication = if (cfg.database.authenticationMethod == "password")
-      then ''-p"${passwd.cat cfg.database.passwordFile}"''
-      else "";
-    in
-    ''${config.services.mysql.package}/bin/mysql "${cfg.database.name}" -u "${cfg.database.user}" ${authentication} -e "${sql}"'';
+    runSql = cfg: sql: ''${config.services.mysql.package}/bin/mysql "${cfg.name}" ${authentication cfg} -e "${sql}"'';
 
     # The name does't really capture what it does, since it's for running code for database manipulation
     # (create database, etc), that's why it's run by root and no database is specified
     runSqlAsRoot = ddl: ''${config.services.mysql.package}/bin/mysql -u root -e "${ddl}"'';
+
+    authentication = dbCfg: ''-u ${dbCfg.user} ${optionalString (dbCfg.authenticationMethod == "password") "-p\"${passwd.cat dbCfg.passwordFile}\""}'';
+
   };
 
   # TODO: Make it mkListen since listen isn't even a block...

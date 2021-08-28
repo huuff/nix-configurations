@@ -176,11 +176,6 @@ in
                 rm -rf ${paths}
                 rsync -a . /
               fi
-
-              # for path_to_backup in ${concatStringsSep " " (map (path: ''"${toString path}"'') cfg.directories.paths)}
-              # do
-              #   cd "$path_to_backup" && rm -rf * && borg extract ${borgLib.buildPath repo}::$latest_archive $(basename "$path_to_backup")
-              # done
             '';
             user = "root";
           })
@@ -235,14 +230,10 @@ in
 
             path = with pkgs; [ config.services.mysql.package borgbackup openssh ];
 
-            script = let
-              # TODO: This in mylib
-              authentication = if (dbCfg.authenticationMethod == "password") then "-p ${myLib.passwd.cat dbCfg.passwordFile}" else "";
-              repo = cfg.database.repository;
-            in
+            script = let repo = cfg.database.repository; in
             ''
               ${borgLib.setEnv repo}
-              mysqldump --order-by-primary -u${dbCfg.user} ${authentication} --databases ${dbCfg.name} --add-drop-database | borg create ${borgLib.buildPath repo}::{now} -
+              mysqldump --order-by-primary ${myLib.db.authentication dbCfg} --databases ${dbCfg.name} --add-drop-database | borg create ${borgLib.buildPath repo}::{now} -
             '';
 
             serviceConfig = {
