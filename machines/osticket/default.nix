@@ -102,9 +102,8 @@ in {
 
     config = mkIf cfg.enable {
       warnings = 
-        if (cfg.admin.username == "root" || cfg.admin.email == "admin@example.org" || cfg.admin.firstName == "Admin" || cfg.admin.lastName == "Admin" || site.email == "osticket.example.org")
-        then [ ''You haven't set some parameter (username, email, firstName, lastName) of the admin or the email of the site.
-            These have defaults to ease testing, but it's recommended to set them, since the osTicket installation requeres them.'' ]
+        if (cfg.admin.email == "admin@example.org" || cfg.site.email == "osticket.example.org")
+        then [ ''osTicket: You haven't set either the admin's or the site's email. These have defaults to ease testing but it's recommended to set them, otherwise you might be unable to use some features.'' ]
         else [];
 
       assertions = [
