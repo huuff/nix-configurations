@@ -79,7 +79,7 @@ pkgs.nixosTest {
 
       environment.systemPackages = with pkgs; [ borgbackup ];
       
-      # TODO: Make this a machine. Is it useful for something?
+      # TODO: Use borg from nixpkgs
       #systemd.services.borg-serve = {
         #description = "Serve borg";
 

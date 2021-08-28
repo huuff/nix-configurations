@@ -47,15 +47,16 @@ in {
         description = "The package that provides osTicket";
       };
 
-      # TODO: Defaults for these as they are tiring to set
       admin = {
         username = mkOption {
           type = str;
+          default = "root";
           description = "Username of the admin account";
         };
 
         email = mkOption {
           type = str;
+          default = "admin@example.org";
           description = "Email of the admin account";
         };
 
@@ -66,11 +67,13 @@ in {
 
         firstName = mkOption {
           type = str;
+          default = "Admin";
           description = "First name of the admin";
         };
 
         lastName = mkOption {
           type = str;
+          default = "Admin";
           description = "Last name of the admin";
         };
       };
@@ -84,6 +87,7 @@ in {
 
         email = mkOption {
           type = str;
+          default = "osticket@example.org";
           description = "E-mail of the site";
         };
       };
@@ -96,6 +100,12 @@ in {
     };
 
     config = mkIf cfg.enable {
+      warnings = 
+        if (cfg.admin.username == "root" || cfg.admin.email == "admin@example.org" || cfg.admin.firstName == "Admin" || cfg.admin.lastName == "Admin" || site.email == "osticket.example.org")
+        then [ ''You haven't set some parameter (username, email, firstName, lastName) of the admin or the email of the site.
+            These have defaults to ease testing, but it's recommended to set them, since the osTicket installation requeres them.'' ]
+        else [];
+
       assertions = [
         {
           assertion = cfg.database.authenticationMethod == "password";

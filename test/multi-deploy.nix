@@ -39,15 +39,7 @@ in
           passwordFile = pkgs.writeText "dbpass" "dbpass";
         };
 
-        site = {
-          email = "test@example.org";
-        };
-
         admin = {
-          username = "root";
-          firstName = "Name";
-          lastName = "LastName";
-          email = "test@test.com";
           passwordFile = pkgs.writeText "pass" "pass";
         };
 
