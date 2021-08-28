@@ -40,7 +40,6 @@
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Backup options, there's nothing yet but it's pretty important
-* `composer install` fails with some weird error about parsing XML. Try to fix it or just ignore the error with `|| true`. UPDATE: Currently ignoring it but not satisfied.
 * Add email options
 
 ## mkInitModule

@@ -186,7 +186,9 @@ in
         {
           name = "install-dependencies";
           description = "Run composer install";
-          # TODO: Fix this shitty XML error from composer
+          # XXX: Composer sometimes fails spuriously with some XML error that I couldn't care to fix
+          # So I add `|| true` but now any legitimate error gets swallowed. Take care of removing the
+          # init file if you want to resume the initialization from this unit.
           script = "COMPOSER_MEMORY_LIMIT=-1 composer install || true";
           path = [ composerWithTidy phpWithTidy ];
           extraDeps = [ "network-online.target" ];
