@@ -34,6 +34,7 @@ in {
   imports = [
     (import ../../lib/mk-database-module.nix "osticket")
     (import ../../modules/ssl "osticket")
+    (import ../../modules/backup "osticket")
     (import ../../lib/mk-installation-module.nix "osticket")
     (import ../../lib/mk-init-module.nix "osticket")
     ];
