@@ -69,6 +69,7 @@ in
         "d ${sslPath}/private 755 root root - - "
       ];
 
+      # TODO: Maybe this should be part of the initialization and remove the existing cert if reinitialized?
       systemd.services."setup-${name}-cert" = mkIf cfg.enable {
         description = "Create a certificate for ${name}";
 
