@@ -229,7 +229,7 @@ in
         virtualHosts.wallabag = {
           root = "${cfg.installation.path}/web";
 
-          listen = myLib.mkListenBlock cfg;
+          listen = myLib.mkListen cfg;
 
           # TODO: are priorities needed?
           locations = {

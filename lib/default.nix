@@ -20,12 +20,12 @@ rec {
     # (create database, etc), that's why it's run by root and no database is specified
     runSqlAsRoot = ddl: ''${config.services.mysql.package}/bin/mysql -u root -e "${ddl}"'';
 
-    authentication = dbCfg: ''-u ${dbCfg.user} ${optionalString (dbCfg.authenticationMethod == "password") "-p\"${passwd.cat dbCfg.passwordFile}\""}'';
+    # Using `toString` so if it's a file path, it doesn't get into the nix store
+    authentication = dbCfg: ''-u ${dbCfg.user} ${optionalString (dbCfg.authenticationMethod == "password") "-p\"${passwd.cat (toString dbCfg.passwordFile)}\""}'';
 
   };
 
-  # TODO: Make it mkListen since listen isn't even a block...
-  mkListenBlock = cfg:
+  mkListen = cfg:
   [
     (mkIf ((cfg ? ssl) -> !cfg.ssl.httpsOnly) {
       addr = "0.0.0.0";

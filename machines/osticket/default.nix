@@ -114,7 +114,7 @@ in {
       virtualHosts.osticket = {
         root = cfg.installation.path;
 
-        listen = myLib.mkListenBlock cfg;
+        listen = myLib.mkListen cfg;
 
         extraConfig = ''
           set $path_info "";

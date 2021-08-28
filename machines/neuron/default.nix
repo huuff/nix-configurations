@@ -101,7 +101,7 @@ in
           virtualHosts.neuron = {
             root = "${cfg.installation.path}/.neuron/output";
 
-            listen = myLib.mkListenBlock cfg;
+            listen = myLib.mkListen cfg;
 
             locations."/".extraConfig = ''
               index index.html index.htm;
