@@ -169,7 +169,6 @@ in
               repo = cfg.directories.repository;
               paths = concatStringsSep " " (map (path: ''"${toString path}"'') cfg.directories.paths);
             in ''
-              set -x
               ${borgLib.setEnv repo}
               if ${borgLib.repoNotEmpty repo}; then
                 latest_archive=${borgLib.latestArchive repo}

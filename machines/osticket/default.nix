@@ -186,7 +186,6 @@ in {
             '';
             userToDML = map (user: (myLib.db.runSql cfg.database (insertUser user))) cfg.users;
           in ''
-            set -x
             ${myLib.db.runSql cfg.database updateAdminPass}
             ${concatStringsSep "\n" userToDML}
           '';
