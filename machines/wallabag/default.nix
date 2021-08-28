@@ -90,6 +90,9 @@ in
         }
       ];
 
+      # TODO: compact these
+      machines.wallabag.installation.ports = myLib.mkHttpPorts cfg;
+
       machines.wallabag.parameters = {
         database_driver = "pdo_mysql";
         database_port = "~";

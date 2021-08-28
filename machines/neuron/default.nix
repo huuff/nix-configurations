@@ -24,6 +24,7 @@ in
     options.machines.neuron = with types; {
       enable = mkEnableOption "neuron";
 
+      # TODO: use `mkInstallation` ports for this
       refreshPort = mkOption {
         type = int;
         default = 55000;
@@ -63,6 +64,7 @@ in
     config = mkIf cfg.enable {
       systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
+      # TODO: Compact these
       machines.neuron.initialization.units = [
         { 
           name = "initialize-zettelkasten";
@@ -78,6 +80,8 @@ in
           extraDeps = [ "network-online.target" ];
         }
       ];
+
+      machines.neuron.installation.ports = myLib.mkHttpPorts cfg;
 
       systemd.services.neuron = {
         description = "Watch and generate Neuron zettelkasten";
