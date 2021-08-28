@@ -25,7 +25,7 @@ rec {
 
   };
 
-  mkHttpPorts = machineCfg: {
+  mkDefaultHttpPorts = machineCfg: {
     http = mkIf ((machineCfg ? ssl) -> !machineCfg.ssl.httpsOnly) (mkDefault 80);
     https = mkIf ((machineCfg ? ssl) && (machineCfg.ssl.enable)) (mkDefault 443);
   };

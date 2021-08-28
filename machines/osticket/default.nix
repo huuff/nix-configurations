@@ -116,7 +116,7 @@ in {
     # is this useful for anything?
     systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.installation.path ];
 
-    machines.osticket.installation.ports = myLib.mkHttpPorts cfg;
+    machines.osticket.installation.ports = myLib.mkDefaultHttpPorts cfg;
 
     services.nginx = {
       enable = true;

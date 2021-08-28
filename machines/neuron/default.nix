@@ -81,7 +81,7 @@ in
         }
       ];
 
-      machines.neuron.installation.ports = myLib.mkHttpPorts cfg;
+      machines.neuron.installation.ports = myLib.mkDefaultHttpPorts cfg;
 
       systemd.services.neuron = {
         description = "Watch and generate Neuron zettelkasten";
