@@ -200,10 +200,9 @@ in
       ];
 
       systemd = {
-        # TODO: check if perms are right
         tmpfiles.rules = [
-          (mkIf (cfg.database.enable && cfg.database.repository.localPath != null) "d ${cfg.database.repository.localPath} 755 ${cfg.user} ${cfg.user} - -")
-          (mkIf (cfg.directories.enable && cfg.directories.repository.localPath != null) "d ${cfg.directories.repository.localPath} 755 ${cfg.user} ${cfg.user} - -")
+          (mkIf (cfg.database.enable && cfg.database.repository.localPath != null) "d ${cfg.database.repository.localPath} 700 ${cfg.user} ${cfg.user} - -")
+          (mkIf (cfg.directories.enable && cfg.directories.repository.localPath != null) "d ${cfg.directories.repository.localPath} 700 ${cfg.user} ${cfg.user} - -")
         ];
 
         timers = {
@@ -212,6 +211,7 @@ in
 
             partOf = [ "backup-${name}-database.service" ];
 
+            # TODO: programmable backup frequency
             timerConfig.OnCalendar = "daily";
           };
 
