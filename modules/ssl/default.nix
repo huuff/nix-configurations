@@ -1,3 +1,4 @@
+# XXX: Requires init module
 name:
 { config, lib, pkgs, ... }:
 with lib;
@@ -43,7 +44,7 @@ in
           description = "Group that will own the certificate";
         };
 
-        # Maybe should be sslOnly? This is going to be used for other ports other than http
+        # TODO: Maybe should be sslOnly? This is going to be used for other ports other than http
         httpsOnly = mkOption {
           type = bool;
           default = false;
@@ -75,39 +76,33 @@ in
         "d ${sslPath}/private 755 root root - - "
       ];
 
-      # TODO: Maybe this should be part of the initialization and remove the existing cert if reinitialized?
-      systemd.services."setup-${name}-cert" = mkIf cfg.enable {
-        description = "Create a certificate for ${name}";
-
-        # For provided cert, maybe softlink instead of copying? but I don't want to need
-        # to have the cert around as provided by some deploy tool
-        script = (if cfg.autoGenerate
-        then ''
-          ${pkgs.libressl}/bin/openssl req -x509 -newkey rsa:4096 -keyout ${keyPath} -out ${certPath} -days 365 -nodes -subj '/CN=localhost'
-        ''
-        else ''
-          cp ${cfg.certificate} ${certPath}
-          cp ${cfg.key} ${keyPath}
-        '') + ''
-          chown ${cfg.user}:${cfg.group} ${certPath}
-          chown ${cfg.user}:${cfg.group} ${keyPath}
-          chmod 644 ${certPath}
-          chmod 640 ${keyPath}
+      machines.${name}.initialization.units = mkBefore [ (mkIf cfg.enable {
+          name = "setup-${name}-cert";
+          description = "Setup certificate for ${name}";
+          path = [ pkgs.libressl ];
+          user = "root";
+          # For provided cert, maybe softlink instead of copying? but I don't want to need
+          # to have the cert around as provided by some deploy tool
+          script = ''
+            rm -f ${certPath} ${keyPath} 
+          '' + (if cfg.autoGenerate
+          then ''
+            openssl req -x509 -newkey rsa:4096 -keyout ${keyPath} -out ${certPath} -days 365 -nodes -subj '/CN=localhost'
           ''
-        ;
+          else ''
+            cp ${cfg.certificate} ${certPath}
+            cp ${cfg.key} ${keyPath}
+          '') + ''
+            chown ${cfg.user}:${cfg.group} ${certPath}
+            chown ${cfg.user}:${cfg.group} ${keyPath}
+            chmod 644 ${certPath}
+            chmod 640 ${keyPath}
+            '';
+        })];
 
-        wantedBy = [ "multi-user.target" ] ++ optional config.services.nginx.enable "nginx.service";
-        
-        unitConfig = {
-          Before = [ "multi-user.target"] ++ optional config.services.nginx.enable "nginx.service" ;
-          ConditionPathExists = "!${certPath}";
-        };
-
-        serviceConfig = {
-          User = "root";
-          Type = "oneshot";
-          RemainAfterExit = true;
-        };
+      systemd.services."setup-${name}-cert" = mkIf config.services.nginx.enable {
+        wantedBy = [ "nginx.service" ];
+        before = [ "nginx.service" ];
       };
     };
   }

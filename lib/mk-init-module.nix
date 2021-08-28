@@ -43,6 +43,7 @@ let
         description = "Script that will be run";
       };
 
+      # TODO: Same as below
       workingDirectory = mkOption {
         type = nullOr (oneOf [ str path ]);
         default = cfg.workingDirectory;
@@ -142,6 +143,7 @@ in
           description = "Default user for the initialization units";
         };
 
+        # TODO: Remove this, I don't think any unit uses it and can be set in exceptional cases in systemd.services.<name>.unitConfig.workingDirectory
         workingDirectory = mkOption {
           type = nullOr str;
           default = config.machines.${machineName}.installation.path or null;

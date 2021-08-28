@@ -1,4 +1,5 @@
-# TODO: DRY this. e.g. some function that sets all environment variables
+# XXX: Requires init module
+# TODO: DRY this
 # TODO: Maybe passphrase from file descriptor? This might allow less eavesdropping
 name:
 { config, pkgs, lib, ... }:
