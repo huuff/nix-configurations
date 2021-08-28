@@ -83,7 +83,6 @@ in
         directories = {
           enable = mkEnableOption "directory backup";
 
-          # TODO: Ensure paths are absolute
           paths = mkOption {
             type = listOf (oneOf [ str path ]);
             default = [];
@@ -196,7 +195,8 @@ in
               ${borgLib.setEnv repo}
               if ${borgLib.repoNotEmpty repo}; then
                 latest_archive=$(borg list --last 1 --format '{archive}' ${borgLib.buildPath repo})
-                ${myLib.db.runSqlAsRoot "$(borg extract --stdout ${borgLib.buildPath repo}::$latest_archive)"}
+
+                borg extract --stdout ${borgLib.buildPath repo}::$latest_archive | ${config.services.mysql.package}/bin/mysql
               fi
             '';
             user = "root";
