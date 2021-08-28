@@ -4,7 +4,7 @@ with lib;
 
 rec {
   # Creates a path string from a repo suitable for borg consumption
-  buildPath = repo: if (repo.localPath != null) then repo.localPath else "ssh://${repo.remote.user}@${repo.remote.hostname}/${repo.remote.path}";
+  buildPath = repo: if (repo.localPath != null) then repo.localPath else "${repo.remote.user}@${repo.remote.hostname}:${repo.remote.path}";
 
   latestArchive = repo: "$(borg list --last 1 --format '{archive}' ${buildPath repo})";
 
