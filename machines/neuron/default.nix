@@ -64,24 +64,26 @@ in
     config = mkIf cfg.enable {
       systemd.services.nginx.serviceConfig.ProtectHome = "read-only";
 
-      # TODO: Compact these
-      machines.neuron.initialization.units = [
-        { 
-          name = "initialize-zettelkasten";
-          description = "Create Zettelkasten directory and clone repository";
-          script = ''
-            echo ">>> Removing previous ${cfg.installation.path}"
-            rm -rf ${cfg.installation.path}/{,.[!.],..?}* # weird but it will delete hidden files too without returning an error for . and ..
-            echo ">>> Cloning ${cfg.repository} to ${cfg.installation.path}"
-            ${gitCommand} clone "${cfg.repository}" ${cfg.installation.path} 
-            echo ">>> Making ${cfg.installation.user} own ${cfg.installation.path}"
-            chown -R ${cfg.installation.user}:${cfg.installation.user} ${cfg.installation.path}
-          '';
-          extraDeps = [ "network-online.target" ];
-        }
-      ];
+      machines.neuron = {
+        initialization.units = [
+          { 
+            name = "initialize-zettelkasten";
+            description = "Create Zettelkasten directory and clone repository";
+            script = ''
+              echo ">>> Removing previous ${cfg.installation.path}"
+              rm -rf ${cfg.installation.path}/{,.[!.],..?}* # weird but it will delete hidden files too without returning an error for . and ..
+              echo ">>> Cloning ${cfg.repository} to ${cfg.installation.path}"
+              ${gitCommand} clone "${cfg.repository}" ${cfg.installation.path} 
+              echo ">>> Making ${cfg.installation.user} own ${cfg.installation.path}"
+              chown -R ${cfg.installation.user}:${cfg.installation.user} ${cfg.installation.path}
+            '';
+            extraDeps = [ "network-online.target" ];
+          }
+        ];
 
-      machines.neuron.installation.ports = myLib.mkDefaultHttpPorts cfg;
+        installation.ports = myLib.mkDefaultHttpPorts cfg;
+
+      };
 
       systemd.services.neuron = {
         description = "Watch and generate Neuron zettelkasten";

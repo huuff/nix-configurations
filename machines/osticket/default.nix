@@ -113,10 +113,86 @@ in {
         }
       ];
 
-    # is this useful for anything?
+    # TODO: is this useful for anything?
     systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.installation.path ];
 
-    machines.osticket.installation.ports = myLib.mkDefaultHttpPorts cfg;
+    machines.osticket = {
+      installation.ports = myLib.mkDefaultHttpPorts cfg;
+
+      initialization.units = [
+        {
+          name = "deploy-osticket";
+          description = "Copy osTicket files and set permissions";
+          script = ''
+            echo ">>> Copying files to ${cfg.installation.path}"
+            cp -r ${cfg.package}/* ${cfg.installation.path}
+
+            echo ">>> Setting permissions for serving"
+            find ${cfg.installation.path} -type d -print0 | xargs -0 chmod 0755
+            find ${cfg.installation.path} -type f -print0 | xargs -0 chmod 0644
+          '';
+        }
+        {
+          name = "install-osticket";
+          description = "Run osTicket installation script and cleanup";
+          script = let
+            protocol = if cfg.ssl.httpsOnly then "https" else "http";
+            port = toString (if cfg.ssl.httpsOnly then cfg.installation.ports.https else cfg.installation.ports.http);
+          in
+          ''
+          echo ">>> Setting config file"
+          mv ${cfg.installation.path}/include/ost-sampleconfig.php ${cfg.installation.path}/include/ost-config.php
+          chmod 0666 ${cfg.installation.path}/include/ost-config.php
+
+            echo ">>> Calling install script"
+            ${pkgs.curl}/bin/curl ${optionalString cfg.ssl.httpsOnly "-k"} "${protocol}://localhost:${port}/setup/install.php" \
+            -F "s=install" \
+            -F "name=${cfg.site.name}" \
+            -F "email=${cfg.site.email}" \
+            -F "fname=${cfg.admin.firstName}" \
+            -F "lname=${cfg.admin.lastName}" \
+            -F "admin_email=${cfg.admin.email}" \
+            -F "username=${cfg.admin.username}" \
+            -F "passwd=passwd" \
+            -F "passwd2=passwd" \
+            -F "prefix=${cfg.database.prefix}" \
+            -F "dbhost=${cfg.database.host}" \
+            -F "dbname=${cfg.database.name}" \
+            -F "dbuser=${cfg.database.user}" \
+            -F "dbpass=${myLib.passwd.cat cfg.database.passwordFile}"
+            echo ">>> Performing post-install cleanup"
+            chmod 0644 ${cfg.installation.path}/include/ost-config.php
+            rm -r ${cfg.installation.path}/setup
+          '';
+          extraDeps = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
+        }
+        {
+          name = "setup-osticket-users";
+          description = "Create initial osTicket users";
+
+          script = let
+            updateAdminPass = ''
+              UPDATE ${cfg.database.prefix}staff SET passwd='${myLib.passwd.catAndBcrypt cfg.admin.passwordFile}' WHERE staff_id=1;
+            '';
+            insertUser = user: ''
+              START TRANSACTION;
+              INSERT INTO ${cfg.database.prefix}user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.fullName}', NOW(), NOW());
+              SELECT LAST_INSERT_ID() INTO @user_id;
+              INSERT INTO ${cfg.database.prefix}user_email (user_id, address) VALUES (@user_id, '${user.email}');
+              SELECT LAST_INSERT_ID() INTO @email_id;
+              UPDATE ${cfg.database.prefix}user SET default_email_id=@email_id WHERE id=@user_id;
+              INSERT INTO ${cfg.database.prefix}user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.passwd.catAndBcrypt user.passwordFile}');
+              COMMIT;
+            '';
+            userToDML = map (user: (myLib.db.runSql cfg.database (insertUser user))) cfg.users;
+          in ''
+            set -x
+            ${myLib.db.runSql cfg.database updateAdminPass}
+            ${concatStringsSep "\n" userToDML}
+          '';
+        }
+      ];
+    };
 
     services.nginx = {
       enable = true;
@@ -202,80 +278,5 @@ in {
         phpEnv."PATH" = lib.makeBinPath [ pkgs.php74 ];
       };
     };
-
-    machines.osticket.initialization.units = [
-      {
-        name = "deploy-osticket";
-        description = "Copy osTicket files and set permissions";
-        script = ''
-        echo ">>> Copying files to ${cfg.installation.path}"
-        cp -r ${cfg.package}/* ${cfg.installation.path}
-
-            echo ">>> Setting permissions for serving"
-            find ${cfg.installation.path} -type d -print0 | xargs -0 chmod 0755
-            find ${cfg.installation.path} -type f -print0 | xargs -0 chmod 0644
-        '';
-      }
-      {
-        name = "install-osticket";
-        description = "Run osTicket installation script and cleanup";
-        script = let
-          protocol = if cfg.ssl.httpsOnly then "https" else "http";
-          port = toString (if cfg.ssl.httpsOnly then cfg.installation.ports.https else cfg.installation.ports.http);
-        in
-        ''
-          echo ">>> Setting config file"
-          mv ${cfg.installation.path}/include/ost-sampleconfig.php ${cfg.installation.path}/include/ost-config.php
-          chmod 0666 ${cfg.installation.path}/include/ost-config.php
-
-          echo ">>> Calling install script"
-          ${pkgs.curl}/bin/curl ${optionalString cfg.ssl.httpsOnly "-k"} "${protocol}://localhost:${port}/setup/install.php" \
-            -F "s=install" \
-            -F "name=${cfg.site.name}" \
-            -F "email=${cfg.site.email}" \
-            -F "fname=${cfg.admin.firstName}" \
-            -F "lname=${cfg.admin.lastName}" \
-            -F "admin_email=${cfg.admin.email}" \
-            -F "username=${cfg.admin.username}" \
-            -F "passwd=passwd" \
-            -F "passwd2=passwd" \
-            -F "prefix=${cfg.database.prefix}" \
-            -F "dbhost=${cfg.database.host}" \
-            -F "dbname=${cfg.database.name}" \
-            -F "dbuser=${cfg.database.user}" \
-            -F "dbpass=${myLib.passwd.cat cfg.database.passwordFile}"
-          echo ">>> Performing post-install cleanup"
-          chmod 0644 ${cfg.installation.path}/include/ost-config.php
-          rm -r ${cfg.installation.path}/setup
-        '';
-        extraDeps = [ "nginx.service" "phpfpm-osTicket.service" "mysql.service" "setup-osticket-db.service" "deploy-osticket.service" ];
-      }
-      {
-        name = "setup-osticket-users";
-        description = "Create initial osTicket users";
-
-        script = let
-          updateAdminPass = ''
-            UPDATE ${cfg.database.prefix}staff SET passwd='${myLib.passwd.catAndBcrypt cfg.admin.passwordFile}' WHERE staff_id=1;
-          '';
-          insertUser = user: ''
-            START TRANSACTION;
-            INSERT INTO ${cfg.database.prefix}user (org_id, default_email_id, name, created, updated) VALUES (0, 0, '${user.fullName}', NOW(), NOW());
-            SELECT LAST_INSERT_ID() INTO @user_id;
-            INSERT INTO ${cfg.database.prefix}user_email (user_id, address) VALUES (@user_id, '${user.email}');
-            SELECT LAST_INSERT_ID() INTO @email_id;
-            UPDATE ${cfg.database.prefix}user SET default_email_id=@email_id WHERE id=@user_id;
-            INSERT INTO ${cfg.database.prefix}user_account (user_id, ${optionalString (user.username != null) "username,"} status, passwd) VALUES (@user_id, ${optionalString (user.username != null) "'${user.username}',"} 1, '${myLib.passwd.catAndBcrypt user.passwordFile}');
-            COMMIT;
-          '';
-          userToDML = map (user: (myLib.db.runSql cfg.database (insertUser user))) cfg.users;
-        in ''
-          set -x
-          ${myLib.db.runSql cfg.database updateAdminPass}
-          ${concatStringsSep "\n" userToDML}
-        '';
-      }
-    ];
-
   };
 }

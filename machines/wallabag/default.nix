@@ -90,141 +90,142 @@ in
         }
       ];
 
-      # TODO: compact these
-      machines.wallabag.installation.ports = myLib.mkDefaultHttpPorts cfg;
+      machines.wallabag = {
+        installation.ports = myLib.mkDefaultHttpPorts cfg;
 
-      machines.wallabag.parameters = {
-        database_driver = "pdo_mysql";
-        database_port = "~";
-        database_name = cfg.database.name;
-        database_user = cfg.database.user;
-        database_path = null;
-        database_table_prefix = cfg.database.prefix;
-        database_charset = "utf8mb4";
+        parameters = {
+          database_driver = "pdo_mysql";
+          database_port = "~";
+          database_name = cfg.database.name;
+          database_user = cfg.database.user;
+          database_path = null;
+          database_table_prefix = cfg.database.prefix;
+          database_charset = "utf8mb4";
 
-        domain_name = (if cfg.ssl.enable then "https://" else "http://") + "localhost:${toString cfg.installation.ports.http}";
-        server_name = "Your wallabag instance";
+          domain_name = (if cfg.ssl.enable then "https://" else "http://") + "localhost:${toString cfg.installation.ports.http}";
+          server_name = "Your wallabag instance";
 
-        mailer_transport = "smtp";
-        mailer_user = "~";
-        mailer_password = "~";
-        mailer_host = "127.0.0.1";
-        mailer_port = "false";
-        mailer_encryption = "~";
-        mailer_auth_mode = "~";
+          mailer_transport = "smtp";
+          mailer_user = "~";
+          mailer_password = "~";
+          mailer_host = "127.0.0.1";
+          mailer_port = "false";
+          mailer_encryption = "~";
+          mailer_auth_mode = "~";
 
-        locale = "en";
+          locale = "en";
 
-        secret = "$(${pkgs.libressl}/bin/openssl rand -hex 12)";
+          secret = "$(${pkgs.libressl}/bin/openssl rand -hex 12)";
 
-        twofactor_auth = true;
-        twofactor_sender = "noreply@wallabag.org";
+          twofactor_auth = true;
+          twofactor_sender = "noreply@wallabag.org";
 
-        fosuser_registration = true;
-        fosuser_confirmation = true;
-        fos_oauth_server_access_token_lifetime = 3600;
-        fos_oauth_server_refresh_token_lifetime = 1209600;
+          fosuser_registration = true;
+          fosuser_confirmation = true;
+          fos_oauth_server_access_token_lifetime = 3600;
+          fos_oauth_server_refresh_token_lifetime = 1209600;
 
-        from_email = "no-reply@wallabag.org";
+          from_email = "no-reply@wallabag.org";
 
-        rss_limit = 50;
+          rss_limit = 50;
 
-        sentry_dsn = "~";
-      } // optionalAttrs (cfg.importTool == "redis") {
-        redis_scheme = "tcp";
-        redis_host = "localhost";
-        redis_port = config.services.redis.port;
-        redis_path = null;
-        redis_password = if (config.services.redis.requirePassFile != null) then myLib.passwd.cat else null;
-      } // optionalAttrs (cfg.importTool == "rabbitmq") {
-        rabbitmq_host = "localhost";
-        rabbitmq_port = config.services.rabbitmq.port;
-        rabbitmq_user = "guest";
-        rabbitmq_password = "guest";
-        rabbitmq_prefetch_count = 10;
-      } // (
-        if (cfg.database.authenticationMethod == "password") then { 
-          database_password = myLib.passwd.cat cfg.database.passwordFile;
-          database_host = "127.0.0.1";
-        }
-        else if (cfg.database.authenticationMethod == "socket") then {
-          database_socket = "/run/mysqld/mysqld.sock";
-          database_host = null;
-        }
-        else throw "Unknown database authentication method"
-        );
+          sentry_dsn = "~";
+        } // optionalAttrs (cfg.importTool == "redis") {
+          redis_scheme = "tcp";
+          redis_host = "localhost";
+          redis_port = config.services.redis.port;
+          redis_path = null;
+          redis_password = if (config.services.redis.requirePassFile != null) then myLib.passwd.cat else null;
+        } // optionalAttrs (cfg.importTool == "rabbitmq") {
+          rabbitmq_host = "localhost";
+          rabbitmq_port = config.services.rabbitmq.port;
+          rabbitmq_user = "guest";
+          rabbitmq_password = "guest";
+          rabbitmq_prefetch_count = 10;
+        } // (
+          if (cfg.database.authenticationMethod == "password") then { 
+            database_password = myLib.passwd.cat cfg.database.passwordFile;
+            database_host = "127.0.0.1";
+          }
+          else if (cfg.database.authenticationMethod == "socket") then {
+            database_socket = "/run/mysqld/mysqld.sock";
+            database_host = null;
+          }
+          else throw "Unknown database authentication method"
+          );
 
-      machines.wallabag.initialization.units = [
-        {
-          name = "copy-wallabag";
-          description = "Copy wallabag to final directory and setting permissions for installation";
-          script = ''
-            echo '>>> Copying all wallabag files from the store to ${cfg.installation.path}'
-            cp -r ${cfg.package}/* ${cfg.installation.path}
-            echo '>>> Setting write permissions to ${cfg.installation.path}'
-            chmod -R u+w ${cfg.installation.path}
-          '';
-        }
-
-        {
-          name = "create-parameters";
-          description = "Create parameters.yml for installation";
-          script =  ''
-            rm -f ${cfg.installation.path}/app/config/parameters.yml
-            echo "${builtins.toJSON { parameters = cfg.parameters; }}" >> ${cfg.installation.path}/app/config/parameters.yml
-          '';
-        }
-
-        {
-          name = "install-wallabag";
-          description = "Install wallabag";
-          script = ''
-            make clean
-            make install
-          '';
-          path = with pkgs; [ gnumake bash composerWithTidy phpWithTidy ];
-          extraDeps = [ "setup-wallabag-db.service" ];
-        }
-
-        {
-          name = "install-dependencies";
-          description = "Run composer install";
-          # XXX: Composer sometimes fails spuriously with some XML error that I couldn't care to fix
-          # So I add `|| true` but now any legitimate error gets swallowed. Take care of removing the
-          # init file if you want to resume the initialization from this unit.
-          script = "COMPOSER_MEMORY_LIMIT=-1 composer install || true";
-          path = [ composerWithTidy phpWithTidy ];
-          extraDeps = [ "network-online.target" ];
-        }
-
-        {
-          name = "setup-wallabag-users";
-          description = "Create default users";
-          script = 
-          let
-            insertUser = user: ''
-              php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile} --no-interaction ${optionalString user.superAdmin "--super-admin"}
-              ${optionalString (user.pocketKeyFile != null) (myLib.db.runSql cfg.database ''
-                SELECT id FROM ${cfg.database.prefix}user WHERE username='${user.username}' INTO @user_id;
-                UPDATE ${cfg.database.prefix}config SET pocket_consumer_key='${myLib.passwd.cat user.pocketKeyFile}' WHERE user_id=@user_id;
-              '')}
+          initialization.units = [
+            {
+              name = "copy-wallabag";
+              description = "Copy wallabag to final directory and setting permissions for installation";
+              script = ''
+                echo '>>> Copying all wallabag files from the store to ${cfg.installation.path}'
+                cp -r ${cfg.package}/* ${cfg.installation.path}
+                echo '>>> Setting write permissions to ${cfg.installation.path}'
+                chmod -R u+w ${cfg.installation.path}
               '';
-          in ''
-            echo '>>> Disabling default "wallabag" user'
-            php bin/console fos:user:deactivate wallabag
-            echo '>>> Creating all users'
-            ${concatStringsSep "\n" (map insertUser cfg.users)}
-          '';
-          path = [ phpWithTidy ];
-        }
+            }
 
-        (mkIf (cfg.importTool != "none") {
-          name = "enable-${cfg.importTool}";
-          description = "Enable ${cfg.importTool} for importing in the database";
-          script = myLib.db.runSql cfg.database "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_${cfg.importTool}';";
-        })
+            {
+              name = "create-parameters";
+              description = "Create parameters.yml for installation";
+              script =  ''
+                rm -f ${cfg.installation.path}/app/config/parameters.yml
+                echo "${builtins.toJSON { parameters = cfg.parameters; }}" >> ${cfg.installation.path}/app/config/parameters.yml
+              '';
+            }
 
-      ];
+            {
+              name = "install-wallabag";
+              description = "Install wallabag";
+              script = ''
+                make clean
+                make install
+              '';
+              path = with pkgs; [ gnumake bash composerWithTidy phpWithTidy ];
+              extraDeps = [ "setup-wallabag-db.service" ];
+            }
+
+            {
+              name = "install-dependencies";
+              description = "Run composer install";
+            # XXX: Composer sometimes fails spuriously with some XML error that I couldn't care to fix
+            # So I add `|| true` but now any legitimate error gets swallowed. Take care of removing the
+            # init file if you want to resume the initialization from this unit.
+            script = "COMPOSER_MEMORY_LIMIT=-1 composer install || true";
+            path = [ composerWithTidy phpWithTidy ];
+            extraDeps = [ "network-online.target" ];
+          }
+
+          {
+            name = "setup-wallabag-users";
+            description = "Create default users";
+            script = 
+            let
+              insertUser = user: ''
+                php bin/console fos:user:create ${user.username} ${user.email} ${myLib.passwd.cat user.passwordFile} --no-interaction ${optionalString user.superAdmin "--super-admin"}
+                ${optionalString (user.pocketKeyFile != null) (myLib.db.runSql cfg.database ''
+                  SELECT id FROM ${cfg.database.prefix}user WHERE username='${user.username}' INTO @user_id;
+                  UPDATE ${cfg.database.prefix}config SET pocket_consumer_key='${myLib.passwd.cat user.pocketKeyFile}' WHERE user_id=@user_id;
+                '')}
+                '';
+            in ''
+              echo '>>> Disabling default "wallabag" user'
+              php bin/console fos:user:deactivate wallabag
+              echo '>>> Creating all users'
+              ${concatStringsSep "\n" (map insertUser cfg.users)}
+            '';
+            path = [ phpWithTidy ];
+          }
+
+          (mkIf (cfg.importTool != "none") {
+            name = "enable-${cfg.importTool}";
+            description = "Enable ${cfg.importTool} for importing in the database";
+            script = myLib.db.runSql cfg.database "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_${cfg.importTool}';";
+          })
+
+        ];
+      };
 
       services.nginx = {
         enable = true;
