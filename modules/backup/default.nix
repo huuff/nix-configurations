@@ -116,6 +116,12 @@ in
             This is a destructive operation since all previous files/databaes will be replaced by the contents of the backup.
             '';
         };
+
+        frequency = mkOption {
+          type = enum [ "minutely" "hourly" "daily" "monthly" "weekly" "yearly" "quarterly" "semianually" ];
+          default = "daily";
+          description = "Frequency with which the data will be backed up";
+        };
       };
     };
 
@@ -211,8 +217,7 @@ in
 
             partOf = [ "backup-${name}-database.service" ];
 
-            # TODO: programmable backup frequency
-            timerConfig.OnCalendar = "daily";
+            timerConfig.OnCalendar = cfg.frequency;
           };
 
           "backup-${name}-directories" = mkIf cfg.directories.enable {
@@ -220,7 +225,7 @@ in
 
             partOf = [ "backup-${name}-directories.service" ];
 
-            timerConfig.OnCalendar = "daily";
+            timerConfig.OnCalendar = cfg.frequency;
           };
         };
 
