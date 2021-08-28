@@ -46,12 +46,6 @@ in
         default = neuronPkg;
         description = "Neuron package used to generate zettelkasten";
       };
-
-      passwordFile = mkOption {
-        type = nullOr (oneOf [ path str ]);
-        default = null;
-        description = "Location of the htpasswd file that contains the password for HTTP basic authentication";
-      };
     };
 
     config = mkIf cfg.enable {
@@ -104,14 +98,9 @@ in
 
             listen = myLib.mkListen cfg;
 
-            # TODO: auth_basic in a nix way
             locations."/".extraConfig = ''
               index index.html index.htm;
-
-            '' + optionalString (cfg.passwordFile != null) ''
-              auth_basic "Neuron";
-              auth_basic_user_file ${cfg.passwordFile};
-            '';
+              '';
           };
         };
 
