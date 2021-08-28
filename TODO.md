@@ -42,6 +42,7 @@
 
 ## mkInitModule
 * Make it somewhat more terse. My init scripts still look a bit hideous
+* Maybe units shouldn't `remainOnExit` since this makes re-initialization harder. Those units that were successful wont be reinitialized until restart (not reactivation). Making removing inits useless.
 
 ## mkDatabaseModule
 * Add `postgres`
