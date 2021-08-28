@@ -35,7 +35,6 @@
 * Set up security
 
 # My library
-* Consider putting database authentication here
 * Some function to create a `passwordFile` option.
 
 ## Wallabag
