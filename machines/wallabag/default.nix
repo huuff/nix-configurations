@@ -231,7 +231,6 @@ in
 
           listen = myLib.mkListen cfg;
 
-          # TODO: are priorities needed?
           locations = {
             "/" = {
               priority = 100;
