@@ -30,7 +30,6 @@
 
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
-* Are perms right? UPDATE: Specifically, after I add write perms to `wallabag` user on the installation dir
 * Add email options
 
 ## mkInitModule
