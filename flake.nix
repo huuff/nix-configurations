@@ -16,6 +16,8 @@
       osticket = import ./machines/osticket;
       wallabag = import ./machines/wallabag;
       mail = import ./machines/mail;
+
+      sshd = import ./modules/paranoid-sshd;
     };
 
     checks.${system} = {
