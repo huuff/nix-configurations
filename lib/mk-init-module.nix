@@ -42,17 +42,10 @@ let
         type = str;
         description = "Script that will be run";
       };
-
-      # TODO: Same as below
-      workingDirectory = mkOption {
-        type = nullOr (oneOf [ str path ]);
-        default = cfg.workingDirectory;
-        description = "Path where the unit will be run";
-      };
     };
   };
 
-  mkUnit = moduleName: config: { 
+  mkUnit = moduleName: unitConfig: { 
     name = moduleName;
 
     value = recursiveUpdate {
@@ -60,7 +53,7 @@ let
         Type = "oneshot";
         User = cfg.user;
         RemainAfterExit = true;
-        WorkingDirectory = mkIf (cfg.workingDirectory != null) cfg.workingDirectory;
+        WorkingDirectory = mkIf (config.machines.${machineName} ? installation) config.machines.${machineName}.installation.path;
         ExecStartPost = createLock moduleName;
       };
 
@@ -72,7 +65,7 @@ let
         ConditionPathExists = "!${lockPath}/${moduleName}";
       };
 
-    } config;
+    } unitConfig;
   };
 
   initModuleToUnit = initModule: mkUnit initModule.name {
@@ -82,7 +75,6 @@ let
 
     serviceConfig = {
       User = initModule.user;
-      WorkingDirectory = mkIf (initModule.workingDirectory != null) initModule.workingDirectory;
     };
 
     unitConfig = {
@@ -141,13 +133,6 @@ in
           type = str;
           default = config.machines.${machineName}.installation.user or "root";
           description = "Default user for the initialization units";
-        };
-
-        # TODO: Remove this, I don't think any unit uses it and can be set in exceptional cases in systemd.services.<name>.unitConfig.workingDirectory
-        workingDirectory = mkOption {
-          type = nullOr str;
-          default = config.machines.${machineName}.installation.path or null;
-          description = "Working directory where the units will be executed";
         };
 
         units = mkOption {
