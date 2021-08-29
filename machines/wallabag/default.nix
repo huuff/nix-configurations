@@ -15,10 +15,7 @@ let
         description = "Username of the user";
       };
 
-      passwordFile = mkOption {
-        type = oneOf [ str path ];
-        description = "Path to the file containing the salt in the first line and the encrypted password in the second";
-      };
+      passwordFile = myLib.passwd.mkOption;
 
       email = mkOption {
         type = str;

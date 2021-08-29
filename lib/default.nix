@@ -8,8 +8,22 @@ rec {
 
   passwd = rec {
     cat = file: "$(cat ${toString file})";
+
     bcrypt = string: ''$(${pkgs.apacheHttpd}/bin/htpasswd -nbB "" "${string}" | cut -d: -f2)'';
+
     catAndBcrypt = file: bcrypt (cat file);
+
+    mkOption = with types; lib.mkOption {
+      type = oneOf [ str path ];
+      default = null;
+      description = "Path to the file containing the password";
+    };
+
+    mkNullableOption = with types; lib.mkOption {
+      type = nullOr (oneOf [ str path ]);
+      default = null;
+      description = "Path to the file containing the password";
+    };
   };
 
   db = rec {

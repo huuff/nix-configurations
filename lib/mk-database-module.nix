@@ -33,11 +33,7 @@ in
             description = "What to authenticate the user to the DB with";
           };
 
-          passwordFile = mkOption {
-            type = nullOr (oneOf [ str path ]);
-            default = null;
-            description = "Password of the database user";
-          };
+          passwordFile = myLib.passwd.mkNullableOption;
 
           prefix = mkOption {
             type = str;

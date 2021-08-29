@@ -19,10 +19,7 @@ let
         description = "Full name of the user";
       };
 
-      passwordFile = mkOption {
-        type = oneOf [ str path ];
-        description = "File containing the bcrypt hash of the user's password";
-      };
+      passwordFile = myLib.passwd.mkOption;
 
       email = mkOption {
         type = str;
@@ -61,10 +58,7 @@ in {
           description = "Email of the admin account";
         };
 
-        passwordFile = mkOption {
-          type = oneOf [ str path ];
-          description = "Path to the file with the hashed password of the admin user";
-        };
+        passwordFile = myLib.passwd.mkOption;
 
         firstName = mkOption {
           type = str;

@@ -30,9 +30,6 @@
 * Set up credentials (in `credentials.xml`)
 * Set up security
 
-# My library
-* Some function to create a `passwordFile` option.
-
 ## Wallabag
 * `copy-wallabag` is really slow on some computers, is it a KVM thing?
 * Are perms right? UPDATE: Specifically, after I add write perms to `wallabag` user on the installation dir
