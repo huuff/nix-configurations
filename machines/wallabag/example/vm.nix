@@ -25,7 +25,7 @@ in with myLib; {
   machines.wallabag = {
     enable = true;
     ssl.enable = true;
-    ssl.httpsOnly = true;
+    ssl.sslOnly = true;
     parameters.domain_name = "https://localhost:8988";
 
     importTool = "rabbitmq";

@@ -19,7 +19,7 @@ in
 
         machines.test.ssl = {
           enable = true;
-          httpsOnly = true;
+          sslOnly = true;
           user = "nginx";
         };
 

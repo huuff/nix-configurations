@@ -82,8 +82,8 @@ in
         # Since wallabag forces us to set a domain name and this will include whether it's
         # http or https, if we choose https then http will not work.
         {
-          assertion = cfg.ssl.enable -> cfg.ssl.httpsOnly;
-          message = "For wallabag, if SSL is enabled then ssl.httpsOnly must be true!";
+          assertion = cfg.ssl.enable -> cfg.ssl.sslOnly;
+          message = "For wallabag, if SSL is enabled then ssl.sslOnly must be true!";
         }
         {
           assertion = cfg.parameters.fosuser_confirmation -> cfg.parameters.fosuser_registration;

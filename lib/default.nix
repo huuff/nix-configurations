@@ -30,13 +30,13 @@ END_OF_SQL'';
   };
 
   mkDefaultHttpPorts = machineCfg: {
-    http = mkIf ((machineCfg ? ssl) -> !machineCfg.ssl.httpsOnly) (mkDefault 80);
+    http = mkIf ((machineCfg ? ssl) -> !machineCfg.ssl.sslOnly) (mkDefault 80);
     https = mkIf ((machineCfg ? ssl) && (machineCfg.ssl.enable)) (mkDefault 443);
   };
 
   mkListen = cfg:
   [
-    (mkIf ((cfg ? ssl) -> !cfg.ssl.httpsOnly) {
+    (mkIf ((cfg ? ssl) -> !cfg.ssl.sslOnly) {
       addr = "0.0.0.0";
       port = cfg.installation.ports.http;
       ssl = false;

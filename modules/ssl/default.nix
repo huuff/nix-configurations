@@ -44,8 +44,7 @@ in
           description = "Group that will own the certificate";
         };
 
-        # TODO: Maybe should be sslOnly? This is going to be used for other ports other than http
-        httpsOnly = mkOption {
+        sslOnly = mkOption {
           type = bool;
           default = false;
           description = "Whether to redirect all http traffic to https";
@@ -64,8 +63,8 @@ in
       networking.firewall.allowedTCPPorts = [ 443 ];
 
       services.nginx.virtualHosts.${name} = mkIf (config.services.nginx.enable && cfg.enable) {
-        addSSL = !cfg.httpsOnly;
-        forceSSL = cfg.httpsOnly;
+        addSSL = !cfg.sslOnly;
+        forceSSL = cfg.sslOnly;
         sslCertificate = certPath;
         sslCertificateKey = keyPath;
       };

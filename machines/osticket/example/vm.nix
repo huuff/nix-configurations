@@ -24,7 +24,7 @@ in with myLib; {
     };
 
     ssl.enable = true;
-    ssl.httpsOnly = false;
+    ssl.sslOnly = false;
 
     database = {
       authenticationMethod = "password";

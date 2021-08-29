@@ -135,8 +135,8 @@ in {
           name = "install-osticket";
           description = "Run osTicket installation script and cleanup";
           script = let
-            protocol = if cfg.ssl.httpsOnly then "https" else "http";
-            port = toString (if cfg.ssl.httpsOnly then cfg.installation.ports.https else cfg.installation.ports.http);
+            protocol = if cfg.ssl.sslOnly then "https" else "http";
+            port = toString (if cfg.ssl.sslOnly then cfg.installation.ports.https else cfg.installation.ports.http);
           in
           ''
           echo ">>> Setting config file"
@@ -144,7 +144,7 @@ in {
           chmod 0666 ${cfg.installation.path}/include/ost-config.php
 
             echo ">>> Calling install script"
-            ${pkgs.curl}/bin/curl ${optionalString cfg.ssl.httpsOnly "-k"} "${protocol}://localhost:${port}/setup/install.php" \
+            ${pkgs.curl}/bin/curl ${optionalString cfg.ssl.sslOnly "-k"} "${protocol}://localhost:${port}/setup/install.php" \
             -F "s=install" \
             -F "name=${cfg.site.name}" \
             -F "email=${cfg.site.email}" \

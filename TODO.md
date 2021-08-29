@@ -5,7 +5,7 @@
 * A hardened `openssh` module like that in [this post](https://christine.website/blog/paranoid-nixos-2021-07-18)
 * Make a file with the `test` config and share it between `test.nix` and `vm.nix` to test interactively in the same test environment (Ideally, I'd get `shell_interact()` to work. Or maybe not? I like having my aliases available) UPDATE: I DEFINITELY need to use `shell_interact()`, anything else is just torture. Maybe I'll have to ask the discourse. UPDATE: Idea: Use some `default.nix` for tests I want to interact with, import `nixpkgs` from the channel and pass it to the test file as a parameter. UPDATE: It doesn't work either. Seems like nobody cares much about `shell_interact()`?
 * Maybe it's time to start passing my library from the flake, look at that import for `testing-lib` in the `virtual-test` for postfix.
-* Does `mkEnableOption` protect against using other options? I don't think so but test it. Especially for `mkSSLModule`, I want to know if I can set `httpsOnly` without `enable` (And if I can, prevent it with an assertion)
+* Does `mkEnableOption` protect against using other options? I don't think so but test it. Especially for `mkSSLModule`, I want to know if I can set `sslOnly` without `enable` (And if I can, prevent it with an assertion)
 * A lot of my code (especially `mkInitModule` is about handling state gracefully, but I shouldn't have to do it if my services were more idempotent
 
 # nixosShellBase
