@@ -10,6 +10,12 @@ in with myLib; {
 
   networking.firewall.allowedTCPPorts = [ 3306 ];
 
+  forwardedPorts = {
+    "8989" = "80";
+    "2222" = "22";
+    "8988" = "443";
+  };
+
   machines.osticket = {
     enable = true;
 
@@ -49,9 +55,4 @@ in with myLib; {
       }
     ];
   };
-
-  virtualisation.qemu.networkingOptions = [
-    "-net nic,netdev=user.0,model=virtio"
-    "-netdev user,id=user.0,hostfwd=tcp::8989-:80,hostfwd=tcp::2222-:22,hostfwd=tcp::8988-:443"
-  ];
 }

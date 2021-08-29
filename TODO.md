@@ -7,9 +7,6 @@
 * Maybe it's time to start passing my library from the flake, look at that import for `testing-lib` in the `virtual-test` for postfix.
 * A lot of my code (especially `mkInitModule` is about handling state gracefully, but I shouldn't have to do it if my services were more idempotent
 
-# nixosShellBase
-* Configuration to forward ports.
-
 ## Testing library
 * Some wrapper around `wait_until_tty_matches` with a timeout, setting current tty and printing.
 * `contains` could be `match` and accept a regex
@@ -44,7 +41,7 @@
 ## mkInitModule
 * Make it somewhat more terse. My init scripts still look a bit hideous
 * Maybe units shouldn't `remainOnExit` since this makes re-initialization harder. Those units that were successful wont be reinitialized until restart (not reactivation). Making removing inits useless.
-* Some way for some units to be superseded by backup restoring
+* Some way for some units to be superseded by backup restoring. UPDATE: Or prevent using them with assertions?
 
 ## mkDatabaseModule
 * Part of `mkInit`? Drop database for correct reinitializations?

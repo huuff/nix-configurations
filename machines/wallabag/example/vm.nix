@@ -9,8 +9,15 @@ in with myLib; {
     ../../../lib/nixos-shell-base.nix
   ];
 
-  virtualisation.memorySize = "2048M";
-  virtualisation.diskSize = 5 * 1024;
+  forwardedPorts = {
+    "8989" = "80";
+    "8988" = "443";
+  };
+
+  virtualisation = {
+    memorySize = "2048M";
+    diskSize = 5 * 1024;
+  };
 
   environment.systemPackages = with pkgs; [
     phpWithTidy
@@ -40,9 +47,4 @@ in with myLib; {
       }
     ];
   };
-
-  virtualisation.qemu.networkingOptions = [
-    "-net nic,netdev=user.0,model=virtio"
-    "-netdev user,id=user.0,hostfwd=tcp::8989-:80,hostfwd=tcp::8988-:443"
-  ];
 }
