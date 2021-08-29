@@ -1,3 +1,4 @@
+# Source: https://christine.website/blog/paranoid-nixos-2021-07-18
 { ... }:
 
 {
