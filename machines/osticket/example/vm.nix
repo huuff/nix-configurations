@@ -23,10 +23,7 @@ in with myLib; {
 
     admin = {
       username = "root";
-      passwordFile = fileFromStore ./adminpass;
-      email = "root@example.com";
-      firstName = "Firstname";
-      lastName = "Lastname";
+      passwordFile = pkgs.writeText "adminpass" "adminpass";
     };
 
     ssl.enable = true;
@@ -34,7 +31,7 @@ in with myLib; {
 
     database = {
       authenticationMethod = "password";
-      passwordFile = fileFromStore ./dbpass;
+      passwordFile = pkgs.writeText "dbpass" "dbpass";
     };
 
     site.email = "site@example.com";
@@ -44,14 +41,14 @@ in with myLib; {
         username = "user1";
         fullName = "Mr. User 1";
         email = "user1@example.com";
-        passwordFile = fileFromStore ./user1pass;
+        passwordFile = pkgs.writeText "user1pass" "user1pass";
       }
 
       {
         username = "user2";
         fullName = "Ms. User 2";
         email = "user2@example.com";
-        passwordFile = fileFromStore ./user2pass;
+        passwordFile = pkgs.writeText "user2pass" "user2pass";
       }
     ];
   };

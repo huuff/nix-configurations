@@ -40,9 +40,8 @@ in with myLib; {
     users = [
       {
         username = "user1";
-        passwordFile = fileFromStore ./user1pass;
+        passwordFile = pkgs.writeText "user1pass" "user1pass";
         email = "user1@example.com";
-        pocketKeyFile = fileFromStore ~/pocket-key;
         superAdmin = true;
       }
     ];
