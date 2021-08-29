@@ -58,6 +58,10 @@ in
           assertion = cfg.autoGenerate -> (cfg.certificate == null && cfg.key == null);
           message = "If ssl.autoGenerate is activated, you can't supply certificate nor key!";
         }
+        {
+          assertion = cfg.sslOnly -> cfg.enable;
+          message = "You can't set sslOnly if you don't enable ssl!";
+        }
       ];
 
       networking.firewall.allowedTCPPorts = [ 443 ];
