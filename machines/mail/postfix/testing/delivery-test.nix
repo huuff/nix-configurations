@@ -15,9 +15,8 @@ in
   pkgs.nixosTest {
     name = "postfix-correct-delivery";
 
-    # TODO: Better names, (client and server instead of machine1 and machine2?)
     nodes = rec {
-      machine1 = { pkgs, ... }: {
+      client = { pkgs, ... }: {
         imports = [ ../default.nix ];
 
         environment.systemPackages = with pkgs; [ mailutils ];
@@ -34,7 +33,6 @@ in
 
           users = [ user1Address ];
 
-          #master.smtpd.args = [ "-v" ];
         };
 
         networking.interfaces.eth1.ipv4.addresses = [
@@ -46,13 +44,13 @@ in
           extraConfig = ''
             address=/${domain1}./${clientIP}
             address=/${domain2}./${serverIP}
-            mx-host=${domain1},machine1,10
-            mx-host=${domain2},machine2,10
+            mx-host=${domain1},client,10
+            mx-host=${domain2},server,10
           '';
         };
       };
 
-      machine2 = { pkgs, ... }: { 
+      server = { pkgs, ... }: { 
         imports = [ ../default.nix ];
 
         environment.systemPackages = with pkgs; [ mailutils ];
@@ -74,7 +72,6 @@ in
 
           users = [ user2Address ];
 
-          #master.smtpd.args = [ "-v" ];
         };
 
         services.dnsmasq = {
@@ -82,8 +79,8 @@ in
           extraConfig = ''
             address=/${domain1}./${clientIP}
             address=/${domain2}./${serverIP}
-            mx-host=${domain1},machine1,10
-            mx-host=${domain2},machine2,10
+            mx-host=${domain1},client,10
+            mx-host=${domain2},server,10
           '';
         };
 
@@ -96,16 +93,16 @@ in
         def print_user2_mail():
           return "echo p | mail -f ${mailPath}/${user2Address}/"
 
-        machine1.wait_for_unit("postfix.service")
-        machine2.wait_for_unit("postfix.service")
+        client.wait_for_unit("postfix.service")
+        server.wait_for_unit("postfix.service")
 
 
-        with subtest("machine2 receives email from machine1"):
-          machine1.succeed('echo "${testContent}" | mail -s "${testSubject}" -r ${user1Address} ${user2Address}')
-          machine2.wait_until_succeeds(print_user2_mail())
-          machine2.output_contains(print_user2_mail(), "To: <${user2Address}>")
-          machine2.output_contains(print_user2_mail(), "From: System administrator <${user1Address}>")
-          machine2.output_contains(print_user2_mail(), "Subject: ${testSubject}")
-          machine2.output_contains(print_user2_mail(), "${testContent}")
+        with subtest("server receives email from client"):
+          client.succeed('echo "${testContent}" | mail -s "${testSubject}" -r ${user1Address} ${user2Address}')
+          server.wait_until_succeeds(print_user2_mail())
+          server.output_contains(print_user2_mail(), "To: <${user2Address}>")
+          server.output_contains(print_user2_mail(), "From: System administrator <${user1Address}>")
+          server.output_contains(print_user2_mail(), "Subject: ${testSubject}")
+          server.output_contains(print_user2_mail(), "${testContent}")
       '';
   }
