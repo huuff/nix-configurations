@@ -22,6 +22,15 @@ def contains(actual, expected):
 {actual}
 """)
 
+def matches(text, regex):
+    if (not re.match(regex, text)):
+            raise AssertionError(f"""
+{Colors.FAIL}The string{Colors.ENDC}
+{text}
+{Colors.FAIL}does not match the regex{Colors.ENDC}: {regex}
+""")
+    
+
 def switch_tty(self, tty):
     global current_tty
     self.send_key(f"alt-f{tty}")
@@ -56,6 +65,10 @@ def output_contains(self, command, expected):
     [ _, out ] = self.execute(command)
     contains(out, expected)
 
+def output_matches(self, command, regex):
+    [ _, out] = self.execute(command)
+    matches(out, regex)
+
 def print_output(self, command):
     [ _, out ] = self.execute(command)
     print(out)
@@ -72,6 +85,7 @@ def put_tty(self, chars):
 def clear_tty(self):
     self.send_key("ctrl-l")
 
+# A command run by a user in a tty returns 0
 def succeed_tty(self, command, tty=current_tty):
     self.put_tty(command)
     self.clear_tty()
@@ -92,6 +106,7 @@ Machine.print_tty = print_tty
 Machine.put_tty = put_tty
 Machine.succeed_tty = succeed_tty
 Machine.clear_tty = clear_tty
+Machine.output_matches = output_matches
 del(login)
 del(create_user_and_login)
 del(create_user)
@@ -103,3 +118,4 @@ del(print_tty)
 del(put_tty)
 del(succeed_tty)
 del(clear_tty)
+del(output_matches)

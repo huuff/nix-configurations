@@ -8,7 +8,6 @@
 
 ## Testing library
 * Some wrapper around `wait_until_tty_matches` with a timeout, setting current tty and printing.
-* `contains` could be `match` and accept a regex
 * `current_tty` could be an instance variable in `Machine`. Currently, two different machines on two different ttys could cause interference with this.
 
 ## Neuron
@@ -34,7 +33,7 @@
 
 ## mkInitModule
 * Make it somewhat more terse. My init scripts still look a bit hideous
-* Maybe units shouldn't `remainOnExit` since this makes re-initialization harder. Those units that were successful wont be reinitialized until restart (not reactivation). Making removing inits useless.
+* Maybe units shouldn't `remainOnExit` since this makes re-initialization harder. Those units that were successful wont be reinitialized until restart (not reactivation). Making removing inits useless. UPDATE: This is a bit hard because units use `bindsTo` to ensure the previous one worked
 * Some way for some units to be superseded by backup restoring. UPDATE: Or prevent using them with assertions?
 
 ## mkDatabaseModule
