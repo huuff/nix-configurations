@@ -48,7 +48,7 @@ pkgs.nixosTest {
 
     with subtest("can send and receive email from local"):
       machine.succeed('echo "${testContent}" | mail -u ${user1Address} -s "${testSubject}" ${user2Address}')
-      machine.sleep(1)
+      machine.sleep(2) # TODO: Something better than a sleep
       machine.output_contains('echo p | mail -f ${mailPath}/${user2Address}/', "To: <${user2Address}>")
       machine.output_contains('echo p | mail -f ${mailPath}/${user2Address}/', "Subject: ${testSubject}")
       machine.output_contains('echo p | mail -f ${mailPath}/${user2Address}/', "${testContent}")

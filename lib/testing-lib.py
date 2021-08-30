@@ -1,7 +1,5 @@
 import re
 
-current_tty = 1
-
 class Colors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -30,18 +28,30 @@ def matches(text, regex):
 {Colors.FAIL}does not match the regex{Colors.ENDC}: {regex}
 """)
     
+# Logic to use a provided tty (tty parameter), the current one for the machine
+# (self.tty) or a default (1)
+def current_tty_or_default(self, tty):
+    if tty is None:
+        if hasattr(self, 'tty'):
+            return self.tty
+        else:
+            self.switch_tty(1)
+            return self.tty
+    else:
+        return tty
 
 def switch_tty(self, tty):
-    global current_tty
     self.send_key(f"alt-f{tty}")
     self.wait_until_succeeds(f"[ $(fgconsole) = {tty} ]")
-    current_tty = tty
+    self.tty = tty;
 
 def create_user(self, user):
     self.succeed(f"useradd -m {user}")
     self.succeed(f"(echo 'password'; echo 'password') | passwd {user}")
 
-def login(self, user, tty=current_tty):
+def login(self, user, tty = None):
+    tty = self.current_tty_or_default(tty)
+
     self.wait_until_tty_matches(tty, "login: ")
     self.send_chars(f"{user}\n")
     self.wait_until_tty_matches(tty, f"login: {user}")
@@ -51,7 +61,9 @@ def login(self, user, tty=current_tty):
     self.wait_until_succeeds(f"pgrep -u {user} bash")
 
 # Create a user and login in the same command
-def create_user_and_login(self, tty=current_tty, user="alice"):
+def create_user_and_login(self, tty = None, user="alice"):
+    tty = self.current_tty_or_default(tty)
+
     self.create_user(user)
     self.switch_tty(tty)
     self.login(user, tty)
@@ -73,20 +85,26 @@ def print_output(self, command):
     [ _, out ] = self.execute(command)
     print(out)
 
-def print_tty(self, tty=current_tty):
+def print_tty(self, tty = None):
+    tty = self.current_tty_or_default(tty)
+
     out = self.get_tty_text(tty);
     print(out);
 
-def put_tty(self, chars):
+def put_tty(self, chars, tty = None):
+    tty = self.current_tty_or_default(tty)
+
     self.send_chars(f"{chars}\n")
-    self.wait_until_tty_matches(current_tty, re.escape(chars))
-    self.print_tty(current_tty)
+    self.wait_until_tty_matches(tty, re.escape(chars))
+    self.print_tty(tty)
 
 def clear_tty(self):
     self.send_key("ctrl-l")
 
 # A command run by a user in a tty returns 0
-def succeed_tty(self, command, tty=current_tty):
+def succeed_tty(self, command, tty = None):
+    tty = self.current_tty_or_default(tty)
+
     self.put_tty(command)
     self.clear_tty()
     self.put_tty("echo $?")
@@ -107,6 +125,7 @@ Machine.put_tty = put_tty
 Machine.succeed_tty = succeed_tty
 Machine.clear_tty = clear_tty
 Machine.output_matches = output_matches
+Machine.current_tty_or_default = current_tty_or_default
 del(login)
 del(create_user_and_login)
 del(create_user)
@@ -119,3 +138,4 @@ del(put_tty)
 del(succeed_tty)
 del(clear_tty)
 del(output_matches)
+del(current_tty_or_default)

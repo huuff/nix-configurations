@@ -96,7 +96,6 @@ in
         client.wait_for_unit("postfix.service")
         server.wait_for_unit("postfix.service")
 
-
         with subtest("server receives email from client"):
           client.succeed('echo "${testContent}" | mail -s "${testSubject}" -r ${user1Address} ${user2Address}')
           server.wait_until_succeeds(print_user2_mail())
