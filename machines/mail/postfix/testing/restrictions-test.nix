@@ -3,19 +3,19 @@ let
   server = rec {
     domain = "example.com";
     userAddress = "server@${domain}";
-    ip = "192.168.2.1";
+    ip = "57.28.65.4";
   };
   client = rec {
     domain = "test.org";
     userAddress = "client@${domain}";
-    ip = "192.168.2.2";
+    ip = "73.21.43.9";
   };
 in
   pkgs.nixosTest {
     name = "postfix-restrictions";
 
     nodes = {
-      server = { pkgs, ... }: {
+      server = { pkgs, lib, ... }: {
         imports = [ ../default.nix ];
 
         machines.postfix = {

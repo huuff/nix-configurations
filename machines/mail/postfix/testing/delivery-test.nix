@@ -1,6 +1,8 @@
 { pkgs, ... }:
 let
   domain1 = "example.com";
+  clientIP = "172.183.43.2";
+  serverIP = "189.122.13.1";
   domain2 = "test.org";
   user1Address = "user1@${domain1}";
   user2Address = "user2@${domain2}";
@@ -13,6 +15,7 @@ in
   pkgs.nixosTest {
     name = "postfix-correct-delivery";
 
+    # TODO: Better names, (client and server instead of machine1 and machine2?)
     nodes = rec {
       machine1 = { pkgs, ... }: {
         imports = [ ../default.nix ];
@@ -35,14 +38,14 @@ in
         };
 
         networking.interfaces.eth1.ipv4.addresses = [
-          { address = "192.168.2.1"; prefixLength = 24; }
+          { address = "${clientIP}"; prefixLength = 24; }
         ];
 
         services.dnsmasq = {
           enable = true;
           extraConfig = ''
-            address=/${domain1}./192.168.2.1
-            address=/${domain2}./192.168.2.2
+            address=/${domain1}./${clientIP}
+            address=/${domain2}./${serverIP}
             mx-host=${domain1},machine1,10
             mx-host=${domain2},machine2,10
           '';
@@ -55,7 +58,7 @@ in
         environment.systemPackages = with pkgs; [ mailutils ];
 
         networking.interfaces.eth1.ipv4.addresses = [
-          { address = "192.168.2.2"; prefixLength = 24; }
+          { address = "${serverIP}"; prefixLength = 24; }
         ];
 
         machines.postfix = {
@@ -77,8 +80,8 @@ in
         services.dnsmasq = {
           enable = true;
           extraConfig = ''
-            address=/${domain1}./192.168.2.1
-            address=/${domain2}./192.168.2.2
+            address=/${domain1}./${clientIP}
+            address=/${domain2}./${serverIP}
             mx-host=${domain1},machine1,10
             mx-host=${domain2},machine2,10
           '';
