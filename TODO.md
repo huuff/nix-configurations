@@ -48,6 +48,7 @@
 * Some way to conditionally load `mkInitModule`? (Not loading it if already loaded)
 * Something about exporting the key
 * Add compression options
+* Backing up installation directory instead of random directories (or instead?)
 
 ## Mail
 * Sieve
