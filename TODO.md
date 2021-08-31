@@ -18,6 +18,7 @@
 * Check that no two machines use the same ports.
 
 ## osTicket
+* IDEMPOTENCE: Should be possible to change DB parameters, also any user information after installation.
 * Add email options
 
 ## Jenkins
@@ -27,7 +28,9 @@
 * Set up security
 
 ## Wallabag
-* `copy-wallabag` is really slow on some computers, is it a KVM thing?
+* IDEMPOTENCE: Should be possible to change any parameters declaratively after installation
+* IDEMPOTENCE: Should be possible to change any user data declaratively after installation
+* `copy-wallabag` is really slow on some computers, is it a KVM thing? UPDATE: Big Idea: forget about the official derivation and just download it? or git clone it? It's going to be much faster and require less effort, I don't think distributing it as a nix package makes much sense since it requires so much mutability
 * Add email options
 
 ## mkInitModule
@@ -46,7 +49,7 @@
 * Some way to conditionally load `mkInitModule`? (Not loading it if already loaded)
 * Something about exporting the key
 * Add compression options
-* Backing up installation directory instead of random directories (or instead?)
+* Backing up installation directory instead of random directories (or in addition to?)
 
 ## Mail
 * Sieve
