@@ -79,27 +79,6 @@ pkgs.nixosTest {
 
       environment.systemPackages = with pkgs; [ borgbackup ];
       
-      # TODO: Use borg from nixpkgs
-      #systemd.services.borg-serve = {
-        #description = "Serve borg";
-
-        #script = "borg serve";
-
-        #path = with pkgs; [ borgbackup ];
-
-        #wantedBy = [ "multi-user.target" ];
-
-        #unitConfig = {
-          #After = [ "network-online.target" ];
-          #Requires = [ "network-online.target" ];
-        #};
-
-        #serviceConfig = {
-          #User = "root";
-          #Restart = "always";
-        #};
-      #};
-
       systemd.tmpfiles.rules = [ 
         "d ${remotePath} 755 root root - -"
       ];

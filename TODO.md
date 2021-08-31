@@ -44,7 +44,6 @@
 * Option to set a global certificate
 
 ## mkBackupModule
-* Test the timer
 * Some way to conditionally load `mkInitModule`? (Not loading it if already loaded)
 * Something about exporting the key
 * Add compression options
