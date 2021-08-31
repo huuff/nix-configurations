@@ -28,7 +28,6 @@
 * Set up security
 
 ## Wallabag
-* IDEMPOTENCE: Should be possible to change any parameters declaratively after installation
 * IDEMPOTENCE: Should be possible to change any user data declaratively after installation
 * `copy-wallabag` is really slow on some computers, is it a KVM thing? UPDATE: Big Idea: forget about the official derivation and just download it? or git clone it? It's going to be much faster and require less effort, I don't think distributing it as a nix package makes much sense since it requires so much mutability
 * Add email options

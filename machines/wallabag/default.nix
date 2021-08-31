@@ -97,6 +97,7 @@ in
           database_name = cfg.database.name;
           database_user = cfg.database.user;
           database_path = null;
+          database_password = null;
           database_table_prefix = cfg.database.prefix;
           database_charset = "utf8mb4";
 
@@ -126,6 +127,12 @@ in
           from_email = "no-reply@wallabag.org";
 
           rss_limit = 50;
+
+          redis_scheme = null;
+          redis_host = null;
+          redis_port = null;
+          redis_path = null;
+          redis_password = null;
 
           sentry_dsn = "~";
         } // optionalAttrs (cfg.importTool == "redis") {
@@ -168,18 +175,15 @@ in
               name = "create-parameters";
               description = "Create parameters.yml for installation";
               script =  ''
-                rm -f ${cfg.installation.path}/app/config/parameters.yml
-                echo "${builtins.toJSON { parameters = cfg.parameters; }}" >> ${cfg.installation.path}/app/config/parameters.yml
+                echo "${builtins.toJSON { parameters = cfg.parameters; }}" > ${cfg.installation.path}/app/config/parameters.yml
               '';
+              idempotent = true;
             }
 
             {
               name = "install-wallabag";
               description = "Install wallabag";
-              script = ''
-                make clean
-                make install
-              '';
+              script = "make clean && make install";
               path = with pkgs; [ gnumake bash composerWithTidy phpWithTidy ];
               extraDeps = [ "setup-wallabag-db.service" ];
             }
@@ -221,6 +225,14 @@ in
             description = "Enable ${cfg.importTool} for importing in the database";
             script = myLib.db.runSql cfg.database "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_${cfg.importTool}';";
           })
+
+          {
+            name = "clear-wallabag-cache";
+            description = "Clear the wallabag cache";
+            script = "php bin/console cache:clear --env=prod";
+            path = [ phpWithTidy ];
+            idempotent = true;
+          }
 
         ];
       };

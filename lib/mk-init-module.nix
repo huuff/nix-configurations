@@ -42,19 +42,25 @@ let
         type = str;
         description = "Script that will be run";
       };
+
+      idempotent = mkOption {
+        type = bool;
+        default = false;
+        description = "This unit won't generate a 'lock' nor remain after exit and thus will be restarted on every activation";
+      };
     };
   };
 
-  mkUnit = moduleName: unitConfig: { 
-    name = moduleName;
+  mkUnit = { name, idempotent ? false }: unitConfig: { 
+    inherit name;
 
     value = recursiveUpdate {
       serviceConfig = {
         Type = "oneshot";
         User = cfg.user;
-        RemainAfterExit = true;
+        RemainAfterExit = mkIf (!idempotent) true;
         WorkingDirectory = mkIf (config.machines.${machineName} ? installation) config.machines.${machineName}.installation.path;
-        ExecStartPost = createLock moduleName;
+        ExecStartPost = mkIf (!idempotent) (createLock name);
       };
 
       unitConfig = {
@@ -62,13 +68,13 @@ let
         BindsTo = [];
         Requires = [];
         PartOf = [];
-        ConditionPathExists = "!${lockPath}/${moduleName}";
+        ConditionPathExists = mkIf (!idempotent) "!${lockPath}/${name}";
       };
 
     } unitConfig;
   };
 
-  initModuleToUnit = initModule: mkUnit initModule.name {
+  initModuleToUnit = initModule: mkUnit { inherit (initModule) name idempotent; } {
     script = initModule.script;
     description = initModule.description;
     path = initModule.path;
@@ -93,7 +99,9 @@ let
 
   # This creates a unit that is required by all others, running only if the "lock" does not exist
   # Therefore, if the "lock" exists (which means the initialization is complete) then nothing will run
-  firstUnit = mkUnit "start-${machineName}-initialization" {
+  # This is useful as an "anchor point" for starting or restarting all units, since doing so with this one
+  # will cascade to the rest
+  firstUnit = mkUnit { name = "start-${machineName}-initialization"; } {
     description = "Start the provisioning of ${machineName}";
 
     script = "echo 'Start provisioning ${machineName}'";
@@ -103,7 +111,8 @@ let
   # * Is after and requires all units in init.
   # * Is wanted by multi-user target, so it will be auto-started and propagate to all others.
   # * It creates a file that will signify the end of the initialization (the "lock")
-  lastUnit = mkUnit "finish-${machineName}-initialization" {
+  # This is useful for signaling, with a predictable name, that initialization is over
+  lastUnit = mkUnit { name = "finish-${machineName}-initialization"; } {
     description = "Finish the provisioning of ${machineName}";
     script = "echo 'Finished provisioning ${machineName}'";
 
