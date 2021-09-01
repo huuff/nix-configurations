@@ -13,7 +13,7 @@ pkgs.nixosTest {
     machine = { pkgs, config, ... }: {
       imports = [
         (import ./default.nix testName)
-        (import ../../lib/mk-database-module.nix testName)
+        (import ../../modules/mk-database-module testName)
         (import ../../modules/mk-installation-module testName)
         (import ../../modules/mk-init-module testName)
       ];

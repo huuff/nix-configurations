@@ -29,7 +29,7 @@ let
   };
 in {
   imports = [
-    (import ../../lib/mk-database-module.nix "osticket")
+    (import ../../modules/mk-database-module "osticket")
     (import ../../modules/ssl "osticket")
     (import ../../modules/backup "osticket")
     (import ../../modules/mk-installation-module "osticket")

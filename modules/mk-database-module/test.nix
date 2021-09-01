@@ -15,8 +15,8 @@ in
 
     machine = { pkgs, lib, ... }: {
       imports = [ 
-        (import ./mk-database-module.nix dbWithPassword.name)
-        (import ./mk-database-module.nix dbWithSocket.name)
+        (import ./default.nix dbWithPassword.name)
+        (import ./default.nix dbWithSocket.name)
       ];
 
       services.mysql.package = lib.mkForce pkgs.mariadb;

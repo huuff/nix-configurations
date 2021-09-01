@@ -41,7 +41,7 @@ in
   {
 
     imports = [
-      (import ../../lib/mk-database-module.nix "wallabag")
+      (import ../../modules/mk-database-module "wallabag")
       (import ../../modules/ssl "wallabag")
       (import ../../modules/backup "wallabag")
       (import ../../modules/mk-installation-module "wallabag")
