@@ -135,6 +135,10 @@ in
           assertion = ((cfg.database.repository.localPath != null) -> cfg.database.repository.remote == null) && ((cfg.directories.repository.localPath != null) -> cfg.directories.repository.remote == null);
           message = "You can't set a path and a remote at the same time for a repository!";
         }
+        {
+          assertion = config.machines.${name} ? initialization;
+          message = "You have imported the backup module for ${name}, but not the initialization module! Note that the backup module requires it.";
+        }
       ];
 
       machines.${name}.initialization.units = mkMerge [ 
