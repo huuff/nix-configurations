@@ -194,12 +194,11 @@ in
             name = "restore-${name}-database-backup";
             description = "Restore the latest ${name} database backup";
             path = with pkgs; [ borgbackup openssh ];
-            # TODO: Can't I use my latest archive function here?
             script = let repo = cfg.database.repository; in
             ''
               ${borgLib.setEnv repo}
               if ${borgLib.repoNotEmpty repo}; then
-                latest_archive=$(borg list --last 1 --format '{archive}' ${borgLib.buildPath repo})
+                latest_archive=${borgLib.latestArchive repo}
 
                 borg extract --stdout ${borgLib.buildPath repo}::$latest_archive | ${config.services.mysql.package}/bin/mysql
               fi
