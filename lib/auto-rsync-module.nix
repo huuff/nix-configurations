@@ -22,7 +22,7 @@ in
     };
 
     config = mkIf cfg.enable {
-      systemd.services.auto-rsync = {
+      systemd.services.auto-rsync = myLib.mkHardenedUnit [ cfg.startPath cfg.endPath ] {
         description = "Automatically rsync ${toString cfg.startPath} to ${toString cfg.endPath}";
 
         serviceConfig = {

@@ -1,7 +1,6 @@
 # TASKS
 * A module or library for `PHP` + `nginx`, but I find it difficult since I just copypaste nginx configurations from the internet.
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
-* Harden long-standing systemd services (`do-on-request`, `auto-rsync`)
 * Make a file with the `test` config and share it between `test.nix` and `vm.nix` to test interactively in the same test environment (Ideally, I'd get `shell_interact()` to work. Or maybe not? I like having my aliases available) UPDATE: I DEFINITELY need to use `shell_interact()`, anything else is just torture. Maybe I'll have to ask the discourse. UPDATE: Idea: Use some `default.nix` for tests I want to interact with, import `nixpkgs` from the channel and pass it to the test file as a parameter. UPDATE: It doesn't work either. Seems like nobody cares much about `shell_interact()`?
 * Move all modules to the `modules` folder
 
