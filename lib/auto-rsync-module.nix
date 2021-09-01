@@ -2,6 +2,7 @@
 with lib;
 let
   cfg = config.services.auto-rsync;
+  myLib = import ./default.nix { inherit pkgs lib config; };
 in
   {
     options = with types; {

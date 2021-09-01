@@ -1,4 +1,3 @@
-# XXX: Requires init module
 # TODO: DRY this
 # TODO: Maybe passphrase from file descriptor? This might allow less eavesdropping
 name:
@@ -195,6 +194,7 @@ in
             name = "restore-${name}-database-backup";
             description = "Restore the latest ${name} database backup";
             path = with pkgs; [ borgbackup openssh ];
+            # TODO: Can't I use my latest archive function here?
             script = let repo = cfg.database.repository; in
             ''
               ${borgLib.setEnv repo}

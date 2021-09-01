@@ -61,4 +61,38 @@ END_OF_SQL'';
     })
   ];
 
+  # Copy-pasted from https://github.com/NixOS/nixpkgs/blob/master/nixos/modules/services/misc/gitea.nix
+  mkHardenedUnit = paths: unit: recursiveUpdate {
+    serviceConfig = {
+     # Access write directories
+      ReadWritePaths = paths;
+      UMask = "0027";
+      # Capabilities
+      CapabilityBoundingSet = "";
+      # Security
+      NoNewPrivileges = true;
+      # Sandboxing
+      ProtectSystem = "strict";
+      ProtectHome = true;
+      PrivateTmp = true;
+      PrivateDevices = true;
+      PrivateUsers = true;
+      ProtectHostname = true;
+      ProtectClock = true;
+      ProtectKernelTunables = true;
+      ProtectKernelModules = true;
+      ProtectKernelLogs = true;
+      ProtectControlGroups = true;
+      RestrictAddressFamilies = [ "AF_UNIX AF_INET AF_INET6" ];
+      LockPersonality = true;
+      MemoryDenyWriteExecute = true;
+      RestrictRealtime = true;
+      RestrictSUIDSGID = true;
+      PrivateMounts = true;
+      # System Call Filtering
+      SystemCallArchitectures = "native";
+      SystemCallFilter = "~@clock @cpu-emulation @debug @keyring @memlock @module @mount @obsolete @raw-io @reboot @resources @setuid @swap";
+    };
+  } unit;
+
 }

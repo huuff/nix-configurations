@@ -2,6 +2,7 @@
 with lib;
 let
   cfg = config.services.do-on-request;
+  myLib = import ./default.nix { inherit pkgs lib config; };
 in
   {
     options.services.do-on-request = with types; {
@@ -34,7 +35,7 @@ in
     config = mkIf cfg.enable {
       networking.firewall.allowedTCPPorts = [ cfg.port ];
 
-      systemd.services.do-on-request = {
+      systemd.services.do-on-request = myLib.mkHardenedUnit (optional (cfg.directory != null) cfg.directory) {
         description = "Run a script when a request is received on port ${toString cfg.port}";
         
         serviceConfig = {

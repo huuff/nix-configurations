@@ -1,6 +1,6 @@
 { pkgs, testingLib, ... }:
 let
-  directory = "/home/neuron";
+  directory = "/var/lib/neuron";
   refreshPort = 8999;
   oldCommit = "6b57be4";
 in

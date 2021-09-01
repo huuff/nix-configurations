@@ -10,8 +10,11 @@ pkgs.nixosTest {
   machine = { pkgs, ... }: {
     imports = [ ./do-on-request-module.nix ];
 
+    networking.firewall.allowedTCPPorts = [ port ];
+
     services.do-on-request = {
       enable = true;
+      directory = "/var";
       script = "echo '${testWord}' >> ${file}";
       inherit port;
     };
