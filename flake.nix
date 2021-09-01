@@ -39,7 +39,7 @@
       mkSSLModule = importTest ./modules/ssl/test.nix;
       mkInstallationModule = importTest ./lib/mk-installation-module-test.nix;
       mkDatabaseModule = importTest ./lib/mk-database-module-test.nix;
-      mkInitModule = importTest ./lib/mk-init-module-test.nix;
+      mkInitModule = importTest ./modules/mk-init-module/test.nix;
       mkBackupModuleDatabase = importTest ./modules/backup/database-test.nix;
       mkBackupModuleDirectories = importTest ./modules/backup/directories-test.nix;
     };

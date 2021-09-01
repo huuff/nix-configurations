@@ -1,7 +1,7 @@
 { pkgs, testingLib, ... }:
 let
   lib = pkgs.lib;
-  copyMachine = import ./copy-machine.nix { inherit lib; };
+  copyMachine = import ./../../lib/copy-machine.nix { inherit lib; };
   unitOrderFilePath = "/var/unit-order";
   testFilePath = "/var/test-file";
 in
@@ -10,7 +10,7 @@ in
 
     nodes = rec {
       machine1 = { pkgs, ... }: {
-        imports = [ (import ./mk-init-module.nix "test") ];
+        imports = [ (import ./default.nix "test") ];
 
         system.activationScripts.createTestFile.text = "touch ${unitOrderFilePath}";
 

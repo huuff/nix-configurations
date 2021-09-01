@@ -33,7 +33,7 @@ in {
     (import ../../modules/ssl "osticket")
     (import ../../modules/backup "osticket")
     (import ../../lib/mk-installation-module.nix "osticket")
-    (import ../../lib/mk-init-module.nix "osticket")
+    (import ../../modules/mk-init-module "osticket")
     ];
 
     options.machines.osticket = with types; {

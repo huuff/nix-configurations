@@ -18,7 +18,7 @@ in
       ../../modules/do-on-request
       (import ../../modules/ssl "neuron")
       (import ../../lib/mk-installation-module.nix "neuron")
-      (import ../../lib/mk-init-module.nix "neuron")
+      (import ../../modules/mk-init-module "neuron")
     ];
 
     options.machines.neuron = with types; {

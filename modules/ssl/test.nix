@@ -14,7 +14,7 @@ in
       machine1 = { pkgs, ... }: {
         imports = [ 
           (import ./default.nix "test") 
-          (import ../../lib/mk-init-module.nix "test")
+          (import ../../modules/mk-init-module "test")
         ];
 
         machines.test.ssl = {
@@ -44,7 +44,7 @@ in
       machine2 = { pkgs, ... }: {
         imports = [ 
           (import ./default.nix "test") 
-          (import ../../lib/mk-init-module.nix "test")
+          (import ../../modules/mk-init-module "test")
         ];
 
         machines.test.ssl = {
