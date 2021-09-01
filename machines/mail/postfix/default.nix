@@ -102,7 +102,7 @@ let
 in
   {
     imports = [
-      (import ../../../lib/mk-installation-module.nix "postfix")
+      (import ../../../modules/mk-installation-module "postfix")
     ];
 
     options = {

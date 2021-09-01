@@ -37,7 +37,7 @@
       autoRsync = importTest ./modules/auto-rsync/test.nix;
 
       mkSSLModule = importTest ./modules/ssl/test.nix;
-      mkInstallationModule = importTest ./lib/mk-installation-module-test.nix;
+      mkInstallationModule = importTest ./modules/mk-installation-module/test.nix;
       mkDatabaseModule = importTest ./lib/mk-database-module-test.nix;
       mkInitModule = importTest ./modules/mk-init-module/test.nix;
       mkBackupModuleDatabase = importTest ./modules/backup/database-test.nix;

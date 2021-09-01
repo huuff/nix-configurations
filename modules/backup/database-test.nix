@@ -14,7 +14,7 @@ pkgs.nixosTest {
       imports = [
         (import ./default.nix testName)
         (import ../../lib/mk-database-module.nix testName)
-        (import ../../lib/mk-installation-module.nix testName)
+        (import ../../modules/mk-installation-module testName)
         (import ../../modules/mk-init-module testName)
       ];
 

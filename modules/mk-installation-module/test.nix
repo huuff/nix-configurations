@@ -8,7 +8,7 @@ pkgs.nixosTest {
   name = "mk-installation-module";
 
   machine = { pkgs, ... }: {
-    imports = [ ( import ./mk-installation-module.nix "test" ) ];
+    imports = [ ( import ./default.nix "test" ) ];
 
     machines.test.installation = { inherit user path group; };
   };
