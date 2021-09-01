@@ -15,7 +15,7 @@ in
     imports = 
     [
       ./cachix.nix
-      ../../lib/do-on-request-module.nix
+      ../../modules/do-on-request
       (import ../../modules/ssl "neuron")
       (import ../../lib/mk-installation-module.nix "neuron")
       (import ../../lib/mk-init-module.nix "neuron")

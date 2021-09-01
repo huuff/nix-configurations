@@ -8,7 +8,7 @@ pkgs.nixosTest {
   name = "do-on-request";
 
   machine = { pkgs, ... }: {
-    imports = [ ./do-on-request-module.nix ];
+    imports = [ ./default.nix ];
 
     networking.firewall.allowedTCPPorts = [ port ];
 

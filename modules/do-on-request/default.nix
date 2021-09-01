@@ -2,7 +2,7 @@
 with lib;
 let
   cfg = config.services.do-on-request;
-  myLib = import ./default.nix { inherit pkgs lib config; };
+  myLib = import ../../lib { inherit pkgs lib config; };
 in
   {
     options.services.do-on-request = with types; {

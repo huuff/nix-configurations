@@ -33,7 +33,7 @@
       postfixDelivery = importTest ./machines/mail/postfix/testing/delivery-test.nix;
       postfixRestrictions = importTest ./machines/mail/postfix/testing/restrictions-test.nix;
 
-      doOnRequest = importTest ./lib/do-on-request-test.nix;
+      doOnRequest = importTest ./modules/do-on-request/test.nix;
       autoRsync = importTest ./modules/auto-rsync/test.nix;
 
       mkSSLModule = importTest ./modules/ssl/test.nix;
