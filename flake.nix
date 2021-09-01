@@ -34,7 +34,7 @@
       postfixRestrictions = importTest ./machines/mail/postfix/testing/restrictions-test.nix;
 
       doOnRequest = importTest ./lib/do-on-request-test.nix;
-      autoRsync = importTest ./lib/auto-rsync-test.nix;
+      autoRsync = importTest ./modules/auto-rsync/test.nix;
 
       mkSSLModule = importTest ./modules/ssl/test.nix;
       mkInstallationModule = importTest ./lib/mk-installation-module-test.nix;

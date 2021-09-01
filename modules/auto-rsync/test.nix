@@ -7,7 +7,7 @@ pkgs.nixosTest {
   name = "auto-rsync";
 
   machine = { pkgs, ... }: {
-    imports = [ ./auto-rsync-module.nix ];
+    imports = [ ./default.nix ];
 
     systemd.tmpfiles.rules = [
       "d ${startPath} 0777 root root - -"
