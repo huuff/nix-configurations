@@ -1,4 +1,3 @@
-# TODO: Maybe use fake machines for these! The real ones are too expensive
 { pkgs, testingLib, ... }:
 let
   group = "group";
