@@ -75,7 +75,7 @@ in
 
     with subtest("all services deployed"):
       machine.succeed("systemctl is-active --quiet finish-wallabag-initialization")
-      machine.succeed("systemctl is-active --quiet finish-neuron-initialization")
+      #machine.succeed("systemctl is-active --quiet finish-neuron-initialization")
       machine.succeed("systemctl is-active --quiet finish-osticket-initialization")
 
     with subtest("neuron is being serve"):

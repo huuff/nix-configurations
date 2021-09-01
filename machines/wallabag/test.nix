@@ -42,6 +42,11 @@ in
           }
         ];
       };
+
+      virtualisation = {
+        memorySize = "2048M";
+        diskSize = 5 * 1024;
+      };
     };
 
     testScript = ''

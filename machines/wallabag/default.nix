@@ -6,6 +6,8 @@ let
   cfg = config.machines.wallabag;
   myLib = import ../../lib/default.nix { inherit config pkgs lib; };
 
+  wallabagRepo = "https://github.com/wallabag/wallabag";
+
   phpWithTidy = pkgs.php74.withExtensions ( { enabled, all }: enabled ++ [ all.tidy ] );
   composerWithTidy = (pkgs.php74Packages.composer.override { php = phpWithTidy; });
   userModule = with types; submodule {
@@ -49,10 +51,10 @@ in
     options.machines.wallabag = with types; {
       enable = mkEnableOption "wallabag";
 
-      package = mkOption {
-        type = package;
-        default = pkgs.wallabag;
-        description = "The wallabag package to use";
+      commit = mkOption {
+        type = str;
+        default = "ca845b3204cb25cb7f623a81bc233ca19b38848e";
+        description = "The commit of wallabag that will be installed";
       };
 
       users = mkOption {
@@ -164,11 +166,11 @@ in
               name = "copy-wallabag";
               description = "Copy wallabag to final directory and setting permissions for installation";
               script = ''
-                echo '>>> Copying all wallabag files from the store to ${cfg.installation.path}'
-                cp -r ${cfg.package}/* ${cfg.installation.path}
-                echo '>>> Setting write permissions to ${cfg.installation.path}'
-                chmod -R u+w ${cfg.installation.path}
+                git clone ${wallabagRepo} ${cfg.installation.path}
+                git reset --hard ${cfg.commit}
               '';
+              path = [ pkgs.git ];
+              extraDeps = [ "network-online.target" ];
             }
 
             {
@@ -184,7 +186,7 @@ in
               name = "install-wallabag";
               description = "Install wallabag";
               script = "make clean && make install";
-              path = with pkgs; [ gnumake bash composerWithTidy phpWithTidy ];
+              path = with pkgs; [ gnumake bash composerWithTidy phpWithTidy git ];
               extraDeps = [ "setup-wallabag-db.service" ];
             }
 
@@ -196,7 +198,6 @@ in
             # init file if you want to resume the initialization from this unit.
             script = "COMPOSER_MEMORY_LIMIT=-1 composer install || true";
             path = [ composerWithTidy phpWithTidy ];
-            extraDeps = [ "network-online.target" ];
           }
 
           {
@@ -220,6 +221,7 @@ in
             path = [ phpWithTidy ];
           }
 
+          # TODO: mark this as idempotent
           (mkIf (cfg.importTool != "none") {
             name = "enable-${cfg.importTool}";
             description = "Enable ${cfg.importTool} for importing in the database";

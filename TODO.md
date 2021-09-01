@@ -3,8 +3,7 @@
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
 * Harden long-standing systemd services (`do-on-request`, `auto-rsync`)
 * Make a file with the `test` config and share it between `test.nix` and `vm.nix` to test interactively in the same test environment (Ideally, I'd get `shell_interact()` to work. Or maybe not? I like having my aliases available) UPDATE: I DEFINITELY need to use `shell_interact()`, anything else is just torture. Maybe I'll have to ask the discourse. UPDATE: Idea: Use some `default.nix` for tests I want to interact with, import `nixpkgs` from the channel and pass it to the test file as a parameter. UPDATE: It doesn't work either. Seems like nobody cares much about `shell_interact()`?
-* Maybe it's time to start passing my library from the flake, look at that import for `testing-lib` in the `virtual-test` for postfix.
-* A lot of my code (especially `mkInitModule` is about handling state gracefully, but I shouldn't have to do it if my services were more idempotent
+* Maybe it's time to start passing my library from the flake, look at that import for `testing-lib` in the `virtual-test` for postfix. UPDATE: Check about referencing root directory [here](https://nix.dev/anti-patterns/language#reproducability-referencing-top-level-directory-with)
 
 ## Testing library
 * Some wrapper around `wait_until_tty_matches` with a timeout, setting current tty and printing.
@@ -18,7 +17,8 @@
 * Check that no two machines use the same ports.
 
 ## osTicket
-* IDEMPOTENCE: Should be possible to change DB parameters, also any user information after installation.
+* IDEMPOTENCE: Change DB parameters after installation
+* IDEMPOTENCE: Change any user information after installation.
 * Add email options
 
 ## Jenkins
@@ -29,7 +29,6 @@
 
 ## Wallabag
 * IDEMPOTENCE: Should be possible to change any user data declaratively after installation
-* `copy-wallabag` is really slow on some computers, is it a KVM thing? UPDATE: Big Idea: forget about the official derivation and just download it? or git clone it? It's going to be much faster and require less effort, I don't think distributing it as a nix package makes much sense since it requires so much mutability
 * Add email options
 
 ## mkInitModule
