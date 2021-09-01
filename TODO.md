@@ -1,14 +1,11 @@
 # TASKS
 * A module or library for `PHP` + `nginx`, but I find it difficult since I just copypaste nginx configurations from the internet.
 * In `osTicket` and `wallabag`, is there any way I can test that users can login? Maybe I need to automate the browser?
-* Harden long-standing systemd services (`do-on-request`, `auto-rsync`)
+* Harden long-standing systemd services (`do-on-request`, `auto-rsync`, `postfix`)
 * Make a file with the `test` config and share it between `test.nix` and `vm.nix` to test interactively in the same test environment (Ideally, I'd get `shell_interact()` to work. Or maybe not? I like having my aliases available) UPDATE: I DEFINITELY need to use `shell_interact()`, anything else is just torture. Maybe I'll have to ask the discourse. UPDATE: Idea: Use some `default.nix` for tests I want to interact with, import `nixpkgs` from the channel and pass it to the test file as a parameter. UPDATE: It doesn't work either. Seems like nobody cares much about `shell_interact()`?
 
 ## Testing library
 * Some wrapper around `wait_until_tty_matches` with a timeout, setting current tty and printing.
-
-## Neuron
-* Finish test. UPDATE: Test that it actually is pulled on a request to `refreshPort`. But how? I can make the request but I don't know how to check it it's pulling. UPDATE: Redirecting the `doOnRequest` log to somewhere and reading it? UPDATE: Is it still necessary? I've tested `doOnRequest` after all. UPDATE: Yeah but these are integration tests and testing the individual components does not guarantee that they all work together
 
 ## multiDeploy
 * Add a way to setup a global certificate, this will help with deploying multiple machines.
