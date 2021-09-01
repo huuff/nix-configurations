@@ -221,11 +221,11 @@ in
             path = [ phpWithTidy ];
           }
 
-          # TODO: mark this as idempotent
           (mkIf (cfg.importTool != "none") {
             name = "enable-${cfg.importTool}";
             description = "Enable ${cfg.importTool} for importing in the database";
             script = myLib.db.runSql cfg.database "UPDATE ${cfg.database.prefix}internal_setting SET value=1 WHERE name='import_with_${cfg.importTool}';";
+            idempotent = true;
           })
 
           {
