@@ -1,5 +1,5 @@
 # TODO: Maybe use fake machines for these! The real ones are too expensive
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   group = "group";
   osticketPort = 8080;
@@ -69,7 +69,7 @@ in
   };
 
   testScript = ''
-    ${ builtins.readFile ../lib/testing-lib.py }
+    ${ testingLib }
 
     machine.wait_for_unit("multi-user.target")
 

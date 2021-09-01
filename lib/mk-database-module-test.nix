@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   dbWithPassword = {
     user = "user1";
@@ -38,7 +38,7 @@ in
     };
 
     testScript = ''
-      ${ builtins.readFile ./testing-lib.py }
+      ${ testingLib }
 
       machine.wait_for_unit("multi-user.target")
 

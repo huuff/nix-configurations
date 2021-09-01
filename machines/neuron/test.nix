@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   directory = "/home/neuron";
   refreshPort = 8999;
@@ -20,7 +20,7 @@ pkgs.nixosTest {
   };
 
   testScript = ''
-      ${ builtins.readFile ../../lib/testing-lib.py }
+      ${ testingLib }
 
       machine.wait_for_unit("multi-user.target")
 

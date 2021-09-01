@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   canonicalDomain = "example.com";
   user1Address = "user1@${canonicalDomain}";
@@ -33,7 +33,7 @@ pkgs.nixosTest {
   };
 
   testScript = ''
-    ${ builtins.readFile ../../../../lib/testing-lib.py }
+    ${ testingLib }
 
     machine.wait_for_unit("multi-user.target")
 

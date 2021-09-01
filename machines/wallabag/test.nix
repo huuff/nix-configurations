@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   user1 = {
     name = "user1";
@@ -50,7 +50,7 @@ in
     };
 
     testScript = ''
-      ${ builtins.readFile ../../lib/testing-lib.py }
+      ${ testingLib }
 
       def listUsers():
         return "cd ${path} && sudo -u ${user} php bin/console wallabag:user:list | tr -s ' '"

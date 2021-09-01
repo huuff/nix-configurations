@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   dbPass = "dbpass";
   backupPath = "/var/lib/backup";
@@ -43,7 +43,7 @@ pkgs.nixosTest {
   };
 
     testScript = ''
-        ${ builtins.readFile ../../lib/testing-lib.py }
+        ${ testingLib }
 
         def borg_boilerplate():
           return "BORG_UNKNOWN_UNENCRYPTED_REPO_ACCESS_IS_OK=yes BORG_PASSPHRASE=${passphrase}"

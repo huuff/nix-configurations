@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   path = "/var/www/osticket";
   admin = {
@@ -64,7 +64,7 @@ in
     };
 
     testScript = ''
-      ${ builtins.readFile ../../lib/testing-lib.py }
+      ${ testingLib }
 
       machine.wait_for_unit("multi-user.target")
 

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   port = 9999;
   file = "/var/test";
@@ -18,7 +18,7 @@ pkgs.nixosTest {
   };
 
   testScript = ''
-    ${ builtins.readFile ./testing-lib.py }
+    ${ testingLib }
 
     machine.wait_for_unit("multi-user.target")
 

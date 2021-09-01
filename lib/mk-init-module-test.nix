@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   lib = pkgs.lib;
   copyMachine = import ./copy-machine.nix { inherit lib; };
@@ -56,7 +56,7 @@ in
 };
 
 testScript = ''
-    ${ builtins.readFile ./testing-lib.py }
+    ${ testingLib }
 
     machine1.wait_for_unit("multi-user.target")
     machine2.wait_for_unit("multi-user.target")

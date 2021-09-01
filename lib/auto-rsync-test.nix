@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   startPath = "/var/startPath";
   endPath = "/var/endPath";
@@ -22,7 +22,7 @@ pkgs.nixosTest {
   };
 
   testScript = ''
-    ${ builtins.readFile ./testing-lib.py }
+    ${ testingLib }
 
     machine.wait_for_unit("multi-user.target")
 

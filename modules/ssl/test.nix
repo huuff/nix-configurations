@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   machine1 = {
     nginxPath = "/var/www";
@@ -58,7 +58,7 @@ in
 
 
     testScript = ''
-      ${ builtins.readFile ../../lib/testing-lib.py }
+      ${ testingLib }
 
       machine1.wait_for_unit("multi-user.target")
       machine2.wait_for_unit("multi-user.target")

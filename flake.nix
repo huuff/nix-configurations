@@ -9,6 +9,8 @@
   let
     system = "x86_64-linux";
     pkgs = import nixpkgs { inherit system; };
+    testingLib = builtins.readFile ./lib/testing-lib.py;
+    importTest = test: import test { inherit pkgs testingLib; };
   in
   {
     nixosModules = {
@@ -21,25 +23,25 @@
     };
 
     checks.${system} = {
-      multiDeploy = import ./test/multi-deploy.nix { inherit pkgs; };
+      multiDeploy = importTest ./test/multi-deploy.nix;
 
-      neuron = import ./machines/neuron/test.nix { inherit pkgs; };
-      wallabag = import ./machines/wallabag/test.nix { inherit pkgs; };
-      osticket = import ./machines/osticket/test.nix { inherit pkgs; };
+      neuron = importTest ./machines/neuron/test.nix;
+      wallabag = importTest ./machines/wallabag/test.nix;
+      osticket = importTest ./machines/osticket/test.nix;
 
-      postfixVirtual = import ./machines/mail/postfix/testing/virtual-test.nix { inherit pkgs; };
-      postfixDelivery = import ./machines/mail/postfix/testing/delivery-test.nix { inherit pkgs; };
-      postfixRestrictions = import ./machines/mail/postfix/testing/restrictions-test.nix { inherit pkgs; };
+      postfixVirtual = importTest ./machines/mail/postfix/testing/virtual-test.nix;
+      postfixDelivery = importTest ./machines/mail/postfix/testing/delivery-test.nix;
+      postfixRestrictions = importTest ./machines/mail/postfix/testing/restrictions-test.nix;
 
-      doOnRequest = import ./lib/do-on-request-test.nix { inherit pkgs; };
-      autoRsync = import ./lib/auto-rsync-test.nix { inherit pkgs; };
+      doOnRequest = importTest ./lib/do-on-request-test.nix;
+      autoRsync = importTest ./lib/auto-rsync-test.nix;
 
-      mkSSLModule = import ./modules/ssl/test.nix { inherit pkgs; };
-      mkInstallationModule = import ./lib/mk-installation-module-test.nix { inherit pkgs; };
-      mkDatabaseModule = import ./lib/mk-database-module-test.nix { inherit pkgs; };
-      mkInitModule = import ./lib/mk-init-module-test.nix { inherit pkgs; };
-      mkBackupModuleDatabase = import ./modules/backup/database-test.nix { inherit pkgs; };
-      mkBackupModuleDirectories = import ./modules/backup/directories-test.nix { inherit pkgs; };
+      mkSSLModule = importTest ./modules/ssl/test.nix;
+      mkInstallationModule = importTest ./lib/mk-installation-module-test.nix;
+      mkDatabaseModule = importTest ./lib/mk-database-module-test.nix;
+      mkInitModule = importTest ./lib/mk-init-module-test.nix;
+      mkBackupModuleDatabase = importTest ./modules/backup/database-test.nix;
+      mkBackupModuleDirectories = importTest ./modules/backup/directories-test.nix;
     };
   };
 

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   domain1 = "example.com";
   clientIP = "172.183.43.2";
@@ -88,7 +88,7 @@ in
     };
 
     testScript = ''
-        ${ builtins.readFile ../../../../lib/testing-lib.py }
+        ${ testingLib }
 
         def print_user2_mail():
           return "echo p | mail -f ${mailPath}/${user2Address}/"

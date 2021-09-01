@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, testingLib, ... }:
 let
   server = rec {
     domain = "example.com";
@@ -75,7 +75,7 @@ in
   };
 
     testScript = ''
-      ${ builtins.readFile ../../../../lib/testing-lib.py }
+      ${ testingLib }
 
       def connect_smtp(self):
         self.put_tty("telnet server 25")
