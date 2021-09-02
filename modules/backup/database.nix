@@ -1,4 +1,4 @@
-{ name, repository, ... }:
+{ name, repository, borgLib, ... }:
 { config, pkgs, lib, ... }:
 
 with lib;
@@ -25,10 +25,10 @@ in
   config = {
 
     assertions = [
-        {
-          assertion = cfg.database.enable -> config.machines.${name}.backup.database.enable;
-          message = "Can't enable database backup without enabling database!";
-        }
+      {
+        assertion = cfg.database.enable -> config.machines.${name}.backup.database.enable;
+        message = "Can't enable database backup without enabling database!";
+      }
     ];
 
     machines.${name}.initialization.units = (mkAfter [

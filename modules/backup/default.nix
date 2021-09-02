@@ -1,4 +1,3 @@
-# TODO: DRY this
 # TODO: Maybe passphrase from file descriptor? This might allow less eavesdropping
 name:
 { config, pkgs, lib, ... }:
@@ -73,7 +72,8 @@ in
   {
 
     imports = [
-      (import ./database.nix { inherit name repository; })
+      (import ./database.nix { inherit name repository borgLib; })
+      (import ./directories.nix { inherit name repository borgLib; })
     ];
 
     options = with types; {
@@ -82,23 +82,6 @@ in
           type = str;
           default = config.machines.${name}.installation.user or null;
           description = "User that will run the backup script";
-        };
-
-        directories = {
-          enable = mkEnableOption "directory backup";
-
-          paths = mkOption {
-            type = listOf (oneOf [ str path ]);
-            default = [];
-            description = "List of paths that will be backed up";
-          };
-
-          repository = mkOption {
-            type = repository;
-            default = {};
-            description = "Options for the borg repository where the directories backup will be stored";
-          };
-
         };
 
         restore = mkOption {
@@ -130,88 +113,26 @@ in
         }
       ];
 
-      machines.${name}.initialization.units = mkMerge [ 
-        (mkBefore [
-          (mkIf (cfg.database.enable || cfg.directories.enable) {
-            name = "initialize-${name}-repositories";
-            description = "Initialize the ${name} borg repository if not already a repository";
-            path = with pkgs; [ borgbackup openssh ];
-            script = let
-              initRepoIfNotInitialized = repo: ''
-                ${borgLib.setEnv repo}
-                set +e
-                borg info ${borgLib.buildPath repo}
-                if [ $? -eq 2 ]; then
-                  borg init -e${repo.encryption.mode} ${borgLib.buildPath repo}
-                fi
-
-                '';
-            in ''
-                ${optionalString cfg.database.enable (initRepoIfNotInitialized cfg.database.repository)}
-                ${optionalString cfg.directories.enable (initRepoIfNotInitialized cfg.directories.repository)}
-            '';
-          })
-        ])
-
-        (mkAfter [
-          (mkIf (cfg.restore && cfg.directories.enable) {
-            name = "restore-${name}-directories-backup";
-            description = "Restore the latest ${name} directories backup";
-            path = with pkgs; [ borgbackup openssh rsync ];
-            script = let 
-              repo = cfg.directories.repository;
-              paths = concatStringsSep " " (map (path: ''"${toString path}"'') cfg.directories.paths);
-            in ''
+      machines.${name}.initialization.units = (mkBefore [
+        (mkIf (cfg.database.enable || cfg.directories.enable) {
+          name = "initialize-${name}-repositories";
+          description = "Initialize the ${name} borg repository if not already a repository";
+          path = with pkgs; [ borgbackup openssh ];
+          script = let
+            initRepoIfNotInitialized = repo: ''
               ${borgLib.setEnv repo}
-              if ${borgLib.repoNotEmpty repo}; then
-                latest_archive=${borgLib.latestArchive repo}
-                
-                tmp_dir=$(mktemp -d)
-                trap "rm -rf $tmp_dir" EXIT
-
-                cd $tmp_dir
-                borg extract ${borgLib.buildPath repo}::"$latest_archive"
-                rm -rf ${paths}
-                rsync -a . /
+              set +e
+              borg info ${borgLib.buildPath repo}
+              if [ $? -eq 2 ]; then
+                borg init -e${repo.encryption.mode} ${borgLib.buildPath repo}
               fi
-            '';
-            user = "root";
-          })
-        ])
-      ];
 
-      systemd = {
-        tmpfiles.rules = [
-          (mkIf (cfg.directories.enable && cfg.directories.repository.localPath != null) "d ${cfg.directories.repository.localPath} 700 ${cfg.user} ${cfg.user} - -")
-        ];
-
-        timers = {
-          "backup-${name}-directories" = mkIf cfg.directories.enable {
-            wantedBy = [ "timers.target" ];
-
-            partOf = [ "backup-${name}-directories.service" ];
-
-            timerConfig.OnCalendar = cfg.frequency;
-          };
-        };
-
-        services = {
-          "backup-${name}-directories" = mkIf cfg.directories.enable {
-            description = "Make a backup of the ${name} directories";
-
-            path = with pkgs; [ borgbackup openssh ];
-
-            script = let repo = cfg.directories.repository; in ''
-              ${borgLib.setEnv repo}
-              borg create ${borgLib.buildPath repo}::{now} ${concatStringsSep " " (map (path: ''"${path}"'') cfg.directories.paths)}
-            '';
-
-            serviceConfig = {
-              Type = "oneshot";
-              User = cfg.user;
-            };
-          };
-        };
-      };
+              '';
+          in ''
+              ${optionalString cfg.database.enable (initRepoIfNotInitialized cfg.database.repository)}
+              ${optionalString cfg.directories.enable (initRepoIfNotInitialized cfg.directories.repository)}
+          '';
+        })
+      ]);
     };
   }
