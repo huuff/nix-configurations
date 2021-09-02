@@ -8,14 +8,13 @@
 
 ## multiDeploy
 * Add a way to setup a global certificate, this will help with deploying multiple machines.
-* Check that all `mysql` packages are the same. UPDATE: I think it's impossible
 
 ## osTicket
 * IDEMPOTENCE: Change any user information after installation.
 * Add email options
 
 ## Jenkins
-* ON HOLD. I want to use `withCLI` in the Jenkins module of nixpkgs but it's not available in my version yet. Wait until it's stable? bump to 21.11pre? I realize I know nothing about the nixpkgs release scheme. UPDATE: Maybe just implement the module myself, there's a good chance I'll have to anyway
+* ON HOLD. I want to use `withCLI` in the Jenkins module of nixpkgs but it's not available in my version yet. Wait until it's stable? bump to 21.11pre? I realize I know nothing about the nixpkgs release scheme. UPDATE: Maybe just implement the module myself, there's a good chance I'll have to anyway. UPDATE: The fact that I don't have the latest `nixpkgs` might be due to `nixos-shell`. Maybe it'll work in a test.
 * Set up JDKs (in `configuration.xml`)
 * Set up credentials (in `credentials.xml`)
 * Set up security

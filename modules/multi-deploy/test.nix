@@ -18,8 +18,6 @@ in
         ../../machines/neuron
       ];
 
-    services.mysql.package = mkForce pkgs.mariadb;
-
     virtualisation = {
       memorySize = "2048M";
       diskSize = 5 * 1024;

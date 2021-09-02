@@ -111,6 +111,8 @@ in {
         }
       ];
 
+    services.mysql.package = mkOverride 998 pkgs.mariadb;
+
     systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.installation.path ];
 
     machines.osticket = {

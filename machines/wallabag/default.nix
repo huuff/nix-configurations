@@ -90,6 +90,9 @@ in
         }
       ];
 
+      # Give a random, high order so it doesn't conflict with other machines
+      services.mysql.package = mkOverride 999 pkgs.mariadb;
+
       machines.wallabag = {
         installation.ports = myLib.mkDefaultHttpPorts cfg;
 
