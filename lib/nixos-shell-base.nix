@@ -23,7 +23,7 @@ with lib;
     virtualisation.qemu.networkingOptions = let
       fwd = hostPort: guestPort: "hostfwd=tcp::${hostPort}-:${guestPort}";
     in
-    [
+    mkIf (config.forwardedPorts != {}) [
       "-net nic,netdev=user.0,model=virtio"
       (mkIf (config.forwardedPorts != {}) "-netdev user,id=user.0,${concatStringsSep "," (mapAttrsToList fwd config.forwardedPorts)}")
     ];
