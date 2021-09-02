@@ -9,7 +9,6 @@
 ## multiDeploy
 * Add a way to setup a global certificate, this will help with deploying multiple machines.
 * Check that all `mysql` packages are the same. UPDATE: I think it's impossible
-* Check that no two machines use the same ports.
 
 ## osTicket
 * IDEMPOTENCE: Change any user information after installation.

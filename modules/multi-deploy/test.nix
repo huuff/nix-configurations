@@ -12,9 +12,10 @@ in
     with lib;
     {
       imports = [
-        ../machines/osticket
-        ../machines/wallabag
-        ../machines/neuron
+        ./default.nix
+        ../../machines/osticket
+        ../../machines/wallabag
+        ../../machines/neuron
       ];
 
     services.mysql.package = mkForce pkgs.mariadb;

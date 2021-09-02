@@ -23,7 +23,7 @@
     };
 
     checks.${system} = {
-      multiDeploy = importTest ./test/multi-deploy.nix;
+      multiDeploy = importTest ./modules/multi-deploy/test.nix;
 
       neuron = importTest ./machines/neuron/test.nix;
       wallabag = importTest ./machines/wallabag/test.nix;
