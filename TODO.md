@@ -12,7 +12,6 @@
 * Check that no two machines use the same ports.
 
 ## osTicket
-* IDEMPOTENCE: Change DB parameters after installation
 * IDEMPOTENCE: Change any user information after installation.
 * Add email options
 

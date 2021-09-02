@@ -77,6 +77,7 @@ in
         "setup-${name}-db" = {
           description = "Create ${cfg.name} and give ${cfg.user} permissions to it";
 
+          # TODO: Update the user authentication after creation so it can be changed in nix
           script = myLib.db.runSqlAsRoot ''
             CREATE DATABASE IF NOT EXISTS ${cfg.name};
             CREATE USER IF NOT EXISTS '${cfg.user}'@${cfg.host} ${ if cfg.authenticationMethod == "password"

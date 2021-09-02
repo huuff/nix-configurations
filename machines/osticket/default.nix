@@ -105,6 +105,10 @@ in {
           assertion = cfg.database.authenticationMethod == "password";
           message = "osTicket needs an authenticationMethod of 'password'";
         }
+        {
+          assertion = cfg.admin.username != "admin";
+          message = "As it turns out, osTicket doesn't accept an admin named 'admin'!";
+        }
       ];
 
     systemd.services.nginx.serviceConfig.ReadWritePaths = [ cfg.installation.path ];
@@ -182,6 +186,21 @@ in {
             ${myLib.db.runSql cfg.database updateAdminPass}
             ${concatStringsSep "\n" userToDML}
           '';
+        }
+
+        {
+          name = "update-osticket-db-config";
+          description = "Update osTicket database config from Nix attrSet";
+
+          script = let configFile = "${cfg.installation.path}/include/ost-config.php"; in
+          ''
+            sed -i "/DBHOST/c\define('DBHOST','${cfg.database.host}');" ${configFile}
+            sed -i "/DBNAME/c\define('DBNAME','${cfg.database.name}');" ${configFile}
+            sed -i "/DBUSER/c\define('DBUSER','${cfg.database.user}');" ${configFile}
+            sed -i "/DBPASS/c\define('DBPASS','${myLib.passwd.cat cfg.database.passwordFile}');" ${configFile}
+          '';
+
+          idempotent = true;
         }
       ];
     };
