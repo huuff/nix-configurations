@@ -37,7 +37,6 @@
 
 ## mkBackupModule
 * Something about exporting the key
-* Add compression options
 * Backing up installation directory instead of random directories (or in addition to?)
 
 ## Mail

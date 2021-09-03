@@ -22,6 +22,7 @@ in
     };
   };
 
+  # TODO: mkIf cfg.database.enable will simplify the below code
   config = {
 
     assertions = [
@@ -69,7 +70,7 @@ in
             script = let repo = cfg.database.repository; in
             ''
               ${borgLib.setEnv repo}
-              mysqldump --order-by-primary ${myLib.db.authentication dbCfg} --databases ${dbCfg.name} --add-drop-database | borg create ${borgLib.buildPath repo}::{now} -
+              mysqldump --order-by-primary ${myLib.db.authentication dbCfg} --databases ${dbCfg.name} --add-drop-database | borg create ${borgLib.compressionArg cfg} ${borgLib.buildPath repo}::{now} -
             '';
 
             serviceConfig = {

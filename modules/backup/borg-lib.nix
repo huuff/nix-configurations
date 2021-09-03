@@ -20,4 +20,6 @@ rec {
     ${exportPassphrase repo}
     ${setBorgRSH repo}
   '';
+
+  compressionArg = cfg: "--compression ${cfg.compressionAlgorithm}${optionalString (cfg.compressionLevel != null) "," + (toString cfg.compressionLevel)}";
 }

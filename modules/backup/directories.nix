@@ -73,7 +73,7 @@ in
 
         script = let repo = cfg.directories.repository; in ''
           ${borgLib.setEnv repo}
-          borg create ${borgLib.buildPath repo}::{now} ${concatStringsSep " " (map (path: ''"${path}"'') cfg.directories.paths)}
+          borg create ${borgLib.compressionArg cfg} ${borgLib.buildPath repo}::{now} ${concatStringsSep " " (map (path: ''"${path}"'') cfg.directories.paths)}
         '';
 
         serviceConfig = {

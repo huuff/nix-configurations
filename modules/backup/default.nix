@@ -98,6 +98,23 @@ in
           default = "daily";
           description = "Frequency with which the data will be backed up";
         };
+
+        # TODO: both compression options in a `compression` set
+        # TODO: Maybe add auto? although I struggle to find how to support it
+        compressionAlgorithm = mkOption {
+          type = enum [ "none" "lz4" "zstd" "zlib" "lzma" ];
+          default = "lz4";
+          description = "Compression algorithm to use";
+        };
+
+        compressionLevel = mkOption {
+          type = nullOr (ints.between 1 (if cfg.compressionAlgorithm == "zstd" then 22 else 9));
+          default = 
+            if cfg.compressionAlgorithm == "zstd" then 3
+            else if (cfg.compressionAlgorithm == "lzma" || cfg.compressionAlgorithm == "zlib") then 6
+            else null; # lz4 and none
+          description = "Level of compression to apply";
+        };
       };
     };
 
@@ -110,6 +127,10 @@ in
         {
           assertion = config.machines.${name} ? initialization;
           message = "You have imported the backup module for ${name}, but not the initialization module! Note that the backup module requires it.";
+        }
+        {
+          assertion = (cfg.compressionAlgorithm == "none" || cfg.compressionAlgorithm == "lz4") -> (cfg.compressionLevel == null);
+          message = "You specified a compression level for ${name} while setting the compression to `none` or `lz4`. This is not supported";
         }
       ];
 
