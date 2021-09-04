@@ -27,7 +27,7 @@ in
         };
 
         ports = mkOption {
-          type = attrsOf int;
+          type = attrsOf port;
           default = {};
           description = "Name of protocol to port that will be open/served by the application";
         };

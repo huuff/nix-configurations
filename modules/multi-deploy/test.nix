@@ -18,6 +18,8 @@ in
         ../../machines/neuron
       ];
 
+    multi-deploy.group = group;
+
     virtualisation = {
       memorySize = "2048M";
       diskSize = 5 * 1024;
@@ -28,7 +30,6 @@ in
         enable = true;
 
         installation = {
-          inherit group;
           ports.http = osticketPort;
         };
 
@@ -47,7 +48,6 @@ in
         enable = true;
 
         installation = {
-          inherit group;
           ports.http = wallabagPort;
         };
       };
@@ -57,7 +57,6 @@ in
         repository = "https://github.com/srid/alien-psychology.git";
 
         installation = {
-          inherit group;
           ports.http = neuronPort;
         };
       };
