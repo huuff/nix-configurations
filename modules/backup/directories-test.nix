@@ -37,8 +37,10 @@ pkgs.nixosTest {
         backup = {
           restore = true;
 
-          compressionAlgorithm = "zlib";
-          compressionLevel = 3;
+          compression = {
+            algorithm = "zlib";
+            level = 3;
+          };
 
           directories = {
             enable = true;

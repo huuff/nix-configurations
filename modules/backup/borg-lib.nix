@@ -21,5 +21,5 @@ rec {
     ${setBorgRSH repo}
   '';
 
-  compressionArg = cfg: "--compression ${cfg.compressionAlgorithm}${optionalString (cfg.compressionLevel != null) "," + (toString cfg.compressionLevel)}";
+  compressionArg = cfg: "--compression ${cfg.compression.algorithm}${optionalString (cfg.compression.level != null) "," + (toString cfg.compression.level)}";
 }

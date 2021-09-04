@@ -27,8 +27,10 @@ pkgs.nixosTest {
         backup = {
           restore = true;
 
-          compressionAlgorithm = "lzma";
-          compressionLevel = 7;
+          compression = {
+            algorithm = "lzma";
+            level = 7;
+          };
 
           database = {
             enable = true;
