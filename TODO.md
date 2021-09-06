@@ -22,6 +22,7 @@
 
 ## Wallabag
 * IDEMPOTENCE: Should be possible to change any user data declaratively after installation
+* Setting API keys
 * Add email options
 
 ## mkInitModule
