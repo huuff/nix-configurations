@@ -20,6 +20,12 @@
       mail = import ./machines/mail;
 
       sshd = import ./modules/paranoid-sshd;
+
+      mkInitModule = import ./modules/mk-init-module;
+      mkInstallationModule = import ./modules/mk-installation-module;
+      mkDatabaseModule = import ./modules/mk-database-module;
+      mkSSLModule = import ./modules/mk-database-module;
+      mkBackupModule = import ./modules/backup; # TODO: Shouldn't it be mkBackupModule?
     };
 
     checks.${system} = {
