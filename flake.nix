@@ -26,6 +26,8 @@
       mkDatabaseModule = import ./modules/mk-database-module;
       mkSSLModule = import ./modules/mk-database-module;
       mkBackupModule = import ./modules/backup; # TODO: Shouldn't it be mkBackupModule?
+
+      nixosShellBase = import ./lib/nixos-shell-base.nix;
     };
 
     checks.${system} = {
