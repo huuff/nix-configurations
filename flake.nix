@@ -3,9 +3,14 @@
 
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-21.05";
+
+    flake-compat = {
+      url = "github:edolstra/flake-compat";
+      flake = false;
+    };
   };
 
-  outputs = { self, nixpkgs, ... }:
+  outputs = { self, nixpkgs, flake-compat, ... }:
   let
     system = "x86_64-linux";
     pkgs = import nixpkgs { inherit system; };
@@ -20,6 +25,16 @@
       mail = import ./machines/mail;
 
       sshd = import ./modules/paranoid-sshd;
+      nixosShellBase = import ./lib/nixos-shell-base.nix;
+
+    };
+
+    moduleLib = {
+      mkInitModule = import ./modules/mk-init-module;
+      mkInstallationModule = import ./modules/mk-installation-module;
+      mkDatabaseModule = import ./modules/mk-database-module;
+      mkSSLModule = import ./modules/mk-database-module;
+      mkBackupModule = import ./modules/backup; # TODO: Shouldn't it be mkBackupModule?
     };
 
     checks.${system} = {
