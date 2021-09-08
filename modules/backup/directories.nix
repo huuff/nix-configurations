@@ -25,11 +25,11 @@ in
     };
   };
 
-  config = {
+  config = mkIf cfg.directories.enable {
     
     machines.${name}.initialization.units = 
         (mkAfter [
-          (mkIf (cfg.restore && cfg.directories.enable) {
+          (mkIf cfg.restore {
             name = "restore-${name}-directories-backup";
             description = "Restore the latest ${name} directories backup";
             path = with pkgs; [ borgbackup openssh rsync ];
@@ -55,10 +55,10 @@ in
         ]);
 
     systemd = {
-      tmpfiles.rules = mkIf (cfg.directories.enable && cfg.directories.repository.localPath != null) ["d ${cfg.directories.repository.localPath} 700 ${cfg.user} ${cfg.user} - -"];
+      tmpfiles.rules = mkIf (cfg.directories.repository.localPath != null) ["d ${cfg.directories.repository.localPath} 700 ${cfg.user} ${cfg.user} - -"];
 
 
-      timers."backup-${name}-directories" = mkIf cfg.directories.enable {
+      timers."backup-${name}-directories" = {
         wantedBy = [ "timers.target" ];
 
         partOf = [ "backup-${name}-directories.service" ];
@@ -66,7 +66,7 @@ in
         timerConfig.OnCalendar = cfg.frequency;
       };
 
-      services."backup-${name}-directories" = mkIf cfg.directories.enable {
+      services."backup-${name}-directories" = {
         description = "Make a backup of the ${name} directories";
 
         path = with pkgs; [ borgbackup openssh ];

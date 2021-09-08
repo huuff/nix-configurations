@@ -148,12 +148,12 @@ in
               if [ $? -eq 2 ]; then
                 borg init -e${repo.encryption.mode} ${borgLib.buildPath repo}
               fi
-
               '';
           in ''
               ${optionalString cfg.database.enable (initRepoIfNotInitialized cfg.database.repository)}
               ${optionalString cfg.directories.enable (initRepoIfNotInitialized cfg.directories.repository)}
           '';
+          idempotent = true;
         })
       ]);
     };

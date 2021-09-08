@@ -22,18 +22,17 @@ in
     };
   };
 
-  # TODO: mkIf cfg.database.enable will simplify the below code
-  config = {
+  config = mkIf cfg.database.enable {
 
     assertions = [
       {
-        assertion = cfg.database.enable -> config.machines.${name}.backup.database.enable;
+        assertion = config.machines.${name} ? database;
         message = "Can't enable database backup without enabling database!";
       }
     ];
 
     machines.${name}.initialization.units = (mkAfter [
-        (mkIf (cfg.restore && cfg.database.enable) {
+        (mkIf cfg.restore {
           name = "restore-${name}-database-backup";
           description = "Restore the latest ${name} database backup";
           path = with pkgs; [ borgbackup openssh ];
@@ -51,10 +50,10 @@ in
       ]);
 
       systemd = {
-        tmpfiles.rules = mkIf (cfg.database.enable && cfg.database.repository.localPath != null)
+        tmpfiles.rules = mkIf (cfg.database.repository.localPath != null)
           [ "d ${cfg.database.repository.localPath} 700 ${cfg.user} ${cfg.user} - -" ];
 
-        timers."backup-${name}-database" = mkIf cfg.database.enable {
+        timers."backup-${name}-database" = {
             wantedBy = [ "timers.target" ];
 
             partOf = [ "backup-${name}-database.service" ];
@@ -62,7 +61,7 @@ in
             timerConfig.OnCalendar = cfg.frequency;
           };
         
-          services."backup-${name}-database" = mkIf cfg.database.enable {
+          services."backup-${name}-database" = {
             description = "Make a backup of the ${name} database";
 
             path = with pkgs; [ config.services.mysql.package borgbackup openssh ];
