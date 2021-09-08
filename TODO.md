@@ -32,6 +32,7 @@
 
 ## mkDatabaseModule
 * Add `postgres`
+* Get remote databases working. NOTE: Remote DB shouldn't be possible with socket authentication
 
 ## mkSSLModule
 * Option to generate one from Let's Encrypt

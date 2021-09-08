@@ -77,10 +77,12 @@ in
         "setup-${name}-db" = {
           description = "Create ${cfg.name} and give ${cfg.user} permissions to it";
 
-          # TODO: Update the user authentication after creation so it can be changed in nix
-          script = myLib.db.runSqlAsRoot ''
+          script = let
+            user = "'${cfg.user}'@${cfg.host}";
+          in myLib.db.runSqlAsRoot ''
             CREATE DATABASE IF NOT EXISTS ${cfg.name};
-            CREATE USER IF NOT EXISTS '${cfg.user}'@${cfg.host} ${ if cfg.authenticationMethod == "password"
+            CREATE USER IF NOT EXISTS ${user}; 
+            ALTER USER ${user} ${ if cfg.authenticationMethod == "password"
             then "IDENTIFIED BY '${myLib.passwd.cat cfg.passwordFile}'"
             else "IDENTIFIED VIA unix_socket"
             };

@@ -105,6 +105,7 @@ in
           database_password = null;
           database_table_prefix = cfg.database.prefix;
           database_charset = "utf8mb4";
+          database_socket = null;
 
           domain_name = (if cfg.ssl.enable then "https://" else "http://") + "localhost:${if cfg.ssl.enable then (toString cfg.installation.ports.https) else (toString cfg.installation.ports.http)}";
           server_name = "Your wallabag instance";
@@ -155,6 +156,7 @@ in
         } // (
           if (cfg.database.authenticationMethod == "password") then { 
             database_password = myLib.passwd.cat cfg.database.passwordFile;
+            # TODO: remote db
             database_host = "127.0.0.1";
           }
           else if (cfg.database.authenticationMethod == "socket") then {
