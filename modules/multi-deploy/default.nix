@@ -2,7 +2,6 @@
 
 with lib;
 
-# TODO: Show the conflicting ports
 let
   cfg = config.multi-deploy;
   machineCfg = machineName: config.machines.${machineName};
@@ -24,15 +23,19 @@ in
     machinesWithInstallation = filter (machine: (machineCfg machine) ? installation) machines;
     portsByMachine = map (machine: mapAttrsToList (protocol: port: port) config.machines.${machine}.installation.ports) machinesWithInstallation;
     usedPorts = flatten portsByMachine;
-    allDifferent = list:
-      if list == [] then true
-      else (!builtins.elem (head list) (tail list)) && (allDifferent (tail list))
-    ;
+    getConflictingPorts = list:
+      if list == [] then []
+      else 
+        if (builtins.elem (head list) (tail list)) 
+          then [(head list)] ++ getConflictingPorts (tail list) 
+          else [] ++ getConflictingPorts (tail list)
+        ;
+      conflictingPorts = getConflictingPorts usedPorts;
   in mkMerge [
     { assertions = [
       {
-        assertion = allDifferent usedPorts;
-        message = "Some machines are using the same ports!";
+        assertion = conflictingPorts == [];
+        message = "These ports are being used by more than one machine: ${toString conflictingPorts}";
       }
     ]; }
 
